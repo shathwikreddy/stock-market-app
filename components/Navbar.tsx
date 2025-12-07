@@ -16,7 +16,8 @@ import {
   LineChart,
   ChevronDown,
   Activity,
-  PieChart
+  PieChart,
+  Globe
 } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -43,7 +44,7 @@ export default function Navbar() {
   ];
 
   const marketDataLinks = {
-    globalMarkets: {
+    marketOverview: {
       indices: [
         { href: '/market-data/indices/nse', label: 'NSE Indices' },
         { href: '/market-data/indices/bse', label: 'BSE Indices' },
@@ -51,6 +52,11 @@ export default function Navbar() {
       sectors: [
         { href: '/market-data/sectors/nse', label: 'NSE Sectors' },
         { href: '/market-data/sectors/bse', label: 'BSE Sectors' },
+      ],
+      globalMarkers: [
+        { href: '/market-data/global-markers/us', label: 'US Markets' },
+        { href: '/market-data/global-markers/europe', label: 'Europe Markets' },
+        { href: '/market-data/global-markers/asia', label: 'Asia Markets' },
       ],
     },
     equity: [
@@ -158,10 +164,10 @@ export default function Navbar() {
                       style={{ backgroundColor: 'white' }}
                     >
                       <div className="flex p-4 gap-6">
-                        {/* Global Markets Column */}
+                        {/* Market Overview Column */}
                         <div className="min-w-[160px]">
                           <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
-                            Global Markets
+                            Market Overview
                           </div>
 
                           {/* Indices */}
@@ -170,7 +176,7 @@ export default function Navbar() {
                               <Activity className="h-3 w-3" />
                               Indices
                             </div>
-                            {marketDataLinks.globalMarkets.indices.map((link) => (
+                            {marketDataLinks.marketOverview.indices.map((link) => (
                               <Link
                                 key={link.href}
                                 href={link.href}
@@ -188,12 +194,35 @@ export default function Navbar() {
                           </div>
 
                           {/* Sectors */}
-                          <div>
+                          <div className="mb-3">
                             <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                               <PieChart className="h-3 w-3" />
                               Sectors
                             </div>
-                            {marketDataLinks.globalMarkets.sectors.map((link) => (
+                            {marketDataLinks.marketOverview.sectors.map((link) => (
+                              <Link
+                                key={link.href}
+                                href={link.href}
+                                className={`
+                                  block px-2 py-1.5 text-sm rounded-lg transition-all
+                                  ${pathname === link.href
+                                    ? 'text-foreground bg-secondary'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                  }
+                                `}
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* Global Markers */}
+                          <div>
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                              <Globe className="h-3 w-3" />
+                              Global Markers
+                            </div>
+                            {marketDataLinks.marketOverview.globalMarkers.map((link) => (
                               <Link
                                 key={link.href}
                                 href={link.href}
@@ -419,10 +448,10 @@ export default function Navbar() {
                             transition={{ duration: 0.2 }}
                             className="mt-2 ml-7 space-y-3 overflow-hidden"
                           >
-                            {/* Global Markets */}
+                            {/* Market Overview */}
                             <div>
                               <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-2 pb-1 border-b border-border">
-                                Global Markets
+                                Market Overview
                               </div>
 
                               {/* Indices */}
@@ -431,7 +460,7 @@ export default function Navbar() {
                                   <Activity className="h-3 w-3" />
                                   Indices
                                 </div>
-                                {marketDataLinks.globalMarkets.indices.map((link) => (
+                                {marketDataLinks.marketOverview.indices.map((link) => (
                                   <Link
                                     key={link.href}
                                     href={link.href}
@@ -453,12 +482,39 @@ export default function Navbar() {
                               </div>
 
                               {/* Sectors */}
-                              <div>
+                              <div className="mb-2">
                                 <div className="flex items-center gap-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                                   <PieChart className="h-3 w-3" />
                                   Sectors
                                 </div>
-                                {marketDataLinks.globalMarkets.sectors.map((link) => (
+                                {marketDataLinks.marketOverview.sectors.map((link) => (
+                                  <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    onClick={() => {
+                                      setMobileMenuOpen(false);
+                                      setMobileMarketDataOpen(false);
+                                    }}
+                                    className={`
+                                      block py-2 pl-5 text-sm rounded-lg transition-colors
+                                      ${pathname === link.href
+                                        ? 'text-foreground bg-secondary'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                      }
+                                    `}
+                                  >
+                                    {link.label}
+                                  </Link>
+                                ))}
+                              </div>
+
+                              {/* Global Markers */}
+                              <div>
+                                <div className="flex items-center gap-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                  <Globe className="h-3 w-3" />
+                                  Global Markers
+                                </div>
+                                {marketDataLinks.marketOverview.globalMarkers.map((link) => (
                                   <Link
                                     key={link.href}
                                     href={link.href}
