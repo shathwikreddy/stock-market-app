@@ -1,16 +1,35 @@
 'use client';
 
 import { Stock } from '@/lib/mockData';
-import { TrendingUp, TrendingDown, Plus } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface StockTableProps {
   stocks: Stock[];
   type: 'gainers' | 'losers';
-  onAddToWatchlist?: (stock: Stock) => void;
 }
 
-export default function StockTable({ stocks, type, onAddToWatchlist }: StockTableProps) {
+// Simple sparkline component to show trend
+function TrendSparkline({ positive }: { positive: boolean }) {
+  const points = positive
+    ? "0,20 10,18 20,15 30,16 40,12 50,10 60,8 70,6 80,4 90,2 100,0"
+    : "0,0 10,2 20,4 30,3 40,8 50,10 60,12 70,14 80,16 90,18 100,20";
+
+  return (
+    <div className="w-16 h-5">
+      <svg viewBox="0 0 100 20" className="w-full h-full">
+        <polyline
+          fill="none"
+          stroke={positive ? '#10b981' : '#ef4444'}
+          strokeWidth="2"
+          points={points}
+        />
+      </svg>
+    </div>
+  );
+}
+
+export default function StockTable({ stocks, type }: StockTableProps) {
   return (
     <div className="bg-background border border-border rounded-xl overflow-hidden shadow-luxury">
       <div className="overflow-x-auto">
@@ -32,6 +51,9 @@ export default function StockTable({ stocks, type, onAddToWatchlist }: StockTabl
               <th className="px-2 py-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Group
               </th>
+              <th className="px-2 py-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Face Value
+              </th>
               <th className="px-2 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Price Band
               </th>
@@ -50,11 +72,9 @@ export default function StockTable({ stocks, type, onAddToWatchlist }: StockTabl
               <th className="px-2 py-2 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 % Change
               </th>
-              {onAddToWatchlist && (
-                <th className="px-2 py-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Action
-                </th>
-              )}
+              <th className="px-2 py-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Trend
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -86,6 +106,11 @@ export default function StockTable({ stocks, type, onAddToWatchlist }: StockTabl
                       {stock.group}
                     </span>
                   </div>
+                </td>
+                <td className="px-2 py-1.5 text-center">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    ₹{stock.faceValue}
+                  </span>
                 </td>
                 <td className="px-2 py-1.5 text-xs font-semibold whitespace-nowrap">
                   <span className={stock.netChange >= 0 ? 'text-success' : 'text-error'}>
@@ -127,17 +152,11 @@ export default function StockTable({ stocks, type, onAddToWatchlist }: StockTabl
                     </span>
                   </div>
                 </td>
-                {onAddToWatchlist && (
-                  <td className="px-2 py-1.5 text-center">
-                    <button
-                      onClick={() => onAddToWatchlist(stock)}
-                      className="inline-flex items-center px-2 py-1 bg-primary text-primary-foreground text-xs font-medium rounded hover:bg-primary/90 transition-all"
-                    >
-                      <Plus className="w-3 h-3 mr-0.5" />
-                      Add
-                    </button>
-                  </td>
-                )}
+                <td className="px-2 py-1.5">
+                  <div className="flex justify-center">
+                    <TrendSparkline positive={type === 'gainers'} />
+                  </div>
+                </td>
               </motion.tr>
             ))}
           </tbody>
@@ -146,3 +165,4 @@ export default function StockTable({ stocks, type, onAddToWatchlist }: StockTabl
     </div>
   );
 }
+

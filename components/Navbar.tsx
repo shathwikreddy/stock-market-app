@@ -38,21 +38,44 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/gainers', label: 'Gainers', icon: TrendingUp },
-    { href: '/losers', label: 'Losers', icon: TrendingDown },
     { href: '/watchlist', label: 'Watchlist', icon: Eye },
     { href: '/portfolio', label: 'Portfolio', icon: Briefcase },
   ];
 
   const marketDataLinks = {
-    indices: [
-      { href: '/market-data/indices/nse', label: 'NSE Indices' },
-      { href: '/market-data/indices/bse', label: 'BSE Indices' },
+    globalMarkets: {
+      indices: [
+        { href: '/market-data/indices/nse', label: 'NSE Indices' },
+        { href: '/market-data/indices/bse', label: 'BSE Indices' },
+      ],
+      sectors: [
+        { href: '/market-data/sectors/nse', label: 'NSE Sectors' },
+        { href: '/market-data/sectors/bse', label: 'BSE Sectors' },
+      ],
+    },
+    equity: [
+      { href: '/market-data/equity/stocks', label: 'Stocks' },
+      { href: '/gainers', label: 'Gainers' },
+      { href: '/losers', label: 'Losers' },
+      { href: '/market-data/equity/sectors', label: 'Sectors' },
+      { href: '/market-data/equity/industry', label: 'Industry' },
+      { href: '/market-data/equity/ipos', label: "IPO's" },
+      { href: '/market-data/equity/fno-stocks', label: 'F&O Stocks' },
     ],
-    sectors: [
-      { href: '/market-data/sectors/nse', label: 'NSE Sectors' },
-      { href: '/market-data/sectors/bse', label: 'BSE Sectors' },
-    ],
+    others: {
+      general: [
+        { href: '/market-data/others/results-calendar', label: 'Results Calendar' },
+        { href: '/market-data/others/fii-dii', label: 'FII & DII' },
+      ],
+      promotersActivity: [
+        { href: '/market-data/others/promoters-activity/buy', label: 'Buy' },
+        { href: '/market-data/others/promoters-activity/sell', label: 'Sell' },
+      ],
+      mutualFunds: [
+        { href: '/market-data/others/mutual-funds/buy', label: 'Buy' },
+        { href: '/market-data/others/mutual-funds/sell', label: 'Sell' },
+      ],
+    },
   };
 
   const isMarketDataActive = pathname.startsWith('/market-data');
@@ -131,22 +154,74 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-full left-0 mt-1 w-64 border border-border rounded-xl shadow-xl overflow-hidden z-50"
+                      className="absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-border rounded-xl shadow-xl overflow-hidden z-50"
                       style={{ backgroundColor: 'white' }}
                     >
-                      <div className="p-3">
-                        {/* Indices Section */}
-                        <div className="mb-3">
-                          <div className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            <Activity className="h-3 w-3" />
-                            Indices
+                      <div className="flex p-4 gap-6">
+                        {/* Global Markets Column */}
+                        <div className="min-w-[160px]">
+                          <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
+                            Global Markets
                           </div>
-                          {marketDataLinks.indices.map((link) => (
+
+                          {/* Indices */}
+                          <div className="mb-3">
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                              <Activity className="h-3 w-3" />
+                              Indices
+                            </div>
+                            {marketDataLinks.globalMarkets.indices.map((link) => (
+                              <Link
+                                key={link.href}
+                                href={link.href}
+                                className={`
+                                  block px-2 py-1.5 text-sm rounded-lg transition-all
+                                  ${pathname === link.href
+                                    ? 'text-foreground bg-secondary'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                  }
+                                `}
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* Sectors */}
+                          <div>
+                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                              <PieChart className="h-3 w-3" />
+                              Sectors
+                            </div>
+                            {marketDataLinks.globalMarkets.sectors.map((link) => (
+                              <Link
+                                key={link.href}
+                                href={link.href}
+                                className={`
+                                  block px-2 py-1.5 text-sm rounded-lg transition-all
+                                  ${pathname === link.href
+                                    ? 'text-foreground bg-secondary'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                  }
+                                `}
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Equity Column */}
+                        <div className="min-w-[140px] border-l border-border pl-6">
+                          <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
+                            Equity
+                          </div>
+                          {marketDataLinks.equity.map((link) => (
                             <Link
                               key={link.href}
                               href={link.href}
                               className={`
-                                block px-3 py-2 text-sm rounded-lg transition-all
+                                block px-2 py-1.5 text-sm rounded-lg transition-all
                                 ${pathname === link.href
                                   ? 'text-foreground bg-secondary'
                                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
@@ -158,18 +233,19 @@ export default function Navbar() {
                           ))}
                         </div>
 
-                        {/* Sectors Section */}
-                        <div className="border-t border-border pt-3">
-                          <div className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            <PieChart className="h-3 w-3" />
-                            Sectors
+                        {/* Others Column */}
+                        <div className="min-w-[160px] border-l border-border pl-6">
+                          <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
+                            Others
                           </div>
-                          {marketDataLinks.sectors.map((link) => (
+
+                          {/* General Others */}
+                          {marketDataLinks.others.general.map((link) => (
                             <Link
                               key={link.href}
                               href={link.href}
                               className={`
-                                block px-3 py-2 text-sm rounded-lg transition-all
+                                block px-2 py-1.5 text-sm rounded-lg transition-all
                                 ${pathname === link.href
                                   ? 'text-foreground bg-secondary'
                                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
@@ -179,6 +255,50 @@ export default function Navbar() {
                               {link.label}
                             </Link>
                           ))}
+
+                          {/* Promoters Activity */}
+                          <div className="mt-3">
+                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                              Promoters Activity
+                            </div>
+                            {marketDataLinks.others.promotersActivity.map((link) => (
+                              <Link
+                                key={link.href}
+                                href={link.href}
+                                className={`
+                                  block px-2 py-1.5 text-sm rounded-lg transition-all
+                                  ${pathname === link.href
+                                    ? 'text-foreground bg-secondary'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                  }
+                                `}
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* Mutual Funds */}
+                          <div className="mt-3">
+                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                              Mutual Funds
+                            </div>
+                            {marketDataLinks.others.mutualFunds.map((link) => (
+                              <Link
+                                key={link.href}
+                                href={link.href}
+                                className={`
+                                  block px-2 py-1.5 text-sm rounded-lg transition-all
+                                  ${pathname === link.href
+                                    ? 'text-foreground bg-secondary'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                  }
+                                `}
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </motion.div>
@@ -297,15 +417,75 @@ export default function Navbar() {
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="mt-2 ml-7 space-y-1 overflow-hidden"
+                            className="mt-2 ml-7 space-y-3 overflow-hidden"
                           >
-                            {/* Indices */}
-                            <div className="mb-2">
-                              <div className="flex items-center gap-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                <Activity className="h-3 w-3" />
-                                Indices
+                            {/* Global Markets */}
+                            <div>
+                              <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-2 pb-1 border-b border-border">
+                                Global Markets
                               </div>
-                              {marketDataLinks.indices.map((link) => (
+
+                              {/* Indices */}
+                              <div className="mb-2">
+                                <div className="flex items-center gap-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                  <Activity className="h-3 w-3" />
+                                  Indices
+                                </div>
+                                {marketDataLinks.globalMarkets.indices.map((link) => (
+                                  <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    onClick={() => {
+                                      setMobileMenuOpen(false);
+                                      setMobileMarketDataOpen(false);
+                                    }}
+                                    className={`
+                                      block py-2 pl-5 text-sm rounded-lg transition-colors
+                                      ${pathname === link.href
+                                        ? 'text-foreground bg-secondary'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                      }
+                                    `}
+                                  >
+                                    {link.label}
+                                  </Link>
+                                ))}
+                              </div>
+
+                              {/* Sectors */}
+                              <div>
+                                <div className="flex items-center gap-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                  <PieChart className="h-3 w-3" />
+                                  Sectors
+                                </div>
+                                {marketDataLinks.globalMarkets.sectors.map((link) => (
+                                  <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    onClick={() => {
+                                      setMobileMenuOpen(false);
+                                      setMobileMarketDataOpen(false);
+                                    }}
+                                    className={`
+                                      block py-2 pl-5 text-sm rounded-lg transition-colors
+                                      ${pathname === link.href
+                                        ? 'text-foreground bg-secondary'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                      }
+                                    `}
+                                  >
+                                    {link.label}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Equity */}
+                            <div>
+                              <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-2 pb-1 border-b border-border">
+                                Equity
+                              </div>
+                              {marketDataLinks.equity.map((link) => (
                                 <Link
                                   key={link.href}
                                   href={link.href}
@@ -314,7 +494,7 @@ export default function Navbar() {
                                     setMobileMarketDataOpen(false);
                                   }}
                                   className={`
-                                    block py-2 pl-5 text-sm rounded-lg transition-colors
+                                    block py-2 pl-2 text-sm rounded-lg transition-colors
                                     ${pathname === link.href
                                       ? 'text-foreground bg-secondary'
                                       : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
@@ -326,13 +506,14 @@ export default function Navbar() {
                               ))}
                             </div>
 
-                            {/* Sectors */}
+                            {/* Others */}
                             <div>
-                              <div className="flex items-center gap-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                                <PieChart className="h-3 w-3" />
-                                Sectors
+                              <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-2 pb-1 border-b border-border">
+                                Others
                               </div>
-                              {marketDataLinks.sectors.map((link) => (
+
+                              {/* General */}
+                              {marketDataLinks.others.general.map((link) => (
                                 <Link
                                   key={link.href}
                                   href={link.href}
@@ -341,7 +522,7 @@ export default function Navbar() {
                                     setMobileMarketDataOpen(false);
                                   }}
                                   className={`
-                                    block py-2 pl-5 text-sm rounded-lg transition-colors
+                                    block py-2 pl-2 text-sm rounded-lg transition-colors
                                     ${pathname === link.href
                                       ? 'text-foreground bg-secondary'
                                       : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
@@ -351,6 +532,58 @@ export default function Navbar() {
                                   {link.label}
                                 </Link>
                               ))}
+
+                              {/* Promoters Activity */}
+                              <div className="mt-2">
+                                <div className="py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                  Promoters Activity
+                                </div>
+                                {marketDataLinks.others.promotersActivity.map((link) => (
+                                  <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    onClick={() => {
+                                      setMobileMenuOpen(false);
+                                      setMobileMarketDataOpen(false);
+                                    }}
+                                    className={`
+                                      block py-2 pl-5 text-sm rounded-lg transition-colors
+                                      ${pathname === link.href
+                                        ? 'text-foreground bg-secondary'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                      }
+                                    `}
+                                  >
+                                    {link.label}
+                                  </Link>
+                                ))}
+                              </div>
+
+                              {/* Mutual Funds */}
+                              <div className="mt-2">
+                                <div className="py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                  Mutual Funds
+                                </div>
+                                {marketDataLinks.others.mutualFunds.map((link) => (
+                                  <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    onClick={() => {
+                                      setMobileMenuOpen(false);
+                                      setMobileMarketDataOpen(false);
+                                    }}
+                                    className={`
+                                      block py-2 pl-5 text-sm rounded-lg transition-colors
+                                      ${pathname === link.href
+                                        ? 'text-foreground bg-secondary'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                      }
+                                    `}
+                                  >
+                                    {link.label}
+                                  </Link>
+                                ))}
+                              </div>
                             </div>
                           </motion.div>
                         )}

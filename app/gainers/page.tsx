@@ -40,24 +40,6 @@ export default function GainersPage() {
     }
   };
 
-  const handleAddToWatchlist = async (stock: Stock) => {
-    try {
-      await axios.post(
-        '/api/watchlist',
-        stock,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-      toast.success(`${stock.company} added to watchlist`);
-    } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      toast.error(axiosError.response?.data?.message || 'Failed to add to watchlist');
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -128,7 +110,7 @@ export default function GainersPage() {
               Showing <span className="font-semibold text-foreground">{stocks.length}</span> stocks
             </p>
           </div>
-          <StockTable stocks={stocks} type="gainers" onAddToWatchlist={handleAddToWatchlist} />
+          <StockTable stocks={stocks} type="gainers" />
         </motion.div>
       </div>
     </div>

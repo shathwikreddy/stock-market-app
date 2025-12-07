@@ -4,6 +4,7 @@ export interface Stock {
   sector: string;
   industry: string;
   group: string;
+  faceValue: number;
   priceBand: string;
   mktCapital: string;
   preClose: number;
@@ -19,6 +20,7 @@ export const topGainersData: Stock[] = [
     sector: "IT Services",
     industry: "Software Services",
     group: "A",
+    faceValue: 1,
     priceBand: "5",
     mktCapital: "₹12,80,000 Cr",
     preClose: 3450.50,
@@ -32,6 +34,7 @@ export const topGainersData: Stock[] = [
     sector: "IT Services",
     industry: "Software Services",
     group: "A",
+    faceValue: 5,
     priceBand: "5",
     mktCapital: "₹6,50,000 Cr",
     preClose: 1560.00,
@@ -45,6 +48,7 @@ export const topGainersData: Stock[] = [
     sector: "Energy",
     industry: "Oil & Gas",
     group: "A",
+    faceValue: 10,
     priceBand: "5",
     mktCapital: "₹16,50,000 Cr",
     preClose: 2425.00,
@@ -58,6 +62,7 @@ export const topGainersData: Stock[] = [
     sector: "Banking",
     industry: "Private Bank",
     group: "A",
+    faceValue: 1,
     priceBand: "5",
     mktCapital: "₹9,00,000 Cr",
     preClose: 1565.30,
@@ -71,6 +76,7 @@ export const topGainersData: Stock[] = [
     sector: "FMCG",
     industry: "Tobacco & FMCG",
     group: "B",
+    faceValue: 1,
     priceBand: "10",
     mktCapital: "₹5,60,000 Cr",
     preClose: 450.10,
@@ -84,6 +90,7 @@ export const topGainersData: Stock[] = [
     sector: "Telecom",
     industry: "Telecommunications",
     group: "A",
+    faceValue: 5,
     priceBand: "5",
     mktCapital: "₹7,80,000 Cr",
     preClose: 1145.75,
@@ -97,6 +104,7 @@ export const topGainersData: Stock[] = [
     sector: "IT Services",
     industry: "Software Services",
     group: "A",
+    faceValue: 2,
     priceBand: "5",
     mktCapital: "₹2,45,000 Cr",
     preClose: 485.30,
@@ -110,6 +118,7 @@ export const topGainersData: Stock[] = [
     sector: "Power",
     industry: "Renewable Energy",
     group: "B",
+    faceValue: 10,
     priceBand: "10",
     mktCapital: "₹2,90,000 Cr",
     preClose: 1625.00,
@@ -123,6 +132,7 @@ export const topGainersData: Stock[] = [
     sector: "Automobile",
     industry: "Auto Manufacturers",
     group: "A",
+    faceValue: 5,
     priceBand: "5",
     mktCapital: "₹3,60,000 Cr",
     preClose: 11875.00,
@@ -136,6 +146,7 @@ export const topGainersData: Stock[] = [
     sector: "IT Services",
     industry: "Software Services",
     group: "A",
+    faceValue: 5,
     priceBand: "5",
     mktCapital: "₹1,25,000 Cr",
     preClose: 1265.50,
@@ -152,6 +163,7 @@ export const topLosersData: Stock[] = [
     sector: "Materials",
     industry: "Building Materials",
     group: "X",
+    faceValue: 10,
     priceBand: "20",
     mktCapital: "₹150 Cr",
     preClose: 27.65,
@@ -165,6 +177,7 @@ export const topLosersData: Stock[] = [
     sector: "Materials",
     industry: "Specialty Chemicals",
     group: "M",
+    faceValue: 10,
     priceBand: "20",
     mktCapital: "₹850 Cr",
     preClose: 187.90,
@@ -178,6 +191,7 @@ export const topLosersData: Stock[] = [
     sector: "Textiles",
     industry: "Textile Manufacturing",
     group: "B",
+    faceValue: 5,
     priceBand: "20",
     mktCapital: "₹2,100 Cr",
     preClose: 433.20,
@@ -191,6 +205,7 @@ export const topLosersData: Stock[] = [
     sector: "FinTech",
     industry: "Financial Services",
     group: "A",
+    faceValue: 1,
     priceBand: "20",
     mktCapital: "₹45,000 Cr",
     preClose: 765.50,
@@ -204,6 +219,7 @@ export const topLosersData: Stock[] = [
     sector: "Consumer Services",
     industry: "Food Delivery",
     group: "A",
+    faceValue: 1,
     priceBand: "20",
     mktCapital: "₹1,20,000 Cr",
     preClose: 225.80,
@@ -212,3 +228,4 @@ export const topLosersData: Stock[] = [
     percentInChange: -13.44
   },
 ];
+
