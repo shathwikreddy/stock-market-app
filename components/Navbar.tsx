@@ -17,8 +17,10 @@ import {
   ChevronDown,
   Activity,
   PieChart,
-  Globe
+  Globe,
+  StickyNote
 } from 'lucide-react';
+
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,6 +43,7 @@ export default function Navbar() {
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/watchlist', label: 'Watchlist', icon: Eye },
     { href: '/portfolio', label: 'Portfolio', icon: Briefcase },
+    { href: '/notes', label: 'Notes', icon: StickyNote },
   ];
 
   const marketDataLinks = {
