@@ -18,7 +18,10 @@ import {
   Activity,
   PieChart,
   Globe,
-  StickyNote
+  StickyNote,
+  Search,
+  Bell,
+  CalendarDays
 } from 'lucide-react';
 
 import { useState } from 'react';
@@ -39,8 +42,16 @@ export default function Navbar() {
     router.push('/login');
   };
 
+  // Order: Dashboard, Market Data (handled separately), Screeners, Alerts, Calendar, Watchlist, Portfolio, Notes (at end)
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    // Market Data dropdown is placed after Dashboard in the JSX
+  ];
+
+  const afterMarketDataLinks = [
+    { href: '/screeners', label: 'Screeners', icon: Search },
+    { href: '/alerts', label: 'Alerts', icon: Bell },
+    { href: '/calendar', label: 'Calendar', icon: CalendarDays },
     { href: '/watchlist', label: 'Watchlist', icon: Eye },
     { href: '/portfolio', label: 'Portfolio', icon: Briefcase },
   ];
@@ -323,7 +334,37 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
 
-              {/* Notes - After Market Data */}
+              {/* Screeners, Alerts, Calendar, Watchlist, Portfolio */}
+              {afterMarketDataLinks.map((link) => {
+                const Icon = link.icon;
+                const isActive = pathname === link.href;
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`
+                      relative flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                      ${isActive
+                        ? 'text-foreground bg-secondary'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                      }
+                    `}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{link.label}</span>
+                    {isActive && (
+                      <motion.div
+                        layoutId="navbar-indicator"
+                        className="absolute inset-0 bg-secondary rounded-lg -z-10"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
+
+              {/* Notes - At the end */}
               <Link
                 href="/notes"
                 className={`
@@ -630,7 +671,31 @@ export default function Navbar() {
                       </AnimatePresence>
                     </div>
 
-                    {/* Notes - After Market Data */}
+                    {/* Mobile: Screeners, Alerts, Calendar, Watchlist, Portfolio */}
+                    {afterMarketDataLinks.map((link) => {
+                      const Icon = link.icon;
+                      const isActive = pathname === link.href;
+
+                      return (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`
+                            flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors
+                            ${isActive
+                              ? 'text-foreground bg-secondary'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                            }
+                          `}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span>{link.label}</span>
+                        </Link>
+                      );
+                    })}
+
+                    {/* Notes - At the end */}
                     <Link
                       href="/notes"
                       onClick={() => setMobileMenuOpen(false)}
