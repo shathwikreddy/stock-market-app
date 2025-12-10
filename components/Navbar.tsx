@@ -42,7 +42,7 @@ export default function Navbar() {
     router.push('/login');
   };
 
-  // Order: Dashboard, Market Data (handled separately), Screeners, Alerts, Calendar, Watchlist, Portfolio, Notes (at end)
+  // Order: Dashboard, Market Data (handled separately), Screeners, Analysis, Alerts, Calendar, Watchlist, Portfolio
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     // Market Data dropdown is placed after Dashboard in the JSX
@@ -50,6 +50,7 @@ export default function Navbar() {
 
   const afterMarketDataLinks = [
     { href: '/screeners', label: 'Screeners', icon: Search },
+    { href: '/analysis', label: 'Analysis', icon: BarChart3 },
     { href: '/alerts', label: 'Alerts', icon: Bell },
     { href: '/calendar', label: 'Calendar', icon: CalendarDays },
     { href: '/watchlist', label: 'Watchlist', icon: Eye },
@@ -66,8 +67,21 @@ export default function Navbar() {
         { href: '/market-data/sectors/nse', label: 'NSE Sectors' },
         { href: '/market-data/sectors/bse', label: 'BSE Sectors' },
       ],
+      totalMarket: [
+        { href: '#', label: 'Total Market', highlight: true },
+        { href: '#', label: 'Advances, Decline & Unchange', highlight: true },
+      ],
+      marketMood: [
+        { href: '#', label: 'Market Mood' },
+      ],
       globalMarkets: [
         { href: '#', label: 'Global Markets' },
+      ],
+      filterings: [
+        { href: '#', label: 'Filterings', highlight: true },
+      ],
+      futuresSupport: [
+        { href: '#', label: 'Futures Support & Resistance', highlight: true },
       ],
     },
     equity: [
@@ -83,10 +97,14 @@ export default function Navbar() {
       { href: '#', label: 'Only Sellers' },
       { href: '#', label: '52 Week High' },
       { href: '#', label: '52 Week Low' },
+      { href: '#', label: 'All Time High (ATH)', highlight: true },
+      { href: '#', label: 'All Time Low (ATL)', highlight: true },
       { href: '#', label: 'Price Shockers' },
       { href: '#', label: 'Volume Shockers' },
       { href: '#', label: 'Most Active Stocks' },
+      { href: '#', label: 'ETFs', highlight: true },
       { href: '#', label: 'Unlisted Shares' },
+      { href: '#', label: 'Filterings', highlight: true },
     ],
     others: {
       general: [
@@ -101,6 +119,11 @@ export default function Navbar() {
         { href: '#', label: 'Bulk Deals' },
         { href: '#', label: 'Block Deals' },
         { href: '#', label: 'Intraday Large Deals' },
+        { href: '#', label: 'Monthly' },
+      ],
+      nifty: [
+        { href: '#', label: 'Nifty' },
+        { href: '#', label: 'PE' },
       ],
     },
   };
@@ -186,15 +209,14 @@ export default function Navbar() {
                     >
                       <div className="flex p-4 gap-6">
                         {/* Market Overview Column */}
-                        <div className="min-w-[160px]">
+                        <div className="min-w-[180px]">
                           <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
                             Market Overview
                           </div>
 
                           {/* Indices */}
-                          <div className="mb-3">
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                              <Activity className="h-3 w-3" />
+                          <div className="mb-2">
+                            <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
                               Indices
                             </div>
                             {marketDataLinks.marketOverview.indices.map((link) => (
@@ -202,7 +224,7 @@ export default function Navbar() {
                                 key={link.href}
                                 href={link.href}
                                 className={`
-                                  block px-2 py-1.5 text-sm rounded-lg transition-all
+                                  block px-2 py-1 text-sm rounded-lg transition-all
                                   ${pathname === link.href
                                     ? 'text-foreground bg-secondary'
                                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
@@ -215,9 +237,8 @@ export default function Navbar() {
                           </div>
 
                           {/* Sectors */}
-                          <div className="mb-3">
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                              <PieChart className="h-3 w-3" />
+                          <div className="mb-2">
+                            <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
                               Sectors
                             </div>
                             {marketDataLinks.marketOverview.sectors.map((link) => (
@@ -225,7 +246,7 @@ export default function Navbar() {
                                 key={link.href}
                                 href={link.href}
                                 className={`
-                                  block px-2 py-1.5 text-sm rounded-lg transition-all
+                                  block px-2 py-1 text-sm rounded-lg transition-all
                                   ${pathname === link.href
                                     ? 'text-foreground bg-secondary'
                                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
@@ -237,23 +258,65 @@ export default function Navbar() {
                             ))}
                           </div>
 
+                          {/* Total Market */}
+                          <div className="mb-2">
+                            {marketDataLinks.marketOverview.totalMarket.map((link) => (
+                              <Link
+                                key={link.label}
+                                href={link.href}
+                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* Market Mood */}
+                          <div className="mb-2">
+                            {marketDataLinks.marketOverview.marketMood.map((link) => (
+                              <Link
+                                key={link.label}
+                                href={link.href}
+                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+
                           {/* Global Markets */}
-                          <div>
-                            <div className="flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                              <Globe className="h-3 w-3" />
-                              Global Markets
-                            </div>
+                          <div className="mb-2">
                             {marketDataLinks.marketOverview.globalMarkets.map((link) => (
                               <Link
-                                key={link.href}
+                                key={link.label}
                                 href={link.href}
-                                className={`
-                                  block px-2 py-1.5 text-sm rounded-lg transition-all
-                                  ${pathname === link.href
-                                    ? 'text-foreground bg-secondary'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                                  }
-                                `}
+                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* Filterings */}
+                          <div className="mb-2">
+                            {marketDataLinks.marketOverview.filterings.map((link) => (
+                              <Link
+                                key={link.label}
+                                href={link.href}
+                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* Futures Support & Resistance */}
+                          <div>
+                            {marketDataLinks.marketOverview.futuresSupport.map((link) => (
+                              <Link
+                                key={link.label}
+                                href={link.href}
+                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
                               >
                                 {link.label}
                               </Link>
@@ -268,10 +331,10 @@ export default function Navbar() {
                           </div>
                           {marketDataLinks.equity.map((link) => (
                             <Link
-                              key={link.href}
+                              key={link.label}
                               href={link.href}
                               className={`
-                                block px-2 py-1.5 text-sm rounded-lg transition-all
+                                block px-2 py-1 text-sm rounded-lg transition-all
                                 ${pathname === link.href
                                   ? 'text-foreground bg-secondary'
                                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
@@ -295,7 +358,7 @@ export default function Navbar() {
                               key={link.href}
                               href={link.href}
                               className={`
-                                block px-2 py-1.5 text-sm rounded-lg transition-all
+                                block px-2 py-1 text-sm rounded-lg transition-all
                                 ${pathname === link.href
                                   ? 'text-foreground bg-secondary'
                                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
@@ -307,16 +370,35 @@ export default function Navbar() {
                           ))}
 
                           {/* Deals */}
-                          <div className="mt-3">
-                            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                          <div className="mt-2">
+                            <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
                               Deals
                             </div>
                             {marketDataLinks.others.deals.map((link) => (
                               <Link
-                                key={link.href}
+                                key={link.label}
                                 href={link.href}
                                 className={`
-                                  block px-2 py-1.5 text-sm rounded-lg transition-all
+                                  block px-2 py-1 text-sm rounded-lg transition-all
+                                  ${pathname === link.href
+                                    ? 'text-foreground bg-secondary'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                  }
+                                `}
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* Nifty */}
+                          <div className="mt-2">
+                            {marketDataLinks.others.nifty.map((link) => (
+                              <Link
+                                key={link.label}
+                                href={link.href}
+                                className={`
+                                  block px-2 py-1 text-sm rounded-lg transition-all
                                   ${pathname === link.href
                                     ? 'text-foreground bg-secondary'
                                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
@@ -363,28 +445,6 @@ export default function Navbar() {
                   </Link>
                 );
               })}
-
-              {/* Notes - At the end */}
-              <Link
-                href="/notes"
-                className={`
-                  relative flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
-                  ${pathname === '/notes'
-                    ? 'text-foreground bg-secondary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                  }
-                `}
-              >
-                <StickyNote className="h-4 w-4" />
-                <span>Notes</span>
-                {pathname === '/notes' && (
-                  <motion.div
-                    layoutId="navbar-indicator"
-                    className="absolute inset-0 bg-secondary rounded-lg -z-10"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-              </Link>
 
               {/* User Menu */}
               <div className="flex items-center space-x-3 ml-6 pl-6 border-l border-border">
@@ -694,22 +754,6 @@ export default function Navbar() {
                         </Link>
                       );
                     })}
-
-                    {/* Notes - At the end */}
-                    <Link
-                      href="/notes"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`
-                        flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors
-                        ${pathname === '/notes'
-                          ? 'text-foreground bg-secondary'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                        }
-                      `}
-                    >
-                      <StickyNote className="h-4 w-4" />
-                      <span>Notes</span>
-                    </Link>
 
 
                     <div className="pt-4 mt-4 border-t border-border">
