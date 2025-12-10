@@ -34,7 +34,9 @@ export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [marketDataOpen, setMarketDataOpen] = useState(false);
+  const [screenersOpen, setScreenersOpen] = useState(false);
   const [mobileMarketDataOpen, setMobileMarketDataOpen] = useState(false);
+  const [mobileScreenersOpen, setMobileScreenersOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -49,13 +51,37 @@ export default function Navbar() {
   ];
 
   const afterMarketDataLinks = [
-    { href: '/screeners', label: 'Screeners', icon: Search },
     { href: '/analysis', label: 'Analysis', icon: BarChart3 },
     { href: '/alerts', label: 'Alerts', icon: Bell },
     { href: '/calendar', label: 'Calendar', icon: CalendarDays },
     { href: '/watchlist', label: 'Watchlist', icon: Eye },
     { href: '/portfolio', label: 'Portfolio', icon: Briefcase },
   ];
+
+  const screenersLinks = {
+    technical: {
+      candlestickPatterns: [
+        { href: '#', label: '1. Single Candlestick Patterns' },
+        { href: '#', label: '2. Dual Candlestick Patterns' },
+        { href: '#', label: '3. Three Candlestick Patterns' },
+        { href: '#', label: '4. Invented by vgsreddy' },
+      ],
+      chartPatterns: [
+        { href: '#', label: 'Bullish Chart Patterns' },
+        { href: '#', label: 'Bearish Chart Patterns' },
+      ],
+      drawingTools: [
+        { href: '#', label: 'Support & Resistance' },
+        { href: '#', label: 'Trendline' },
+        { href: '#', label: 'Price Action' },
+        { href: '#', label: 'Swing High & Lows' },
+        { href: '#', label: 'Demand & Supply Zones' },
+      ],
+      indicators: [],
+      strategies: [],
+    },
+    fundamental: [],
+  };
 
   const marketDataLinks = {
     marketOverview: {
@@ -129,6 +155,7 @@ export default function Navbar() {
   };
 
   const isMarketDataActive = pathname.startsWith('/market-data');
+  const isScreenersActive = pathname.startsWith('/screeners');
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -416,7 +443,119 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
 
-              {/* Screeners, Alerts, Calendar, Watchlist, Portfolio */}
+              {/* Screeners Dropdown */}
+              <div
+                className="relative"
+                onMouseEnter={() => setScreenersOpen(true)}
+                onMouseLeave={() => setScreenersOpen(false)}
+              >
+                <button
+                  className={`
+                    relative flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                    ${isScreenersActive
+                      ? 'text-foreground bg-secondary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                    }
+                  `}
+                >
+                  <Search className="h-4 w-4" />
+                  <span>Screeners</span>
+                  <ChevronDown className={`h-3 w-3 transition-transform ${screenersOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {screenersOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-border rounded-xl shadow-xl overflow-hidden z-50"
+                      style={{ backgroundColor: 'white' }}
+                    >
+                      <div className="flex p-4 gap-6">
+                        {/* Technical Column */}
+                        <div className="min-w-[200px]">
+                          <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
+                            Technical
+                          </div>
+
+                          {/* Candlestick Patterns */}
+                          <div className="mb-3">
+                            <div className="px-2 py-1 text-xs font-semibold text-foreground">
+                              Candlestick Patterns
+                            </div>
+                            {screenersLinks.technical.candlestickPatterns.map((link) => (
+                              <Link
+                                key={link.label}
+                                href={link.href}
+                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* Chart Patterns */}
+                          <div className="mb-3">
+                            <div className="px-2 py-1 text-xs font-semibold text-foreground">
+                              Chart Patterns
+                            </div>
+                            {screenersLinks.technical.chartPatterns.map((link) => (
+                              <Link
+                                key={link.label}
+                                href={link.href}
+                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* Drawing Tools */}
+                          <div className="mb-3">
+                            <div className="px-2 py-1 text-xs font-semibold text-foreground">
+                              Drawing Tools
+                            </div>
+                            {screenersLinks.technical.drawingTools.map((link) => (
+                              <Link
+                                key={link.label}
+                                href={link.href}
+                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                              >
+                                {link.label}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {/* Indicators */}
+                          <div className="mb-3">
+                            <div className="px-2 py-1 text-xs font-semibold text-foreground">
+                              Indicators
+                            </div>
+                          </div>
+
+                          {/* Strategies */}
+                          <div>
+                            <div className="px-2 py-1 text-xs font-semibold text-foreground">
+                              Strategies
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Fundamental Column */}
+                        <div className="min-w-[160px] border-l border-border pl-6">
+                          <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
+                            Fundamental
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Analysis, Alerts, Calendar, Watchlist, Portfolio */}
               {afterMarketDataLinks.map((link) => {
                 const Icon = link.icon;
                 const isActive = pathname === link.href;
@@ -445,6 +584,28 @@ export default function Navbar() {
                   </Link>
                 );
               })}
+
+              {/* Notes - At the end */}
+              <Link
+                href="/notes"
+                className={`
+                  relative flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                  ${pathname === '/notes'
+                    ? 'text-foreground bg-secondary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                  }
+                `}
+              >
+                <StickyNote className="h-4 w-4" />
+                <span>Notes</span>
+                {pathname === '/notes' && (
+                  <motion.div
+                    layoutId="navbar-indicator"
+                    className="absolute inset-0 bg-secondary rounded-lg -z-10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+              </Link>
 
               {/* User Menu */}
               <div className="flex items-center space-x-3 ml-6 pl-6 border-l border-border">
@@ -754,6 +915,22 @@ export default function Navbar() {
                         </Link>
                       );
                     })}
+
+                    {/* Notes - At the end */}
+                    <Link
+                      href="/notes"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`
+                        flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors
+                        ${pathname === '/notes'
+                          ? 'text-foreground bg-secondary'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                        }
+                      `}
+                    >
+                      <StickyNote className="h-4 w-4" />
+                      <span>Notes</span>
+                    </Link>
 
 
                     <div className="pt-4 mt-4 border-t border-border">
