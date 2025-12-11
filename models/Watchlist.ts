@@ -2,21 +2,24 @@ import mongoose, { Schema, models } from 'mongoose';
 
 export interface IWatchlistStock {
   sNo: number;
-  company: string;
+  date: Date;
+  sourceFrom: string;
+  segments: string;
+  tradingSymbol: string;
   sector: string;
   industry: string;
-  group: string;
-  priceBand: string;
-  mktCapital: string;
-  preClose: number;
   ltp: number;
-  netChange: number;
-  percentInChange: number;
+  entryPrice: number;
+  stopLoss: number;
+  target: number;
+  redFlags: string;
+  note: string;
   addedAt: Date;
 }
 
 export interface IWatchlist {
   userId: string;
+  name: string;
   stocks: IWatchlistStock[];
   createdAt: Date;
   updatedAt: Date;
@@ -24,16 +27,18 @@ export interface IWatchlist {
 
 const WatchlistStockSchema = new Schema({
   sNo: Number,
-  company: String,
+  date: { type: Date, default: Date.now },
+  sourceFrom: String,
+  segments: String,
+  tradingSymbol: String,
   sector: String,
   industry: String,
-  group: String,
-  priceBand: String,
-  mktCapital: String,
-  preClose: Number,
   ltp: Number,
-  netChange: Number,
-  percentInChange: Number,
+  entryPrice: Number,
+  stopLoss: Number,
+  target: Number,
+  redFlags: String,
+  note: String,
   addedAt: { type: Date, default: Date.now },
 });
 
@@ -43,6 +48,10 @@ const WatchlistSchema = new Schema<IWatchlist>(
       type: String,
       required: true,
       unique: true,
+    },
+    name: {
+      type: String,
+      default: 'My Watchlist',
     },
     stocks: [WatchlistStockSchema],
   },
