@@ -160,23 +160,23 @@ export default function WatchlistPage() {
           className="bg-background border border-border rounded-2xl shadow-luxury overflow-hidden"
         >
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1400px]">
+            <table className="w-full min-w-[1200px]">
               <thead>
-                <tr className="bg-secondary/50 border-b border-border">
-                  <th className="px-4 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">S No</th>
-                  <th className="px-4 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date</th>
-                  <th className="px-4 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Source From</th>
-                  <th className="px-4 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Segments</th>
-                  <th className="px-4 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Trading Symbol</th>
-                  <th className="px-4 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sector</th>
-                  <th className="px-4 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Industry</th>
-                  <th className="px-4 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">LTP</th>
-                  <th className="px-4 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Entry Price</th>
-                  <th className="px-4 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Stop Loss</th>
-                  <th className="px-4 py-4 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Target</th>
-                  <th className="px-4 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Red Flags</th>
-                  <th className="px-4 py-4 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Note</th>
-                  <th className="px-4 py-4 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
+                <tr className="border-b border-border">
+                  <th className="px-2 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">#</th>
+                  <th className="px-2 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date</th>
+                  <th className="px-2 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Source</th>
+                  <th className="px-2 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Seg</th>
+                  <th className="px-2 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Symbol</th>
+                  <th className="px-2 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Sector</th>
+                  <th className="px-2 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Industry</th>
+                  <th className="px-2 py-2 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">LTP</th>
+                  <th className="px-2 py-2 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Entry</th>
+                  <th className="px-2 py-2 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">SL</th>
+                  <th className="px-2 py-2 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Target</th>
+                  <th className="px-2 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Flags</th>
+                  <th className="px-2 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Note</th>
+                  <th className="px-2 py-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -192,57 +192,57 @@ export default function WatchlistPage() {
                       transition={{ delay: index * 0.05 }}
                       className="hover:bg-secondary/30 transition-colors group"
                     >
-                      <td className="px-4 py-4 text-sm font-medium text-foreground">{stock.sNo}</td>
-                      <td className="px-4 py-4 text-sm text-muted-foreground">{stock.date}</td>
-                      <td className="px-4 py-4 text-sm text-muted-foreground">{stock.sourceFrom}</td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-lg ${stock.segments === 'NSE'
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                      <td className="px-2 py-1.5 text-xs font-medium text-foreground">{stock.sNo}</td>
+                      <td className="px-2 py-1.5 text-xs text-muted-foreground whitespace-nowrap">{stock.date}</td>
+                      <td className="px-2 py-1.5 text-xs text-muted-foreground">{stock.sourceFrom}</td>
+                      <td className="px-2 py-1.5">
+                        <span className={`inline-flex px-1.5 py-0.5 text-xs font-semibold rounded ${stock.segments === 'NSE'
+                          ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                          : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
                           }`}>
                           {stock.segments}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-sm font-semibold text-foreground">{stock.tradingSymbol}</td>
-                      <td className="px-4 py-4 text-sm text-muted-foreground">{stock.sector}</td>
-                      <td className="px-4 py-4 text-sm text-muted-foreground">{stock.industry}</td>
-                      <td className="px-4 py-4 text-sm font-mono text-right font-semibold text-foreground">₹{stock.ltp.toFixed(2)}</td>
-                      <td className="px-4 py-4 text-sm font-mono text-right text-muted-foreground">₹{stock.entryPrice.toFixed(2)}</td>
-                      <td className="px-4 py-4 text-sm font-mono text-right">
+                      <td className="px-2 py-1.5 text-xs font-semibold text-foreground">{stock.tradingSymbol}</td>
+                      <td className="px-2 py-1.5 text-xs text-muted-foreground">{stock.sector}</td>
+                      <td className="px-2 py-1.5 text-xs text-muted-foreground">{stock.industry}</td>
+                      <td className="px-2 py-1.5 text-xs font-mono text-right font-semibold text-foreground">₹{stock.ltp.toFixed(2)}</td>
+                      <td className="px-2 py-1.5 text-xs font-mono text-right text-muted-foreground">₹{stock.entryPrice.toFixed(2)}</td>
+                      <td className="px-2 py-1.5 text-xs font-mono text-right">
                         <span className="text-error">₹{stock.stopLoss.toFixed(2)}</span>
-                        <span className="block text-xs text-error/60">-{riskPercent}%</span>
+                        <span className="block text-[10px] text-error/60">-{riskPercent}%</span>
                       </td>
-                      <td className="px-4 py-4 text-sm font-mono text-right">
+                      <td className="px-2 py-1.5 text-xs font-mono text-right">
                         <span className="text-success">₹{stock.target.toFixed(2)}</span>
-                        <span className="block text-xs text-success/60">+{profitPercent}%</span>
+                        <span className="block text-[10px] text-success/60">+{profitPercent}%</span>
                       </td>
-                      <td className="px-4 py-4 text-sm">
+                      <td className="px-2 py-1.5 text-xs">
                         {stock.redFlags !== 'None' ? (
-                          <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-lg bg-warning/10 text-warning">
+                          <span className="inline-flex px-1.5 py-0.5 text-xs font-semibold rounded bg-warning/10 text-warning">
                             {stock.redFlags}
                           </span>
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
                       </td>
-                      <td className="px-4 py-4 text-sm text-muted-foreground max-w-[200px] truncate" title={stock.note}>
+                      <td className="px-2 py-1.5 text-xs text-muted-foreground max-w-[150px] truncate" title={stock.note}>
                         {stock.note}
                       </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <td className="px-2 py-1.5">
+                        <div className="flex items-center justify-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleEdit(stock.sNo)}
-                            className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
+                            className="p-1 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded transition-all"
                             title="Edit"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleRemove(stock.sNo)}
-                            className="p-2 text-muted-foreground hover:text-error hover:bg-error/10 rounded-lg transition-all"
+                            className="p-1 text-muted-foreground hover:text-error hover:bg-error/10 rounded transition-all"
                             title="Delete"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </td>
