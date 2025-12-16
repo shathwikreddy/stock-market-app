@@ -21,7 +21,8 @@ import {
   StickyNote,
   Search,
   Bell,
-  CalendarDays
+  CalendarDays,
+  FileText
 } from 'lucide-react';
 
 import { useState } from 'react';
@@ -35,8 +36,10 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [marketDataOpen, setMarketDataOpen] = useState(false);
   const [screenersOpen, setScreenersOpen] = useState(false);
+  const [portfolioOpen, setPortfolioOpen] = useState(false);
   const [mobileMarketDataOpen, setMobileMarketDataOpen] = useState(false);
   const [mobileScreenersOpen, setMobileScreenersOpen] = useState(false);
+  const [mobilePortfolioOpen, setMobilePortfolioOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -55,7 +58,11 @@ export default function Navbar() {
     { href: '/alerts', label: 'Alerts', icon: Bell },
     { href: '/calendar', label: 'Calendar', icon: CalendarDays },
     { href: '/watchlist', label: 'Watchlist', icon: Eye },
-    { href: '/portfolio', label: 'Portfolio', icon: Briefcase },
+  ];
+
+  const portfolioLinks = [
+    { href: '/portfolio/live-trading', label: 'Live Trading', icon: TrendingUp },
+    { href: '/portfolio/paper-trading', label: 'Paper Trading', icon: FileText },
   ];
 
   const screenersLinks = {
@@ -156,6 +163,7 @@ export default function Navbar() {
 
   const isMarketDataActive = pathname.startsWith('/market-data');
   const isScreenersActive = pathname.startsWith('/screeners');
+  const isPortfolioActive = pathname.startsWith('/portfolio');
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -555,7 +563,7 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
 
-              {/* Analysis, Alerts, Calendar, Watchlist, Portfolio */}
+              {/* Analysis, Alerts, Calendar, Watchlist */}
               {afterMarketDataLinks.map((link) => {
                 const Icon = link.icon;
                 const isActive = pathname === link.href;
@@ -584,6 +592,62 @@ export default function Navbar() {
                   </Link>
                 );
               })}
+
+              {/* Portfolio Dropdown */}
+              <div
+                className="relative"
+                onMouseEnter={() => setPortfolioOpen(true)}
+                onMouseLeave={() => setPortfolioOpen(false)}
+              >
+                <button
+                  className={`
+                    relative flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+                    ${isPortfolioActive
+                      ? 'text-foreground bg-secondary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                    }
+                  `}
+                >
+                  <Briefcase className="h-4 w-4" />
+                  <span>Portfolio</span>
+                  <ChevronDown className={`h-3 w-3 transition-transform ${portfolioOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {portfolioOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-border rounded-xl shadow-xl overflow-hidden z-50"
+                      style={{ backgroundColor: 'white' }}
+                    >
+                      <div className="p-3 min-w-[180px]">
+                        {portfolioLinks.map((link) => {
+                          const Icon = link.icon;
+                          return (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              className={`
+                                flex items-center space-x-3 px-3 py-2.5 text-sm rounded-lg transition-all
+                                ${pathname === link.href
+                                  ? 'text-foreground bg-secondary'
+                                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                }
+                              `}
+                            >
+                              <Icon className="h-4 w-4" />
+                              <span>{link.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               {/* Notes - At the end */}
               <Link
@@ -892,7 +956,7 @@ export default function Navbar() {
                       </AnimatePresence>
                     </div>
 
-                    {/* Mobile: Screeners, Alerts, Calendar, Watchlist, Portfolio */}
+                    {/* Mobile: Analysis, Alerts, Calendar, Watchlist */}
                     {afterMarketDataLinks.map((link) => {
                       const Icon = link.icon;
                       const isActive = pathname === link.href;
@@ -915,6 +979,62 @@ export default function Navbar() {
                         </Link>
                       );
                     })}
+
+                    {/* Mobile Portfolio Section */}
+                    <div className="px-4 py-3">
+                      <button
+                        onClick={() => setMobilePortfolioOpen(!mobilePortfolioOpen)}
+                        className={`
+                          w-full flex items-center justify-between text-sm font-medium transition-colors
+                          ${isPortfolioActive
+                            ? 'text-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                          }
+                        `}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Briefcase className="h-4 w-4" />
+                          <span>Portfolio</span>
+                        </div>
+                        <ChevronDown className={`h-4 w-4 transition-transform ${mobilePortfolioOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      <AnimatePresence>
+                        {mobilePortfolioOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="mt-2 ml-7 space-y-1 overflow-hidden"
+                          >
+                            {portfolioLinks.map((link) => {
+                              const Icon = link.icon;
+                              return (
+                                <Link
+                                  key={link.href}
+                                  href={link.href}
+                                  onClick={() => {
+                                    setMobileMenuOpen(false);
+                                    setMobilePortfolioOpen(false);
+                                  }}
+                                  className={`
+                                    flex items-center space-x-3 py-2 pl-2 text-sm rounded-lg transition-colors
+                                    ${pathname === link.href
+                                      ? 'text-foreground bg-secondary'
+                                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                                    }
+                                  `}
+                                >
+                                  <Icon className="h-4 w-4" />
+                                  <span>{link.label}</span>
+                                </Link>
+                              );
+                            })}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
 
                     {/* Notes - At the end */}
                     <Link

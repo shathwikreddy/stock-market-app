@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Wallet, TrendingUp, PieChart, BarChart3, LineChart } from 'lucide-react';
+import { Briefcase, TrendingUp, FileText, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
@@ -28,11 +28,25 @@ const itemVariants = {
   },
 };
 
-const upcomingFeatures = [
-  { icon: TrendingUp, label: 'Add and track stock holdings' },
-  { icon: BarChart3, label: 'Real-time profit/loss calculation' },
-  { icon: PieChart, label: 'Investment performance analytics' },
-  { icon: LineChart, label: 'Portfolio diversification insights' },
+const portfolioOptions = [
+  {
+    href: '/portfolio/live-trading',
+    icon: TrendingUp,
+    title: 'Live Trading',
+    description: 'View your real trading portfolio with actual market positions',
+    gradient: 'from-green-500 to-emerald-600',
+    bgColor: 'bg-green-500/10',
+    iconColor: 'text-green-500',
+  },
+  {
+    href: '/portfolio/paper-trading',
+    icon: FileText,
+    title: 'Paper Trading',
+    description: 'Practice trading with simulated positions and virtual money',
+    gradient: 'from-blue-500 to-indigo-600',
+    bgColor: 'bg-blue-500/10',
+    iconColor: 'text-blue-500',
+  },
 ];
 
 export default function PortfolioPage() {
@@ -55,14 +69,14 @@ export default function PortfolioPage() {
         >
           <div className="flex items-center space-x-4 mb-4">
             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center">
-              <Wallet className="w-7 h-7 text-primary" />
+              <Briefcase className="w-7 h-7 text-primary" />
             </div>
             <div>
               <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground">
-                My Portfolio
+                Portfolio
               </h1>
               <p className="text-lg text-muted-foreground mt-1">
-                Track your investments and returns
+                Manage your trading portfolios
               </p>
             </div>
           </div>
@@ -72,53 +86,30 @@ export default function PortfolioPage() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="bg-background border border-border rounded-2xl p-12 text-center shadow-luxury"
+          className="grid md:grid-cols-2 gap-6 max-w-4xl"
         >
-          <motion.div variants={itemVariants}>
-            <div className="w-20 h-20 bg-secondary rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Wallet className="w-10 h-10 text-muted-foreground" />
-            </div>
-            <h3 className="text-2xl font-display font-bold text-foreground mb-2">
-              Portfolio Management
-            </h3>
-            <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-              Coming Soon! Track your holdings, P&L, and investment performance.
-            </p>
-          </motion.div>
-
-          <motion.div
-            variants={itemVariants}
-            className="bg-secondary rounded-2xl p-8 max-w-2xl mx-auto"
-          >
-            <h4 className="text-lg font-display font-bold text-foreground mb-6">
-              Upcoming Features
-            </h4>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {upcomingFeatures.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemVariants}
-                  className="flex items-center space-x-3 p-3 bg-background rounded-xl border border-border"
-                >
-                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <feature.icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium text-foreground text-left">
-                    {feature.label}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div variants={itemVariants} className="mt-8">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-all shadow-sm hover:shadow-md"
-            >
-              Back to Dashboard
-            </Link>
-          </motion.div>
+          {portfolioOptions.map((option) => (
+            <motion.div key={option.href} variants={itemVariants}>
+              <Link
+                href={option.href}
+                className="group block bg-background border border-border rounded-2xl p-8 shadow-luxury hover:shadow-2xl transition-all duration-300 hover:border-primary/30"
+              >
+                <div className={`w-14 h-14 ${option.bgColor} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                  <option.icon className={`w-7 h-7 ${option.iconColor}`} />
+                </div>
+                <h3 className="text-2xl font-display font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                  {option.title}
+                </h3>
+                <p className="text-muted-foreground mb-6">
+                  {option.description}
+                </p>
+                <div className="flex items-center text-primary font-medium">
+                  <span>View Portfolio</span>
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            </motion.div>
+          ))}
         </motion.div>
       </div>
     </div>
