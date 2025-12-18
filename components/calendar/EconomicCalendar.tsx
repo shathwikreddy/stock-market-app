@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import CalendarHeader from './CalendarHeader';
 import CalendarFilters from './CalendarFilters';
 import CalendarTable from './CalendarTable';
@@ -10,24 +10,41 @@ import DividendsTable from './DividendsTable';
 import SplitsTable from './SplitsTable';
 import IPOTable from './IPOTable';
 import ExpirationTable from './ExpirationTable';
+import AddEntryModal from './AddEntryModal';
+import { useCalendarData } from '@/hooks/useCalendarData';
 import dummyData from '@/data/economic-calendar-data.json';
 
-// Type assertion for dummyData to handle loose typing of JSON import
 const data = dummyData as any;
 
-export default function EconomicCalendar() {
-    const [activeTab, setActiveTab] = useState('Economic Calendar');
-    const [activeFilter, setActiveFilter] = useState('Today');
+type TabType = 'Economic Calendar' | 'Holidays' | 'Earnings' | 'Dividends' | 'Splits' | 'IPO' | 'Expiration';
 
-    // Generic filter function based on date
+export default function EconomicCalendar() {
+    const [activeTab, setActiveTab] = useState<TabType>('Economic Calendar');
+    const [activeFilter, setActiveFilter] = useState('Today');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showAddModal, setShowAddModal] = useState(false);
+
+    const {
+        customData,
+        isLoaded,
+        addEconomicEvent,
+        deleteEconomicEvent,
+        addHoliday,
+        deleteHoliday,
+        addEarning,
+        deleteEarning,
+        addDividend,
+        deleteDividend,
+        addSplit,
+        deleteSplit,
+        addIPO,
+        deleteIPO,
+        addExpiration,
+        deleteExpiration,
+    } = useCalendarData();
+
     const filterData = (categoryData: any[]) => {
         if (!categoryData) return [];
-
-        // Extended filtering logic for demo:
-        // If the category has exact dates like "Dec 16, 2025" in JSON, we can't easily map "Today" to it without a real date library and knowing what "Today" is.
-        // For this demo, we will Just Return All Data for the new categories (Holidays, Dividends, etc.) 
-        // to ensure the user sees the expanded tables immediately without fighting the "Today" filter being empty.
-        // The Economic Calendar tab still uses "Today"/"Tomorrow" strings so we keep logic for that.
 
         if (activeTab === 'Economic Calendar') {
             if (activeFilter === 'Yesterday' || activeFilter === 'Today' || activeFilter === 'Tomorrow') {
@@ -35,39 +52,181 @@ export default function EconomicCalendar() {
             }
         }
 
-        // For other tabs with hardcoded specific dates (Dec 16, Dec 17...), show all for now
-        // so the user can verify the structure regardless of the filter button state.
         return categoryData;
     };
 
+    const applySearch = (items: any[]) => {
+        if (!searchQuery.trim()) return items;
+        const query = searchQuery.toLowerCase();
+        return items.filter((item: any) => {
+            return Object.values(item).some((value) =>
+                String(value).toLowerCase().includes(query)
+            );
+        });
+    };
+
+    const allEconomic = useMemo(() => {
+        return [...(data.economic || []), ...customData.economic];
+    }, [customData.economic]);
+
+    const allHolidays = useMemo(() => {
+        return [...(data.holidays || []), ...customData.holidays];
+    }, [customData.holidays]);
+
+    const allEarnings = useMemo(() => {
+        return [...(data.earnings || []), ...customData.earnings];
+    }, [customData.earnings]);
+
+    const allDividends = useMemo(() => {
+        return [...(data.dividends || []), ...customData.dividends];
+    }, [customData.dividends]);
+
+    const allSplits = useMemo(() => {
+        return [...(data.splits || []), ...customData.splits];
+    }, [customData.splits]);
+
+    const allIPO = useMemo(() => {
+        return [...(data.ipo || []), ...customData.ipo];
+    }, [customData.ipo]);
+
+    const allExpiration = useMemo(() => {
+        return [...(data.expiration || []), ...customData.expiration];
+    }, [customData.expiration]);
+
+    const getCustomIds = (category: keyof typeof customData) => {
+        return customData[category].map((item: any) => item.id);
+    };
+
     const renderContent = () => {
+        if (!isLoaded) {
+            return <div className="p-4 text-center text-gray-400">Loading...</div>;
+        }
+
         switch (activeTab) {
             case 'Economic Calendar':
-                return <CalendarTable events={filterData(data.economic)} />;
+                return (
+                    <CalendarTable
+                        events={applySearch(filterData(allEconomic))}
+                        onDeleteEvent={deleteEconomicEvent}
+                        customEventIds={getCustomIds('economic')}
+                    />
+                );
             case 'Holidays':
-                return <HolidaysTable events={filterData(data.holidays)} />;
+                return (
+                    <HolidaysTable
+                        events={applySearch(filterData(allHolidays))}
+                        onDeleteHoliday={deleteHoliday}
+                        customHolidayIds={getCustomIds('holidays')}
+                    />
+                );
             case 'Earnings':
-                return <EarningsTable events={filterData(data.earnings)} />;
+                return (
+                    <EarningsTable
+                        events={applySearch(filterData(allEarnings))}
+                        onDeleteEarning={deleteEarning}
+                        customEarningIds={getCustomIds('earnings')}
+                    />
+                );
             case 'Dividends':
-                return <DividendsTable events={filterData(data.dividends)} />;
+                return (
+                    <DividendsTable
+                        events={applySearch(filterData(allDividends))}
+                        onDeleteDividend={deleteDividend}
+                        customDividendIds={getCustomIds('dividends')}
+                    />
+                );
             case 'Splits':
-                return <SplitsTable events={filterData(data.splits)} />;
+                return (
+                    <SplitsTable
+                        events={applySearch(filterData(allSplits))}
+                        onDeleteSplit={deleteSplit}
+                        customSplitIds={getCustomIds('splits')}
+                    />
+                );
             case 'IPO':
-                return <IPOTable events={filterData(data.ipo)} />;
+                return (
+                    <IPOTable
+                        events={applySearch(filterData(allIPO))}
+                        onDeleteIPO={deleteIPO}
+                        customIPOIds={getCustomIds('ipo')}
+                    />
+                );
             case 'Expiration':
-                return <ExpirationTable events={filterData(data.expiration)} />;
+                return (
+                    <ExpirationTable
+                        events={applySearch(filterData(allExpiration))}
+                        onDeleteExpiration={deleteExpiration}
+                        customExpirationIds={getCustomIds('expiration')}
+                    />
+                );
             default:
                 return <div className="p-4 text-center">Select a tab</div>;
         }
     };
 
+    const getAddButtonLabel = () => {
+        switch (activeTab) {
+            case 'Economic Calendar': return 'Add Event';
+            case 'Holidays': return 'Add Holiday';
+            case 'Earnings': return 'Add Earnings';
+            case 'Dividends': return 'Add Dividend';
+            case 'Splits': return 'Add Split';
+            case 'IPO': return 'Add IPO';
+            case 'Expiration': return 'Add Expiration';
+            default: return 'Add Entry';
+        }
+    };
+
     return (
         <div className="w-full bg-white font-sans text-[#333333]">
-            <CalendarHeader activeTab={activeTab} onTabChange={setActiveTab} />
+            <CalendarHeader activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab as TabType)} />
 
-            {/* Filters usually apply to most tabs, but maybe not all in real life. 
-          For consistency with Investing.com, dates apply to most. */}
             <CalendarFilters activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+
+            <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-200">
+                <div className="relative flex-1 max-w-md">
+                    <input
+                        type="text"
+                        placeholder={`Search ${activeTab}...`}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full px-4 py-2 pl-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <svg
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                    </svg>
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
+
+                <button
+                    onClick={() => setShowAddModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    {getAddButtonLabel()}
+                </button>
+            </div>
 
             <div className="min-h-[300px]">
                 {renderContent()}
@@ -76,6 +235,19 @@ export default function EconomicCalendar() {
             <div className="mt-8 text-center text-gray-500 text-sm">
                 <p>Real-time {activeTab} provided by Investing.com.</p>
             </div>
+
+            <AddEntryModal
+                isOpen={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                activeTab={activeTab}
+                onAddEconomic={addEconomicEvent}
+                onAddHoliday={addHoliday}
+                onAddEarning={addEarning}
+                onAddDividend={addDividend}
+                onAddSplit={addSplit}
+                onAddIPO={addIPO}
+                onAddExpiration={addExpiration}
+            />
         </div>
     );
 }

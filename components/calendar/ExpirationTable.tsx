@@ -11,9 +11,14 @@ interface ExpirationEvent {
 
 interface ExpirationTableProps {
     events: ExpirationEvent[];
+    onDeleteExpiration?: (id: string) => void;
+    customExpirationIds?: string[];
 }
 
-export default function ExpirationTable({ events }: ExpirationTableProps) {
+export default function ExpirationTable({ events, onDeleteExpiration, customExpirationIds = [] }: ExpirationTableProps) {
+    const isCustom = (id: string) => customExpirationIds.includes(id);
+    const hasCustom = customExpirationIds.length > 0;
+
     return (
         <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
@@ -24,25 +29,46 @@ export default function ExpirationTable({ events }: ExpirationTableProps) {
                         <th className="py-2">Month</th>
                         <th className="py-2">Settlement</th>
                         <th className="py-2 pr-4">Last Rollover</th>
+                        {hasCustom && <th className="py-2 pr-2 w-12">Actions</th>}
                     </tr>
                 </thead>
                 <tbody>
                     {events.length === 0 ? (
-                        <tr><td colSpan={5} className="py-4 text-center text-gray-400">No events found.</td></tr>
+                        <tr><td colSpan={hasCustom ? 6 : 5} className="py-4 text-center text-gray-400">No events found.</td></tr>
                     ) : (
                         events.map((item) => (
                             <tr
                                 key={item.id}
                                 className="group hover:bg-gray-50 border-b border-gray-100 transition-colors h-[40px]"
                             >
-                                <td className="pl-2 font-semibold text-[#1256A0] flex items-center gap-2">
-                                    <span className="w-4 h-3 bg-gray-200 inline-block rounded-[1px]"></span> {/* Mock Flag */}
+                                <td className={`pl-2 font-semibold flex items-center gap-2 ${isCustom(item.id) ? 'text-blue-600' : 'text-[#1256A0]'}`}>
+                                    <span className="w-4 h-3 bg-gray-200 inline-block rounded-[1px]"></span>
                                     {item.instrument}
+                                    {isCustom(item.id) && (
+                                        <span className="ml-2 inline-flex items-center px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
+                                            Custom
+                                        </span>
+                                    )}
                                 </td>
                                 <td className="text-gray-900">{item.contract}</td>
                                 <td className="text-gray-900">{item.month}</td>
                                 <td className="text-gray-900">{item.settlement}</td>
                                 <td className="pr-4 text-gray-900">{item.rollover}</td>
+                                {hasCustom && (
+                                    <td className="pr-2">
+                                        {isCustom(item.id) && onDeleteExpiration && (
+                                            <button
+                                                onClick={() => onDeleteExpiration(item.id)}
+                                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                title="Delete expiration"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        )}
+                                    </td>
+                                )}
                             </tr>
                         )))}
                 </tbody>
