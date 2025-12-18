@@ -145,6 +145,7 @@ export default function Navbar() {
         { href: '#', label: 'FII & DII Activity' },
         { href: '#', label: 'Promoters Activity' },
         { href: '#', label: 'Mutual Funds Activity' },
+        { href: '#', label: 'Super Investors' },
         { href: '#', label: 'Corporate Action' },
       ],
       deals: [
