@@ -957,6 +957,112 @@ export default function Navbar() {
                       </AnimatePresence>
                     </div>
 
+                    {/* Mobile Screeners Section */}
+                    <div className="px-4 py-3">
+                      <button
+                        onClick={() => setMobileScreenersOpen(!mobileScreenersOpen)}
+                        className={`
+                          w-full flex items-center justify-between text-sm font-medium transition-colors
+                          ${isScreenersActive
+                            ? 'text-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                          }
+                        `}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Search className="h-4 w-4" />
+                          <span>Screeners</span>
+                        </div>
+                        <ChevronDown className={`h-4 w-4 transition-transform ${mobileScreenersOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      <AnimatePresence>
+                        {mobileScreenersOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="mt-2 ml-7 space-y-3 overflow-hidden"
+                          >
+                            {/* Technical */}
+                            <div>
+                              <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-2 pb-1 border-b border-border">
+                                Technical
+                              </div>
+
+                              {/* Candlestick Patterns */}
+                              <div className="mb-2">
+                                <div className="py-1 text-xs font-semibold text-muted-foreground">
+                                  Candlestick Patterns
+                                </div>
+                                {screenersLinks.technical.candlestickPatterns.map((link) => (
+                                  <Link
+                                    key={link.label}
+                                    href={link.href}
+                                    onClick={() => {
+                                      setMobileMenuOpen(false);
+                                      setMobileScreenersOpen(false);
+                                    }}
+                                    className="block py-2 pl-2 text-sm rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                                  >
+                                    {link.label}
+                                  </Link>
+                                ))}
+                              </div>
+
+                              {/* Chart Patterns */}
+                              <div className="mb-2">
+                                <div className="py-1 text-xs font-semibold text-muted-foreground">
+                                  Chart Patterns
+                                </div>
+                                {screenersLinks.technical.chartPatterns.map((link) => (
+                                  <Link
+                                    key={link.label}
+                                    href={link.href}
+                                    onClick={() => {
+                                      setMobileMenuOpen(false);
+                                      setMobileScreenersOpen(false);
+                                    }}
+                                    className="block py-2 pl-2 text-sm rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                                  >
+                                    {link.label}
+                                  </Link>
+                                ))}
+                              </div>
+
+                              {/* Drawing Tools */}
+                              <div className="mb-2">
+                                <div className="py-1 text-xs font-semibold text-muted-foreground">
+                                  Drawing Tools
+                                </div>
+                                {screenersLinks.technical.drawingTools.map((link) => (
+                                  <Link
+                                    key={link.label}
+                                    href={link.href}
+                                    onClick={() => {
+                                      setMobileMenuOpen(false);
+                                      setMobileScreenersOpen(false);
+                                    }}
+                                    className="block py-2 pl-2 text-sm rounded-lg transition-colors text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                                  >
+                                    {link.label}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Fundamental */}
+                            <div>
+                              <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-2 pb-1 border-b border-border">
+                                Fundamental
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
                     {/* Mobile: Analysis, Alerts, Calendar, Watchlist */}
                     {afterMarketDataLinks.map((link) => {
                       const Icon = link.icon;
