@@ -432,7 +432,7 @@ export default function Navbar() {
                               href="#"
                               className="block px-4 py-1 text-sm font-bold hover:bg-gray-100"
                             >
-                              Monthly
+                              Monthly Wise
                             </Link>
                           </div>
 
