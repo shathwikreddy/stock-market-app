@@ -430,7 +430,7 @@ export default function Navbar() {
                             </Link>
                             <Link
                               href="#"
-                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                              className="block px-4 py-1 text-sm font-bold hover:bg-gray-100"
                             >
                               Monthly
                             </Link>
