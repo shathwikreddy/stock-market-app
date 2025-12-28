@@ -121,8 +121,8 @@ export default function Navbar() {
       { href: '#', label: 'Stocks' },
       { href: '#', label: 'Sectors' },
       { href: '#', label: 'Indutry' },
-      { href: '#', label: "IPO's" },
       { href: '#', label: 'F&O Stocks' },
+      { href: '#', label: "IPO's" },
       { href: '#', label: 'All Statistics' },
       { href: '/gainers', label: 'Top Gainers' },
       { href: '/losers', label: 'Top Losers' },
@@ -137,7 +137,6 @@ export default function Navbar() {
       { href: '#', label: 'Most Active Stocks' },
       { href: '#', label: 'ETFs' },
       { href: '#', label: 'Unlisted Shares' },
-      { href: '#', label: 'Filterings' },
     ],
     others: {
       general: [
