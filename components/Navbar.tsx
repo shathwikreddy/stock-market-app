@@ -101,26 +101,26 @@ export default function Navbar() {
         { href: '/market-data/sectors/bse', label: 'BSE Sectors' },
       ],
       totalMarket: [
-        { href: '#', label: 'Total Market', highlight: true },
-        { href: '#', label: 'Advances, Decline & Unchange', highlight: true },
+        { href: '#', label: 'Total Market' },
+        { href: '#', label: 'Advances, Decline & Unchange' },
       ],
       marketMood: [
         { href: '#', label: 'Market Mood' },
+      ],
+      futuresSupport: [
+        { href: '#', label: 'Futures Support & Resistance' },
       ],
       globalMarkets: [
         { href: '#', label: 'Global Markets' },
       ],
       filterings: [
-        { href: '#', label: 'Filterings', highlight: true },
-      ],
-      futuresSupport: [
-        { href: '#', label: 'Futures Support & Resistance', highlight: true },
+        { href: '#', label: 'Filterings' },
       ],
     },
     equity: [
       { href: '#', label: 'Stocks' },
       { href: '#', label: 'Sectors' },
-      { href: '#', label: 'Industry' },
+      { href: '#', label: 'Indutry' },
       { href: '#', label: "IPO's" },
       { href: '#', label: 'F&O Stocks' },
       { href: '#', label: 'All Statistics' },
@@ -130,14 +130,14 @@ export default function Navbar() {
       { href: '#', label: 'Only Sellers' },
       { href: '#', label: '52 Week High' },
       { href: '#', label: '52 Week Low' },
-      { href: '#', label: 'All Time High (ATH)', highlight: true },
-      { href: '#', label: 'All Time Low (ATL)', highlight: true },
+      { href: '#', label: 'All Time High (ATH)' },
+      { href: '#', label: 'All Time Low (ATL)' },
       { href: '#', label: 'Price Shockers' },
       { href: '#', label: 'Volume Shockers' },
       { href: '#', label: 'Most Active Stocks' },
-      { href: '#', label: 'ETFs', highlight: true },
+      { href: '#', label: 'ETFs' },
       { href: '#', label: 'Unlisted Shares' },
-      { href: '#', label: 'Filterings', highlight: true },
+      { href: '#', label: 'Filterings' },
     ],
     others: {
       general: [
@@ -145,7 +145,7 @@ export default function Navbar() {
         { href: '#', label: 'FII & DII Activity' },
         { href: '#', label: 'Promoters Activity' },
         { href: '#', label: 'Mutual Funds Activity' },
-        { href: '#', label: 'Super Investors' },
+        { href: '#', label: 'Super Investors', highlight: true },
         { href: '#', label: 'Corporate Action' },
       ],
       deals: [
@@ -240,32 +240,26 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-border rounded-xl shadow-xl overflow-hidden z-50"
+                      className="absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-gray-300 shadow-xl overflow-hidden z-50"
                       style={{ backgroundColor: 'white' }}
                     >
-                      <div className="flex p-4 gap-6">
+                      <div className="flex">
                         {/* Market Overview Column */}
-                        <div className="min-w-[180px]">
-                          <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
+                        <div className="min-w-[200px] border-r border-gray-300">
+                          <div className="px-4 py-2 text-sm font-bold text-black border-b border-gray-300 bg-gray-50">
                             Market Overview
                           </div>
 
                           {/* Indices */}
-                          <div className="mb-2">
-                            <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
+                          <div className="border-b border-gray-300">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black">
                               Indices
                             </div>
                             {marketDataLinks.marketOverview.indices.map((link) => (
                               <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`
-                                  block px-2 py-1 text-sm rounded-lg transition-all
-                                  ${pathname === link.href
-                                    ? 'text-foreground bg-secondary'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                                  }
-                                `}
+                                className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
                               >
                                 {link.label}
                               </Link>
@@ -273,21 +267,15 @@ export default function Navbar() {
                           </div>
 
                           {/* Sectors */}
-                          <div className="mb-2">
-                            <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
+                          <div className="border-b border-gray-300">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black">
                               Sectors
                             </div>
                             {marketDataLinks.marketOverview.sectors.map((link) => (
                               <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`
-                                  block px-2 py-1 text-sm rounded-lg transition-all
-                                  ${pathname === link.href
-                                    ? 'text-foreground bg-secondary'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                                  }
-                                `}
+                                className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
                               >
                                 {link.label}
                               </Link>
@@ -295,155 +283,173 @@ export default function Navbar() {
                           </div>
 
                           {/* Total Market */}
-                          <div className="mb-2">
-                            {marketDataLinks.marketOverview.totalMarket.map((link) => (
-                              <Link
-                                key={link.label}
-                                href={link.href}
-                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                              >
-                                {link.label}
-                              </Link>
-                            ))}
+                          <div className="border-b border-gray-300">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black">
+                              Total Market
+                            </div>
+                            <Link
+                              href="#"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                            >
+                              Advances, Decline & Unchange
+                            </Link>
                           </div>
 
                           {/* Market Mood */}
-                          <div className="mb-2">
-                            {marketDataLinks.marketOverview.marketMood.map((link) => (
-                              <Link
-                                key={link.label}
-                                href={link.href}
-                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                              >
-                                {link.label}
-                              </Link>
-                            ))}
-                          </div>
-
-                          {/* Global Markets */}
-                          <div className="mb-2">
-                            {marketDataLinks.marketOverview.globalMarkets.map((link) => (
-                              <Link
-                                key={link.label}
-                                href={link.href}
-                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                              >
-                                {link.label}
-                              </Link>
-                            ))}
-                          </div>
-
-                          {/* Filterings */}
-                          <div className="mb-2">
-                            {marketDataLinks.marketOverview.filterings.map((link) => (
-                              <Link
-                                key={link.label}
-                                href={link.href}
-                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                              >
-                                {link.label}
-                              </Link>
-                            ))}
+                          <div className="border-b border-gray-300">
+                            <Link
+                              href="#"
+                              className="block px-4 py-1.5 text-sm text-black hover:bg-gray-100"
+                            >
+                              Market Mood
+                            </Link>
                           </div>
 
                           {/* Futures Support & Resistance */}
+                          <div className="border-b border-gray-300">
+                            <Link
+                              href="#"
+                              className="block px-4 py-1.5 text-sm text-black hover:bg-gray-100"
+                            >
+                              Futures Support & Resistance
+                            </Link>
+                          </div>
+
+                          {/* Global Markets */}
+                          <div className="border-b border-gray-300">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black">
+                              Global Markets
+                            </div>
+                          </div>
+
+                          {/* Filterings */}
                           <div>
-                            {marketDataLinks.marketOverview.futuresSupport.map((link) => (
-                              <Link
-                                key={link.label}
-                                href={link.href}
-                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                              >
-                                {link.label}
-                              </Link>
-                            ))}
+                            <div className="px-4 py-1.5 text-sm font-bold text-black">
+                              Filterings
+                            </div>
                           </div>
                         </div>
 
                         {/* Equity Column */}
-                        <div className="min-w-[140px] border-l border-border pl-6">
-                          <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
+                        <div className="min-w-[150px] border-r border-gray-300">
+                          <div className="px-4 py-2 text-sm font-bold text-black border-b border-gray-300 bg-gray-50">
                             Equity
                           </div>
                           {marketDataLinks.equity.map((link) => (
                             <Link
                               key={link.label}
                               href={link.href}
-                              className={`
-                                block px-2 py-1 text-sm rounded-lg transition-all
-                                ${pathname === link.href
-                                  ? 'text-foreground bg-secondary'
-                                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                                }
-                              `}
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
                             >
                               {link.label}
                             </Link>
                           ))}
+                          <div className="border-b border-gray-300">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black">
+                              Filterings
+                            </div>
+                          </div>
                         </div>
 
                         {/* Others Column */}
-                        <div className="min-w-[160px] border-l border-border pl-6">
-                          <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
+                        <div className="min-w-[180px]">
+                          <div className="px-4 py-2 text-sm font-bold text-black border-b border-gray-300 bg-gray-50">
                             Others
                           </div>
 
-                          {/* General Others */}
-                          {marketDataLinks.others.general.map((link) => (
-                            <Link
-                              key={link.href}
-                              href={link.href}
-                              className={`
-                                block px-2 py-1 text-sm rounded-lg transition-all
-                                ${pathname === link.href
-                                  ? 'text-foreground bg-secondary'
-                                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                                }
-                              `}
-                            >
-                              {link.label}
-                            </Link>
-                          ))}
+                          {/* Results Calendar */}
+                          <Link
+                            href="#"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                          >
+                            Results Calendar
+                          </Link>
+
+                          {/* FII & DII Activity */}
+                          <Link
+                            href="#"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                          >
+                            FII & DII Activity
+                          </Link>
+
+                          {/* Promoters Activity */}
+                          <Link
+                            href="#"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                          >
+                            Promoters Activity
+                          </Link>
+
+                          {/* Mutual Funds Activity */}
+                          <Link
+                            href="#"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                          >
+                            Mutual Funds Activity
+                          </Link>
+
+                          {/* Super Investors */}
+                          <Link
+                            href="#"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                          >
+                            Super Investors
+                          </Link>
+
+                          {/* Corporate Action */}
+                          <Link
+                            href="#"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                          >
+                            Corporate Action
+                          </Link>
 
                           {/* Deals */}
-                          <div className="mt-2">
-                            <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">
+                          <div className="border-b border-gray-200">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black">
                               Deals
                             </div>
-                            {marketDataLinks.others.deals.map((link) => (
-                              <Link
-                                key={link.label}
-                                href={link.href}
-                                className={`
-                                  block px-2 py-1 text-sm rounded-lg transition-all
-                                  ${pathname === link.href
-                                    ? 'text-foreground bg-secondary'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                                  }
-                                `}
-                              >
-                                {link.label}
-                              </Link>
-                            ))}
+                            <Link
+                              href="#"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                            >
+                              Bulk Deals
+                            </Link>
+                            <Link
+                              href="#"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                            >
+                              Block Deals
+                            </Link>
+                            <Link
+                              href="#"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                            >
+                              Intraday Large Deals
+                            </Link>
+                            <Link
+                              href="#"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                            >
+                              Monthly
+                            </Link>
                           </div>
 
                           {/* Nifty */}
-                          <div className="mt-2">
-                            {marketDataLinks.others.nifty.map((link) => (
-                              <Link
-                                key={link.label}
-                                href={link.href}
-                                className={`
-                                  block px-2 py-1 text-sm rounded-lg transition-all
-                                  ${pathname === link.href
-                                    ? 'text-foreground bg-secondary'
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                                  }
-                                `}
-                              >
-                                {link.label}
-                              </Link>
-                            ))}
+                          <div className="border-b border-gray-200">
+                            <Link
+                              href="#"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                            >
+                              Nifty
+                            </Link>
+                            <Link
+                              href="#"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                            >
+                              PE
+                            </Link>
                           </div>
                         </div>
                       </div>
