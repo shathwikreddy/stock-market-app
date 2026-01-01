@@ -251,14 +251,14 @@ export default function Navbar() {
 
                           {/* Indices */}
                           <div className="border-b border-gray-300">
-                            <div className="px-4 py-1.5 text-sm font-bold text-black">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black border-b border-gray-200">
                               Indices
                             </div>
                             {marketDataLinks.marketOverview.indices.map((link) => (
                               <Link
                                 key={link.href}
                                 href={link.href}
-                                className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                                className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                               >
                                 {link.label}
                               </Link>
@@ -267,14 +267,14 @@ export default function Navbar() {
 
                           {/* Sectors */}
                           <div className="border-b border-gray-300">
-                            <div className="px-4 py-1.5 text-sm font-bold text-black">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black border-b border-gray-200">
                               Sectors
                             </div>
                             {marketDataLinks.marketOverview.sectors.map((link) => (
                               <Link
                                 key={link.href}
                                 href={link.href}
-                                className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                                className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                               >
                                 {link.label}
                               </Link>
@@ -283,12 +283,12 @@ export default function Navbar() {
 
                           {/* Total Market */}
                           <div className="border-b border-gray-300">
-                            <div className="px-4 py-1.5 text-sm font-bold text-black">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black border-b border-gray-200">
                               Total Market
                             </div>
                             <Link
                               href="#"
-                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               Advances, Decline & Unchange
                             </Link>
@@ -298,7 +298,7 @@ export default function Navbar() {
                           <div className="border-b border-gray-300">
                             <Link
                               href="#"
-                              className="block px-4 py-1.5 text-sm text-black hover:bg-gray-100"
+                              className="block px-4 py-1.5 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300"
                             >
                               Market Mood
                             </Link>
@@ -308,7 +308,7 @@ export default function Navbar() {
                           <div className="border-b border-gray-300">
                             <Link
                               href="#"
-                              className="block px-4 py-1.5 text-sm text-black hover:bg-gray-100"
+                              className="block px-4 py-1.5 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300"
                             >
                               Futures Support & Resistance
                             </Link>
@@ -338,7 +338,7 @@ export default function Navbar() {
                             <Link
                               key={link.label}
                               href={link.href}
-                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               {link.label}
                             </Link>
@@ -359,7 +359,7 @@ export default function Navbar() {
                           {/* Results Calendar */}
                           <Link
                             href="#"
-                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                           >
                             Results Calendar
                           </Link>
@@ -367,7 +367,7 @@ export default function Navbar() {
                           {/* FII & DII Activity */}
                           <Link
                             href="#"
-                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                           >
                             FII & DII Activity
                           </Link>
@@ -375,7 +375,7 @@ export default function Navbar() {
                           {/* Promoters Activity */}
                           <Link
                             href="#"
-                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                           >
                             Promoters Activity
                           </Link>
@@ -383,7 +383,7 @@ export default function Navbar() {
                           {/* Mutual Funds Activity */}
                           <Link
                             href="#"
-                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                           >
                             Mutual Funds Activity
                           </Link>
@@ -391,7 +391,7 @@ export default function Navbar() {
                           {/* Super Investors */}
                           <Link
                             href="#"
-                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                           >
                             Super Investors
                           </Link>
@@ -399,53 +399,50 @@ export default function Navbar() {
                           {/* Corporate Action */}
                           <Link
                             href="#"
-                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 border-b border-gray-200"
+                            className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                           >
                             Corporate Action
                           </Link>
 
                           {/* Deals */}
                           <div className="border-b border-gray-200">
-                            <div className="px-4 py-1.5 text-sm font-bold text-black">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black border-b border-gray-200">
                               Deals
                             </div>
                             <Link
                               href="#"
-                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               Bulk Deals
                             </Link>
                             <Link
                               href="#"
-                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               Block Deals
                             </Link>
                             <Link
                               href="#"
-                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               Intraday Large Deals
                             </Link>
-                            <Link
-                              href="#"
-                              className="block px-4 py-1 text-sm font-bold hover:bg-gray-100"
-                            >
+                            <div className="px-4 py-1.5 text-sm font-bold text-black">
                               Monthly Wise
-                            </Link>
+                            </div>
                           </div>
 
                           {/* Nifty */}
                           <div className="border-b border-gray-200">
                             <Link
                               href="#"
-                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               Nifty
                             </Link>
                             <Link
                               href="#"
-                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               PE
                             </Link>
@@ -487,23 +484,23 @@ export default function Navbar() {
                       className="absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-border rounded-xl shadow-xl overflow-hidden z-50"
                       style={{ backgroundColor: 'white' }}
                     >
-                      <div className="flex p-4 gap-6">
+                      <div className="flex">
                         {/* Technical Column */}
-                        <div className="min-w-[200px]">
-                          <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
+                        <div className="min-w-[200px] border-r border-gray-300">
+                          <div className="px-4 py-2 text-sm font-bold text-black border-b border-gray-300 bg-gray-50">
                             Technical
                           </div>
 
                           {/* Candlestick Patterns */}
-                          <div className="mb-3">
-                            <div className="px-2 py-1 text-xs font-semibold text-foreground">
+                          <div className="border-b border-gray-300">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black border-b border-gray-200">
                               Candlestick Patterns
                             </div>
                             {screenersLinks.technical.candlestickPatterns.map((link) => (
                               <Link
                                 key={link.label}
                                 href={link.href}
-                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                                className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                               >
                                 {link.label}
                               </Link>
@@ -511,15 +508,15 @@ export default function Navbar() {
                           </div>
 
                           {/* Chart Patterns */}
-                          <div className="mb-3">
-                            <div className="px-2 py-1 text-xs font-semibold text-foreground">
+                          <div className="border-b border-gray-300">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black border-b border-gray-200">
                               Chart Patterns
                             </div>
                             {screenersLinks.technical.chartPatterns.map((link) => (
                               <Link
                                 key={link.label}
                                 href={link.href}
-                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                                className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                               >
                                 {link.label}
                               </Link>
@@ -527,15 +524,15 @@ export default function Navbar() {
                           </div>
 
                           {/* Drawing Tools */}
-                          <div className="mb-3">
-                            <div className="px-2 py-1 text-xs font-semibold text-foreground">
+                          <div className="border-b border-gray-300">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black border-b border-gray-200">
                               Drawing Tools
                             </div>
                             {screenersLinks.technical.drawingTools.map((link) => (
                               <Link
                                 key={link.label}
                                 href={link.href}
-                                className="block px-2 py-1 text-sm rounded-lg transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                                className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                               >
                                 {link.label}
                               </Link>
@@ -543,23 +540,23 @@ export default function Navbar() {
                           </div>
 
                           {/* Indicators */}
-                          <div className="mb-3">
-                            <div className="px-2 py-1 text-xs font-semibold text-foreground">
+                          <div className="border-b border-gray-300">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black">
                               Indicators
                             </div>
                           </div>
 
                           {/* Strategies */}
                           <div>
-                            <div className="px-2 py-1 text-xs font-semibold text-foreground">
+                            <div className="px-4 py-1.5 text-sm font-bold text-black">
                               Strategies
                             </div>
                           </div>
                         </div>
 
                         {/* Fundamental Column */}
-                        <div className="min-w-[160px] border-l border-border pl-6">
-                          <div className="text-xs font-bold text-foreground uppercase tracking-wider mb-3 pb-2 border-b border-border">
+                        <div className="min-w-[160px]">
+                          <div className="px-4 py-2 text-sm font-bold text-black border-b border-gray-300 bg-gray-50">
                             Fundamental
                           </div>
                         </div>
@@ -626,23 +623,20 @@ export default function Navbar() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-border rounded-xl shadow-xl overflow-hidden z-50"
+                      className="absolute top-full left-1/2 -translate-x-1/2 mt-1 border border-gray-300 shadow-xl overflow-hidden z-50"
                       style={{ backgroundColor: 'white' }}
                     >
-                      <div className="p-3 min-w-[180px]">
+                      <div className="min-w-[180px]">
+                        <div className="px-4 py-2 text-sm font-bold text-black border-b border-gray-300 bg-gray-50">
+                          Portfolio
+                        </div>
                         {portfolioLinks.map((link) => {
                           const Icon = link.icon;
                           return (
                             <Link
                               key={link.href}
                               href={link.href}
-                              className={`
-                                flex items-center space-x-3 px-3 py-2.5 text-sm rounded-lg transition-all
-                                ${pathname === link.href
-                                  ? 'text-foreground bg-secondary'
-                                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                                }
-                              `}
+                              className="flex items-center space-x-3 px-4 py-1.5 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               <Icon className="h-4 w-4" />
                               <span>{link.label}</span>

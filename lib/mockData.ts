@@ -26,6 +26,14 @@ export interface TopGainerLoserStock {
   open: number;
   vwap: number;
   sparklineData: number[]; // Array of price points for mini chart
+  // Additional fields for detailed table view
+  sector?: string;
+  industry?: string;
+  group?: string;
+  faceValue?: number;
+  priceBand?: number;
+  mktCap?: string;
+  preClose?: number;
 }
 
 // Dummy data for Top Gainers - NSE (matching the reference image structure)

@@ -6,7 +6,7 @@ import { Lock, MoreVertical, ChevronDown, Settings, ArrowUpDown } from 'lucide-r
 
 interface TopGainersLosersTableProps {
     data: TopGainerLoserStock[];
-    type: 'gainers' | 'losers' | '52wkHigh' | '52wkLow' | 'onlyBuyers' | 'onlySellers' | 'priceShockers';
+    type: 'gainers' | 'losers' | '52wkHigh' | '52wkLow' | 'onlyBuyers' | 'onlySellers' | 'priceShockers' | 'volumeShockers' | 'mostActiveByValue';
     exchange: 'NSE' | 'BSE';
     index: string;
     date: string;
@@ -49,6 +49,16 @@ const categoryInfo: Record<string, { title: string; description: string; isPosit
         description: 'Stocks experiencing unusual and significant price movements in either direction. These require careful analysis as they may indicate major news or market events....',
         isPositive: true,
     },
+    volumeShockers: {
+        title: 'VOLUME SHOCKERS',
+        description: 'Stocks experiencing unusually high trading volumes compared to their average. High volume often precedes significant price movements and indicates strong investor interest....',
+        isPositive: true,
+    },
+    mostActiveByValue: {
+        title: 'MOST ACTIVE BY VALUE',
+        description: 'Stocks with the highest trading value (price × volume) for the current session. These represent the most liquid stocks where large institutional trades are taking place....',
+        isPositive: true,
+    },
 };
 
 // Mini Sparkline Chart Component
@@ -79,7 +89,6 @@ const SparklineChart = ({ data, isGainer }: { data: number[]; isGainer: boolean 
     );
 };
 
-// Main Categories Tabs
 const categoryTabs = [
     { id: 'gainers', label: 'Top Gainers' },
     { id: 'losers', label: 'Top Losers' },
@@ -88,6 +97,8 @@ const categoryTabs = [
     { id: 'onlyBuyers', label: 'Only Buyers' },
     { id: 'onlySellers', label: 'Only Sellers' },
     { id: 'priceShockers', label: 'Price Shockers' },
+    { id: 'volumeShockers', label: 'Volume Shockers' },
+    { id: 'mostActiveByValue', label: 'Most Active By Value' },
 ];
 
 // Sub-tabs for data views
@@ -219,115 +230,102 @@ export default function TopGainersLosersTable({
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="border-b border-gray-200 text-sm text-gray-500">
-                            <th className="px-6 py-4 text-left font-medium">
-                                <div className="flex items-center space-x-1 cursor-pointer hover:text-gray-700">
-                                    <span>Stock Name</span>
-                                    <ArrowUpDown className="w-3 h-3" />
-                                </div>
+                        <tr className="border-b border-gray-200 bg-gray-50">
+                            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                #
                             </th>
-                            <th className="px-4 py-4 text-right font-medium">
-                                <div className="flex items-center justify-end space-x-1 cursor-pointer hover:text-gray-700">
-                                    <span>Price</span>
-                                    <ArrowUpDown className="w-3 h-3" />
-                                </div>
+                            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Company
                             </th>
-                            <th className="px-4 py-4 text-right font-medium">
-                                <div className="flex items-center justify-end space-x-1 cursor-pointer hover:text-gray-700">
-                                    <span>Day&apos;s High</span>
-                                    <ArrowUpDown className="w-3 h-3" />
-                                </div>
+                            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Sector
                             </th>
-                            <th className="px-4 py-4 text-right font-medium">
-                                <div className="flex items-center justify-end space-x-1 cursor-pointer hover:text-gray-700">
-                                    <span>Day&apos;s Low</span>
-                                    <ArrowUpDown className="w-3 h-3" />
-                                </div>
+                            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Industry
                             </th>
-                            <th className="px-4 py-4 text-right font-medium">
-                                <div className="flex items-center justify-end space-x-1 cursor-pointer hover:text-gray-700">
-                                    <span>Open</span>
-                                    <ArrowUpDown className="w-3 h-3" />
-                                </div>
+                            <th className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Group
                             </th>
-                            <th className="px-4 py-4 text-right font-medium">
-                                <div className="flex items-center justify-end space-x-1 cursor-pointer hover:text-gray-700">
-                                    <span>VWAP</span>
-                                    <ArrowUpDown className="w-3 h-3" />
-                                </div>
+                            <th className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Face Value
                             </th>
-                            <th className="px-4 py-4 text-center font-medium">
-                                <div className="flex items-center justify-center space-x-1 cursor-pointer hover:text-gray-700">
-                                    <span>Analysis</span>
-                                    <ArrowUpDown className="w-3 h-3" />
-                                </div>
+                            <th className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Price Band
                             </th>
-                            <th className="px-2 py-4"></th>
+                            <th className="px-3 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Mkt Cap
+                            </th>
+                            <th className="px-3 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Pre Close
+                            </th>
+                            <th className="px-3 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                LTP
+                            </th>
+                            <th className="px-3 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Net Change
+                            </th>
+                            <th className="px-3 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                % Change
+                            </th>
+                            <th className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Trend
+                            </th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-gray-100">
                         {data.map((stock, index) => (
                             <tr
                                 key={stock.id}
-                                className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                                className="hover:bg-gray-50 transition-colors"
                             >
-                                {/* Stock Name with Sparkline */}
-                                <td className="px-6 py-5">
-                                    <div className="flex items-center space-x-4">
-                                        <span className="font-medium text-gray-900 min-w-[120px]">
-                                            {stock.stockName}
-                                        </span>
+                                <td className="px-3 py-2.5 text-sm text-gray-500 font-medium">
+                                    {index + 1}
+                                </td>
+                                <td className="px-3 py-2.5">
+                                    <span className="text-sm font-semibold text-gray-900 hover:text-blue-600 cursor-pointer">
+                                        {stock.stockName}
+                                    </span>
+                                </td>
+                                <td className="px-3 py-2.5 text-sm text-gray-600">
+                                    {stock.sector || 'IT Services'}
+                                </td>
+                                <td className="px-3 py-2.5 text-sm text-gray-600">
+                                    {stock.industry || 'Software Services'}
+                                </td>
+                                <td className="px-3 py-2.5 text-center">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                                        {stock.group || 'A'}
+                                    </span>
+                                </td>
+                                <td className="px-3 py-2.5 text-center text-sm text-gray-600">
+                                    ₹{stock.faceValue || 1}
+                                </td>
+                                <td className="px-3 py-2.5 text-center text-sm text-gray-600">
+                                    {stock.priceBand || 5}
+                                </td>
+                                <td className="px-3 py-2.5 text-right text-sm text-gray-600 whitespace-nowrap">
+                                    {stock.mktCap || '₹12,60,000 Cr'}
+                                </td>
+                                <td className="px-3 py-2.5 text-right text-sm text-gray-600 font-mono">
+                                    ₹{stock.preClose?.toFixed(2) || (stock.price - stock.change).toFixed(2)}
+                                </td>
+                                <td className="px-3 py-2.5 text-right text-sm font-semibold text-gray-900 font-mono">
+                                    ₹{stock.price.toFixed(2)}
+                                </td>
+                                <td className="px-3 py-2.5 text-right text-sm font-mono">
+                                    <span className={`font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                                        {isPositive ? '+' : ''}₹{stock.change.toFixed(2)}
+                                    </span>
+                                </td>
+                                <td className="px-3 py-2.5 text-right text-sm font-mono">
+                                    <span className={`font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                                        {isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                                    </span>
+                                </td>
+                                <td className="px-3 py-2.5">
+                                    <div className="flex justify-center">
                                         <SparklineChart data={stock.sparklineData} isGainer={isPositive} />
                                     </div>
-                                </td>
-
-                                {/* Price with Change */}
-                                <td className="px-4 py-5 text-right">
-                                    <div className="flex flex-col items-end">
-                                        <span className="font-semibold text-gray-900">
-                                            {stock.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                        </span>
-                                        <span className={`text-sm ${isPositive ? 'text-orange-500' : 'text-red-500'}`}>
-                                            {Math.abs(stock.change).toFixed(2)} ({Math.abs(stock.changePercent).toFixed(2)}%)
-                                        </span>
-                                    </div>
-                                </td>
-
-                                {/* Day's High */}
-                                <td className="px-4 py-5 text-right text-gray-700">
-                                    {stock.daysHigh.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </td>
-
-                                {/* Day's Low */}
-                                <td className="px-4 py-5 text-right text-gray-700">
-                                    {stock.daysLow.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </td>
-
-                                {/* Open */}
-                                <td className="px-4 py-5 text-right text-gray-700">
-                                    {stock.open.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </td>
-
-                                {/* VWAP */}
-                                <td className="px-4 py-5 text-right text-gray-700">
-                                    {stock.vwap.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                </td>
-
-                                {/* Analysis Button */}
-                                <td className="px-4 py-5">
-                                    <div className="flex justify-center">
-                                        <button className="flex items-center space-x-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                                            <Lock className="w-3 h-3" />
-                                            <span>Analysis</span>
-                                        </button>
-                                    </div>
-                                </td>
-
-                                {/* More Options */}
-                                <td className="px-2 py-5">
-                                    <button className="p-1 hover:bg-gray-100 rounded">
-                                        <MoreVertical className="w-4 h-4 text-gray-400" />
-                                    </button>
                                 </td>
                             </tr>
                         ))}
