@@ -130,8 +130,8 @@ export default function Navbar() {
       { href: '/only-sellers', label: 'Only Sellers' },
       { href: '/52-week-high', label: '52 Week High' },
       { href: '/52-week-low', label: '52 Week Low' },
-      { href: '#', label: 'All Time High (ATH)' },
-      { href: '#', label: 'All Time Low (ATL)' },
+      { href: '/all-time-high', label: 'All Time High (ATH)' },
+      { href: '/all-time-low', label: 'All Time Low (ATL)' },
       { href: '/price-shockers', label: 'Price Shockers' },
       { href: '#', label: 'Volume Shockers' },
       { href: '#', label: 'Most Active Stocks' },
@@ -366,7 +366,7 @@ export default function Navbar() {
 
                           {/* FII & DII Activity */}
                           <Link
-                            href="#"
+                            href="/market-data/fii-dii"
                             className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                           >
                             FII & DII Activity

@@ -6,7 +6,7 @@ import { Lock, MoreVertical, ChevronDown, Settings, ArrowUpDown } from 'lucide-r
 
 interface TopGainersLosersTableProps {
     data: TopGainerLoserStock[];
-    type: 'gainers' | 'losers' | '52wkHigh' | '52wkLow' | 'onlyBuyers' | 'onlySellers' | 'priceShockers' | 'volumeShockers' | 'mostActiveByValue';
+    type: 'gainers' | 'losers' | '52wkHigh' | '52wkLow' | 'onlyBuyers' | 'onlySellers' | 'priceShockers' | 'volumeShockers' | 'mostActiveByValue' | 'allTimeHigh' | 'allTimeLow';
     exchange: 'NSE' | 'BSE';
     index: string;
     date: string;
@@ -59,6 +59,16 @@ const categoryInfo: Record<string, { title: string; description: string; isPosit
         description: 'Stocks with the highest trading value (price × volume) for the current session. These represent the most liquid stocks where large institutional trades are taking place....',
         isPositive: true,
     },
+    allTimeHigh: {
+        title: 'ALL TIME HIGH',
+        description: 'Stocks that have reached their highest price ever recorded. These stocks are showing exceptional bullish momentum and breaking through historical resistance levels....',
+        isPositive: true,
+    },
+    allTimeLow: {
+        title: 'ALL TIME LOW',
+        description: 'Stocks that have reached their lowest price ever recorded. These stocks may present deep value opportunities or could indicate fundamental issues with the company....',
+        isPositive: false,
+    },
 };
 
 // Mini Sparkline Chart Component
@@ -92,13 +102,15 @@ const SparklineChart = ({ data, isGainer }: { data: number[]; isGainer: boolean 
 const categoryTabs = [
     { id: 'gainers', label: 'Top Gainers' },
     { id: 'losers', label: 'Top Losers' },
-    { id: '52wkHigh', label: '52 Wk High' },
-    { id: '52wkLow', label: '52 Wk Low' },
     { id: 'onlyBuyers', label: 'Only Buyers' },
     { id: 'onlySellers', label: 'Only Sellers' },
     { id: 'priceShockers', label: 'Price Shockers' },
     { id: 'volumeShockers', label: 'Volume Shockers' },
     { id: 'mostActiveByValue', label: 'Most Active By Value' },
+    { id: '52wkHigh', label: '52 Wk High' },
+    { id: '52wkLow', label: '52 Wk Low' },
+    { id: 'allTimeHigh', label: 'All Time High' },
+    { id: 'allTimeLow', label: 'All Time Low' },
 ];
 
 // Sub-tabs for data views
@@ -228,101 +240,97 @@ export default function TopGainersLosersTable({
 
             {/* Table */}
             <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full text-[13px]">
                     <thead>
-                        <tr className="border-b border-gray-200 bg-gray-50">
-                            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <tr className="border-b border-gray-300 bg-gray-50">
+                            <th className="px-2 py-2 text-left font-semibold text-gray-600 uppercase tracking-wide">
                                 #
                             </th>
-                            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-left font-semibold text-gray-600 uppercase tracking-wide">
                                 Company
                             </th>
-                            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-left font-semibold text-gray-600 uppercase tracking-wide">
                                 Sector
                             </th>
-                            <th className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-left font-semibold text-gray-600 uppercase tracking-wide">
                                 Industry
                             </th>
-                            <th className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-center font-semibold text-gray-600 uppercase tracking-wide">
                                 Group
                             </th>
-                            <th className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-center font-semibold text-gray-600 uppercase tracking-wide">
                                 Face Value
                             </th>
-                            <th className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-center font-semibold text-gray-600 uppercase tracking-wide">
                                 Price Band
                             </th>
-                            <th className="px-3 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-right font-semibold text-gray-600 uppercase tracking-wide">
                                 Mkt Cap
                             </th>
-                            <th className="px-3 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-right font-semibold text-gray-600 uppercase tracking-wide">
                                 Pre Close
                             </th>
-                            <th className="px-3 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-right font-semibold text-gray-600 uppercase tracking-wide">
                                 LTP
                             </th>
-                            <th className="px-3 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-right font-semibold text-gray-600 uppercase tracking-wide">
                                 Net Change
                             </th>
-                            <th className="px-3 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-right font-semibold text-gray-600 uppercase tracking-wide">
                                 % Change
                             </th>
-                            <th className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th className="px-2 py-2 text-center font-semibold text-gray-600 uppercase tracking-wide">
                                 Trend
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody>
                         {data.map((stock, index) => (
                             <tr
                                 key={stock.id}
-                                className="hover:bg-gray-50 transition-colors"
+                                className="border-b border-gray-100 hover:bg-gray-50"
                             >
-                                <td className="px-3 py-2.5 text-sm text-gray-500 font-medium">
+                                <td className="px-2 py-0.1 text-gray-700">
                                     {index + 1}
                                 </td>
-                                <td className="px-3 py-2.5">
-                                    <span className="text-sm font-semibold text-gray-900 hover:text-blue-600 cursor-pointer">
-                                        {stock.stockName}
-                                    </span>
+                                <td className="px-2 py-0.1 font-semibold text-gray-900 hover:text-blue-600 cursor-pointer whitespace-nowrap">
+                                    {stock.stockName}
                                 </td>
-                                <td className="px-3 py-2.5 text-sm text-gray-600">
+                                <td className="px-2 py-0.1 text-gray-600">
                                     {stock.sector || 'IT Services'}
                                 </td>
-                                <td className="px-3 py-2.5 text-sm text-gray-600">
+                                <td className="px-2 py-0.1 text-gray-600">
                                     {stock.industry || 'Software Services'}
                                 </td>
-                                <td className="px-3 py-2.5 text-center">
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
-                                        {stock.group || 'A'}
-                                    </span>
+                                <td className="px-2 py-0.1 text-center text-gray-700">
+                                    {stock.group || 'A'}
                                 </td>
-                                <td className="px-3 py-2.5 text-center text-sm text-gray-600">
+                                <td className="px-2 py-0.1 text-center text-gray-600">
                                     ₹{stock.faceValue || 1}
                                 </td>
-                                <td className="px-3 py-2.5 text-center text-sm text-gray-600">
+                                <td className="px-2 py-0.1 text-center text-gray-600">
                                     {stock.priceBand || 5}
                                 </td>
-                                <td className="px-3 py-2.5 text-right text-sm text-gray-600 whitespace-nowrap">
-                                    {stock.mktCap || '₹12,60,000 Cr'}
+                                <td className="px-2 py-0.1 text-right text-gray-600 whitespace-nowrap">
+                                    {stock.mktCap || '₹12,80,000 Cr'}
                                 </td>
-                                <td className="px-3 py-2.5 text-right text-sm text-gray-600 font-mono">
+                                <td className="px-2 py-0.1 text-right text-gray-600">
                                     ₹{stock.preClose?.toFixed(2) || (stock.price - stock.change).toFixed(2)}
                                 </td>
-                                <td className="px-3 py-2.5 text-right text-sm font-semibold text-gray-900 font-mono">
+                                <td className="px-2 py-0.1 text-right text-gray-900 font-medium">
                                     ₹{stock.price.toFixed(2)}
                                 </td>
-                                <td className="px-3 py-2.5 text-right text-sm font-mono">
-                                    <span className={`font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                                <td className="px-2 py-0.1 text-right">
+                                    <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
                                         {isPositive ? '+' : ''}₹{stock.change.toFixed(2)}
                                     </span>
                                 </td>
-                                <td className="px-3 py-2.5 text-right text-sm font-mono">
-                                    <span className={`font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                                <td className="px-2 py-0.1 text-right">
+                                    <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
                                         {isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%
                                     </span>
                                 </td>
-                                <td className="px-3 py-2.5">
+                                <td className="px-2 py-0.1">
                                     <div className="flex justify-center">
                                         <SparklineChart data={stock.sparklineData} isGainer={isPositive} />
                                     </div>
