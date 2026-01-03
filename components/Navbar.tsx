@@ -145,7 +145,7 @@ export default function Navbar() {
         { href: '#', label: 'Promoters Activity' },
         { href: '#', label: 'Mutual Funds Activity' },
         { href: '#', label: 'Super Investors', highlight: true },
-        { href: '#', label: 'Corporate Action' },
+        { href: '/market-data/corporate-action', label: 'Corporate Action' },
       ],
       deals: [
         { href: '#', label: 'Deals' },
@@ -398,7 +398,7 @@ export default function Navbar() {
 
                           {/* Corporate Action */}
                           <Link
-                            href="#"
+                            href="/market-data/corporate-action"
                             className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                           >
                             Corporate Action
