@@ -410,19 +410,19 @@ export default function Navbar() {
                               Deals
                             </div>
                             <Link
-                              href="#"
+                              href="/market-data/bulk-deals"
                               className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               Bulk Deals
                             </Link>
                             <Link
-                              href="#"
+                              href="/market-data/block-deals"
                               className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               Block Deals
                             </Link>
                             <Link
-                              href="#"
+                              href="/market-data/intraday-deals"
                               className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               Intraday Large Deals

@@ -1,0 +1,163 @@
+export interface IntradayDeal {
+    id: string;
+    date: string;
+    time: string;
+    stockName: string;
+    symbol: string;
+    industry: string;
+    quantity: number;
+    tradedPrice: number;
+    dealValue: number;
+    exchange: 'BSE' | 'NSE';
+}
+
+export const intradayDealsData: IntradayDeal[] = [
+    {
+        id: '1',
+        date: '02 Jan, 2026',
+        time: '15:44',
+        stockName: 'Nazara',
+        symbol: 'NAZARA',
+        industry: 'Software',
+        quantity: 118126,
+        tradedPrice: 285.15,
+        dealValue: 3.37,
+        exchange: 'NSE',
+    },
+    {
+        id: '2',
+        date: '02 Jan, 2026',
+        time: '15:40',
+        stockName: 'Vodafone Idea',
+        symbol: 'IDEA',
+        industry: 'Telecommunication - Service Provider',
+        quantity: 3300951,
+        tradedPrice: 11.78,
+        dealValue: 3.89,
+        exchange: 'NSE',
+    },
+    {
+        id: '3',
+        date: '02 Jan, 2026',
+        time: '15:40',
+        stockName: 'Franklin Ind',
+        symbol: 'FRANKIND',
+        industry: 'Construction - Real Estate',
+        quantity: 943877,
+        tradedPrice: 0.6,
+        dealValue: 0.06,
+        exchange: 'BSE',
+    },
+    {
+        id: '4',
+        date: '02 Jan, 2026',
+        time: '15:29',
+        stockName: 'Avance Tech',
+        symbol: 'AVANCETECH',
+        industry: 'IT Services & Consulting',
+        quantity: 500027,
+        tradedPrice: 2.08,
+        dealValue: 0.1,
+        exchange: 'BSE',
+    },
+    {
+        id: '5',
+        date: '02 Jan, 2026',
+        time: '15:29',
+        stockName: 'ICICIAMC',
+        symbol: 'ICICIAMC',
+        industry: 'Finance - Investment',
+        quantity: 16634,
+        tradedPrice: 2660,
+        dealValue: 4.42,
+        exchange: 'NSE',
+    },
+    {
+        id: '6',
+        date: '02 Jan, 2026',
+        time: '15:29',
+        stockName: 'Vodafone Idea',
+        symbol: 'IDEA',
+        industry: 'Telecommunication - Service Provider',
+        quantity: 1080520,
+        tradedPrice: 11.84,
+        dealValue: 1.28,
+        exchange: 'NSE',
+    },
+    {
+        id: '7',
+        date: '02 Jan, 2026',
+        time: '15:29',
+        stockName: 'SHAH METACORP',
+        symbol: 'SHAHMETACORP',
+        industry: 'Iron & Steel',
+        quantity: 1091748,
+        tradedPrice: 5.01,
+        dealValue: 0.55,
+        exchange: 'NSE',
+    },
+    {
+        id: '8',
+        date: '02 Jan, 2026',
+        time: '15:29',
+        stockName: 'IDBI Bank',
+        symbol: 'IDBI',
+        industry: 'Bank - Private',
+        quantity: 354636,
+        tradedPrice: 114.71,
+        dealValue: 4.07,
+        exchange: 'NSE',
+    },
+    {
+        id: '9',
+        date: '02 Jan, 2026',
+        time: '15:29',
+        stockName: 'Vodafone Idea',
+        symbol: 'IDEA',
+        industry: 'Telecommunication - Service Provider',
+        quantity: 657180,
+        tradedPrice: 11.84,
+        dealValue: 0.78,
+        exchange: 'NSE',
+    },
+    {
+        id: '10',
+        date: '02 Jan, 2026',
+        time: '15:15',
+        stockName: 'Tata Motors',
+        symbol: 'TATAMOTORS',
+        industry: 'Automobile - Passenger Cars',
+        quantity: 425000,
+        tradedPrice: 875.50,
+        dealValue: 3.72,
+        exchange: 'NSE',
+    },
+    {
+        id: '11',
+        date: '02 Jan, 2026',
+        time: '14:58',
+        stockName: 'Reliance Industries',
+        symbol: 'RELIANCE',
+        industry: 'Oil & Gas - Refining',
+        quantity: 180000,
+        tradedPrice: 2450.25,
+        dealValue: 4.41,
+        exchange: 'BSE',
+    },
+    {
+        id: '12',
+        date: '02 Jan, 2026',
+        time: '14:45',
+        stockName: 'Infosys',
+        symbol: 'INFY',
+        industry: 'IT Services & Consulting',
+        quantity: 225000,
+        tradedPrice: 1850.75,
+        dealValue: 4.16,
+        exchange: 'NSE',
+    },
+];
+
+export const filterTabs = ["Today's Intraday Deals", "Top Stock Intraday Deals", "Industry Wise Deals"];
+export const exchangeOptions = ['All Exchanges', 'BSE', 'NSE'];
+export const sortOptions = ['Time (Latest)', 'Time (Oldest)', 'Deal Value (High)', 'Deal Value (Low)', 'Quantity (High)', 'Quantity (Low)'];
