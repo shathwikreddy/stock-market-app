@@ -1,0 +1,265 @@
+'use client';
+
+import { useState } from 'react';
+import { ChevronDown, ChevronRight, Settings, BarChart3, Menu, X } from 'lucide-react';
+import {
+    nifty50Stocks,
+    indexCategories,
+    categoryTabs,
+    dataViewTabs,
+    heatmapData,
+} from '@/lib/nseIndicesMockData';
+
+export default function NSEIndicesTerminal() {
+    const [selectedCategory, setSelectedCategory] = useState('keyIndices');
+    const [selectedIndex, setSelectedIndex] = useState('nifty50');
+    const [selectedDataView, setSelectedDataView] = useState('overview');
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    const currentIndex = indexCategories.find(i => i.id === selectedIndex) || indexCategories[0];
+
+    return (
+        <div className="min-h-screen bg-white">
+            {/* Header Tabs */}
+            <div className="flex items-center border-b border-gray-200 px-2 sm:px-4 overflow-x-auto">
+                <button className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 bg-gray-800 text-white text-xs sm:text-sm font-medium rounded-t whitespace-nowrap">
+                    <span className="hidden sm:inline">Markets Terminal</span>
+                    <span className="sm:hidden">Terminal</span>
+                    <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                </button>
+                <div className="flex items-center gap-1 px-2 sm:px-4 py-2 sm:py-3 text-gray-600 text-xs sm:text-sm">
+                    <span className="bg-green-500 text-white text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.5 rounded">NSE</span>
+                    <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                </div>
+                <button className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 text-gray-600 text-xs sm:text-sm font-medium hover:text-gray-800 whitespace-nowrap">
+                    <span className="hidden sm:inline">Live Markets</span>
+                    <span className="sm:hidden">Live</span>
+                    <span className="bg-green-500 text-white text-[10px] sm:text-xs px-1 sm:px-1.5 py-0.5 rounded">NSE</span>
+                    <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                </button>
+            </div>
+
+            {/* Category Tabs - Scrollable on mobile */}
+            <div className="flex items-center gap-2 sm:gap-4 px-2 sm:px-4 py-2 border-b border-gray-200 text-xs sm:text-sm overflow-x-auto scrollbar-hide">
+                {categoryTabs.map((tab) => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setSelectedCategory(tab.id)}
+                        className={`py-1 sm:py-2 whitespace-nowrap ${selectedCategory === tab.id
+                            ? 'text-blue-600 border-b-2 border-blue-600 font-medium'
+                            : 'text-gray-600 hover:text-gray-800'
+                            }`}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* Market Map Section */}
+            <div className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
+                <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                    <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
+                    <span className="text-xs sm:text-sm text-gray-600">Market Map</span>
+                    <span className="text-[10px] sm:text-xs text-gray-400 hidden sm:inline">Stocks filtered based on their performance</span>
+                </div>
+
+                {/* Heatmap Boxes - Responsive */}
+                <div className="flex flex-wrap sm:flex-nowrap items-end gap-1 mb-2">
+                    <div className="flex items-end gap-1 flex-wrap sm:flex-nowrap">
+                        {heatmapData.map((item, idx) => (
+                            <div key={idx} className="flex flex-col items-center">
+                                <div
+                                    className="flex items-center justify-center text-white text-[10px] sm:text-sm font-bold rounded"
+                                    style={{
+                                        backgroundColor: item.color,
+                                        width: `${Math.max(30, item.count * 2)}px`,
+                                        height: `${Math.max(24, item.count * 1.5 + 16)}px`,
+                                    }}
+                                >
+                                    {item.count}
+                                </div>
+                                <span className="text-[8px] sm:text-[10px] text-gray-500 mt-1 whitespace-nowrap">{item.range}</span>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="ml-auto flex items-center gap-3 sm:gap-6 text-xs sm:text-sm">
+                        <div className="text-center">
+                            <div className="text-green-600 font-bold text-sm sm:text-base">39</div>
+                            <div className="text-gray-500 text-[10px] sm:text-xs">Advances</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-red-600 font-bold text-sm sm:text-base">11</div>
+                            <div className="text-gray-500 text-[10px] sm:text-xs">Declines</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-gray-600 font-bold text-sm sm:text-base">0</div>
+                            <div className="text-gray-500 text-[10px] sm:text-xs">Unchanged</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Index Display - Responsive */}
+            <div className="px-2 sm:px-4 py-2 sm:py-3 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+                    <span className="text-base sm:text-lg font-bold text-gray-900">{currentIndex.name}</span>
+                    <span className="text-base sm:text-lg font-bold text-gray-900">
+                        {currentIndex.value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </span>
+                    <span className={`text-sm font-medium ${currentIndex.pctChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        ▲ {Math.abs(currentIndex.change).toFixed(2)} ({Math.abs(currentIndex.pctChange).toFixed(2)}%)
+                    </span>
+                </div>
+                <button className="flex items-center gap-1 text-xs sm:text-sm text-blue-600 hover:underline">
+                    <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                    Market Snapshot
+                    <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
+                </button>
+            </div>
+
+            {/* Mobile Sidebar Toggle */}
+            <div className="lg:hidden px-2 py-2 border-b border-gray-200">
+                <button
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm bg-gray-100 rounded-lg w-full"
+                >
+                    {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                    {currentIndex.name}
+                    <ChevronDown className="w-4 h-4 ml-auto" />
+                </button>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex flex-col lg:flex-row">
+                {/* Left Sidebar - Collapsible on mobile */}
+                <div className={`${sidebarOpen ? 'block' : 'hidden'} lg:block w-full lg:w-48 border-b lg:border-b-0 lg:border-r border-gray-200 py-2 bg-white z-10`}>
+                    <div className="px-3 mb-2">
+                        <select className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded">
+                            <option>Key Indices</option>
+                            <option>Sectoral Indices</option>
+                            <option>Other Indices</option>
+                        </select>
+                    </div>
+                    <div className="space-y-0.5 max-h-64 lg:max-h-none overflow-y-auto">
+                        {indexCategories.map((index) => (
+                            <button
+                                key={index.id}
+                                onClick={() => {
+                                    setSelectedIndex(index.id);
+                                    setSidebarOpen(false);
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left hover:bg-gray-50 ${selectedIndex === index.id ? 'bg-gray-100 font-medium' : ''
+                                    }`}
+                            >
+                                <span className="truncate">{index.name}</span>
+                                <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                            </button>
+                        ))}
+                    </div>
+                    <div className="px-3 mt-4 text-xs text-gray-500 hidden lg:block">
+                        <strong>Note:</strong> You can change the category by selecting the options on top
+                    </div>
+                </div>
+
+                {/* Data Table Section */}
+                <div className="flex-1 min-w-0">
+                    {/* Data View Tabs - Scrollable */}
+                    <div className="flex items-center justify-between px-2 sm:px-4 border-b border-gray-200 overflow-x-auto">
+                        <div className="flex items-center gap-2 sm:gap-4">
+                            {dataViewTabs.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setSelectedDataView(tab.id)}
+                                    className={`py-2 sm:py-3 text-xs sm:text-sm whitespace-nowrap ${selectedDataView === tab.id
+                                        ? 'text-gray-900 border-b-2 border-gray-900 font-medium'
+                                        : 'text-gray-500 hover:text-gray-700'
+                                        }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+                            * choose your choice of data
+                            <Settings className="w-4 h-4" />
+                        </div>
+                    </div>
+
+                    {/* Stock Table - Responsive */}
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-xs sm:text-sm min-w-[800px]">
+                            <thead>
+                                <tr className="border-b border-gray-200 bg-gray-50">
+                                    <th className="px-2 sm:px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">Name ↕</th>
+                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">LTP ↕</th>
+                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">%Chg ↕</th>
+                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Chg ↕</th>
+                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Volume ↕</th>
+                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Buy Price ↕</th>
+                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Sell Price ↕</th>
+                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Buy Qty ↕</th>
+                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Sell Qty ↕</th>
+                                    <th className="px-2 sm:px-3 py-2 text-center font-medium text-gray-600 whitespace-nowrap">Analysis</th>
+                                    <th className="px-2 sm:px-3 py-2 text-center font-medium text-gray-600 whitespace-nowrap">Technical Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {nifty50Stocks.map((stock) => (
+                                    <tr key={stock.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 font-medium text-gray-900 whitespace-nowrap">{stock.name}</td>
+                                        <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right font-medium whitespace-nowrap ${stock.pctChg >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                            {stock.ltp.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                        </td>
+                                        <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right font-medium whitespace-nowrap ${stock.pctChg >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                            {stock.pctChg >= 0 ? '+' : ''}{stock.pctChg.toFixed(2)}
+                                        </td>
+                                        <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.chg >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                            {stock.chg >= 0 ? '+' : ''}{stock.chg.toFixed(2)}
+                                        </td>
+                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">
+                                            {stock.volume.toLocaleString('en-IN')}
+                                        </td>
+                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">
+                                            {stock.buyPrice > 0 ? stock.buyPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}
+                                        </td>
+                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">
+                                            {stock.sellPrice > 0 ? stock.sellPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}
+                                        </td>
+                                        <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.buyQty > 0 ? 'text-green-600' : 'text-gray-400'}`}>
+                                            {stock.buyQty.toLocaleString('en-IN')}
+                                        </td>
+                                        <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.sellQty > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                                            {stock.sellQty.toLocaleString('en-IN')}
+                                        </td>
+                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-center">
+                                            <button className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-50 whitespace-nowrap">
+                                                🔒 Analysis &gt;
+                                            </button>
+                                        </td>
+                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-center">
+                                            <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                                                <span className="text-green-500 text-xs sm:text-sm">📈</span>
+                                                <span className="text-gray-400 text-xs sm:text-sm">⚪</span>
+                                                <span className="text-green-500 text-xs sm:text-sm">▼</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="flex items-center justify-end gap-2 px-2 sm:px-4 py-2 sm:py-3 border-t border-gray-200">
+                        <button className="p-1.5 sm:p-2 border border-gray-300 rounded hover:bg-gray-50 text-sm">
+                            &lt;
+                        </button>
+                        <button className="p-1.5 sm:p-2 border border-gray-300 rounded hover:bg-gray-50 text-sm">
+                            &gt;
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
