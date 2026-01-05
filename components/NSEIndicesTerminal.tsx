@@ -9,12 +9,15 @@ import {
     dataViewTabs,
     heatmapData,
 } from '@/lib/nseIndicesMockData';
+import DataSettingsModal, { getAllDefaultColumns } from './DataSettingsModal';
 
 export default function NSEIndicesTerminal() {
     const [selectedCategory, setSelectedCategory] = useState('keyIndices');
     const [selectedIndex, setSelectedIndex] = useState('nifty50');
     const [selectedDataView, setSelectedDataView] = useState('overview');
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+    const [selectedColumns, setSelectedColumns] = useState<Record<string, string[]>>(getAllDefaultColumns());
 
     const currentIndex = indexCategories.find(i => i.id === selectedIndex) || indexCategories[0];
 
@@ -179,74 +182,204 @@ export default function NSEIndicesTerminal() {
                                 </button>
                             ))}
                         </div>
-                        <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+                        <button
+                            onClick={() => setSettingsModalOpen(true)}
+                            className="hidden sm:flex items-center gap-2 text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
+                        >
                             * choose your choice of data
                             <Settings className="w-4 h-4" />
-                        </div>
+                        </button>
                     </div>
 
                     {/* Stock Table - Responsive */}
                     <div className="overflow-x-auto">
-                        <table className="w-full text-xs sm:text-sm min-w-[800px]">
-                            <thead>
-                                <tr className="border-b border-gray-200 bg-gray-50">
-                                    <th className="px-2 sm:px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">Name ↕</th>
-                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">LTP ↕</th>
-                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">%Chg ↕</th>
-                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Chg ↕</th>
-                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Volume ↕</th>
-                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Buy Price ↕</th>
-                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Sell Price ↕</th>
-                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Buy Qty ↕</th>
-                                    <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Sell Qty ↕</th>
-                                    <th className="px-2 sm:px-3 py-2 text-center font-medium text-gray-600 whitespace-nowrap">Analysis</th>
-                                    <th className="px-2 sm:px-3 py-2 text-center font-medium text-gray-600 whitespace-nowrap">Technical Rating</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {nifty50Stocks.map((stock) => (
-                                    <tr key={stock.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 font-medium text-gray-900 whitespace-nowrap">{stock.name}</td>
-                                        <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right font-medium whitespace-nowrap ${stock.pctChg >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                            {stock.ltp.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                                        </td>
-                                        <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right font-medium whitespace-nowrap ${stock.pctChg >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                            {stock.pctChg >= 0 ? '+' : ''}{stock.pctChg.toFixed(2)}
-                                        </td>
-                                        <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.chg >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                            {stock.chg >= 0 ? '+' : ''}{stock.chg.toFixed(2)}
-                                        </td>
-                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">
-                                            {stock.volume.toLocaleString('en-IN')}
-                                        </td>
-                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">
-                                            {stock.buyPrice > 0 ? stock.buyPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}
-                                        </td>
-                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">
-                                            {stock.sellPrice > 0 ? stock.sellPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}
-                                        </td>
-                                        <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.buyQty > 0 ? 'text-green-600' : 'text-gray-400'}`}>
-                                            {stock.buyQty.toLocaleString('en-IN')}
-                                        </td>
-                                        <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.sellQty > 0 ? 'text-red-600' : 'text-gray-400'}`}>
-                                            {stock.sellQty.toLocaleString('en-IN')}
-                                        </td>
-                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-center">
-                                            <button className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-50 whitespace-nowrap">
-                                                🔒 Analysis &gt;
-                                            </button>
-                                        </td>
-                                        <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-center">
-                                            <div className="flex items-center justify-center gap-0.5 sm:gap-1">
-                                                <span className="text-green-500 text-xs sm:text-sm">📈</span>
-                                                <span className="text-gray-400 text-xs sm:text-sm">⚪</span>
-                                                <span className="text-green-500 text-xs sm:text-sm">▼</span>
-                                            </div>
-                                        </td>
+                        {selectedDataView === 'technical' ? (
+                            /* Technical View Table */
+                            <table className="w-full text-xs sm:text-sm min-w-[1000px]">
+                                <thead>
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <th className="px-2 sm:px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">Name ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">LTP ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">SMA50 ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">SMA200 ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">RSI(14) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">MACD(12,26,9) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Stochastic(20,3) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">MFI(14) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">ADX(14) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-center font-medium text-gray-600 whitespace-nowrap">Technical Rating ↕</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {nifty50Stocks.map((stock) => (
+                                        <tr key={stock.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 font-medium text-gray-900 whitespace-nowrap">{stock.name}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right font-medium whitespace-nowrap ${stock.pctChg >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                {stock.ltp.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                            </td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.sma50.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.sma200.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.rsi14.toFixed(2)}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.macd >= 0 ? 'text-gray-700' : 'text-red-600'}`}>{stock.macd.toFixed(2)}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.stochastic.toFixed(2)}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.mfi14.toFixed(2)}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.adx14.toFixed(2)}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-center">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    {stock.technicalRating === 'buy' && (<><span className="text-green-500">↗</span><span className="text-gray-400">⊙</span><span className="text-green-500">▼</span></>)}
+                                                    {stock.technicalRating === 'sell' && (<><span className="text-red-500">↘</span><span className="text-gray-400">⊙</span><span className="text-red-500">▲</span></>)}
+                                                    {stock.technicalRating === 'neutral' && (<><span className="text-gray-400">→</span><span className="text-gray-400">⊙</span><span className="text-gray-400">−</span></>)}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : selectedDataView === 'fundamental' ? (
+                            /* Fundamental View Table */
+                            <table className="w-full text-xs sm:text-sm min-w-[1000px]">
+                                <thead>
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <th className="px-2 sm:px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">Name ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">LTP ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">P/E ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Debt to Equity ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">EPS(Rs.) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">BVPS(Rs.) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Net Profit(Rs. Cr) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">DPS(Rs.) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">NPM% ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">ROE% ↕</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {nifty50Stocks.map((stock) => (
+                                        <tr key={stock.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 font-medium text-gray-900 whitespace-nowrap">{stock.name}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right font-medium whitespace-nowrap ${stock.pctChg >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.ltp.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.pe.toFixed(2)}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.debtToEquity.toFixed(2)}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.eps.toFixed(2)}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.bvps.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.netProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.dps.toFixed(2)}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.npm.toFixed(2)}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.roe.toFixed(2)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : selectedDataView === 'performance' ? (
+                            /* Performance View Table */
+                            <table className="w-full text-xs sm:text-sm min-w-[1100px]">
+                                <thead>
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <th className="px-2 sm:px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">Name ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">LTP ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">YTD(%) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">1 Week(%) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">1 Month(%) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">3 Months(%) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">6 Months(%) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">1 Year(%) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">2 Years(%) ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">3 Years(%) ↕</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {nifty50Stocks.map((stock) => (
+                                        <tr key={stock.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 font-medium text-gray-900 whitespace-nowrap">{stock.name}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right font-medium whitespace-nowrap ${stock.pctChg >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.ltp.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.ytd >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.ytd.toFixed(2)}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.week1 >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.week1.toFixed(2)}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.month1 >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.month1.toFixed(2)}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.months3 >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.months3.toFixed(2)}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.months6 >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.months6.toFixed(2)}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.year1 >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.year1.toFixed(2)}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.year2 >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.year2.toFixed(2)}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.year3 >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.year3.toFixed(2)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : selectedDataView === 'pivotLevel' ? (
+                            /* Pivot Level View Table */
+                            <table className="w-full text-xs sm:text-sm min-w-[900px]">
+                                <thead>
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <th className="px-2 sm:px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">Name ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">LTP ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Pivot Point ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">R1 ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">R2 ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">R3 ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">S1 ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">S2 ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">S3 ↕</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {nifty50Stocks.map((stock) => (
+                                        <tr key={stock.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 font-medium text-gray-900 whitespace-nowrap">{stock.name}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right font-medium whitespace-nowrap ${stock.pctChg >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.ltp.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.pivotPoint.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-green-600 whitespace-nowrap">{stock.r1.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-green-600 whitespace-nowrap">{stock.r2.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-green-600 whitespace-nowrap">{stock.r3.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-red-600 whitespace-nowrap">{stock.s1.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-red-600 whitespace-nowrap">{stock.s2.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-red-600 whitespace-nowrap">{stock.s3.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            /* Overview Table (default) */
+                            <table className="w-full text-xs sm:text-sm min-w-[800px]">
+                                <thead>
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <th className="px-2 sm:px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">Name ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">LTP ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">%Chg ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Chg ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Volume ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Buy Price ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Sell Price ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Buy Qty ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-right font-medium text-gray-600 whitespace-nowrap">Sell Qty ↕</th>
+                                        <th className="px-2 sm:px-3 py-2 text-center font-medium text-gray-600 whitespace-nowrap">Analysis</th>
+                                        <th className="px-2 sm:px-3 py-2 text-center font-medium text-gray-600 whitespace-nowrap">Technical Rating</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {nifty50Stocks.map((stock) => (
+                                        <tr key={stock.id} className="border-b border-gray-100 hover:bg-gray-50">
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 font-medium text-gray-900 whitespace-nowrap">{stock.name}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right font-medium whitespace-nowrap ${stock.pctChg >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.ltp.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right font-medium whitespace-nowrap ${stock.pctChg >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.pctChg >= 0 ? '+' : ''}{stock.pctChg.toFixed(2)}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.chg >= 0 ? 'text-green-600' : 'text-red-600'}`}>{stock.chg >= 0 ? '+' : ''}{stock.chg.toFixed(2)}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.volume.toLocaleString('en-IN')}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.buyPrice > 0 ? stock.buyPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-right text-gray-700 whitespace-nowrap">{stock.sellPrice > 0 ? stock.sellPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.buyQty > 0 ? 'text-green-600' : 'text-gray-400'}`}>{stock.buyQty.toLocaleString('en-IN')}</td>
+                                            <td className={`px-2 sm:px-3 py-1.5 sm:py-2 text-right whitespace-nowrap ${stock.sellQty > 0 ? 'text-red-600' : 'text-gray-400'}`}>{stock.sellQty.toLocaleString('en-IN')}</td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-center">
+                                                <button className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[10px] sm:text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-50 whitespace-nowrap">🔒 Analysis &gt;</button>
+                                            </td>
+                                            <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-center">
+                                                <div className="flex items-center justify-center gap-0.5 sm:gap-1">
+                                                    <span className="text-green-500 text-xs sm:text-sm">📈</span>
+                                                    <span className="text-gray-400 text-xs sm:text-sm">⚪</span>
+                                                    <span className="text-green-500 text-xs sm:text-sm">▼</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
 
                     {/* Pagination */}
@@ -260,6 +393,14 @@ export default function NSEIndicesTerminal() {
                     </div>
                 </div>
             </div>
+
+            {/* Data Settings Modal */}
+            <DataSettingsModal
+                isOpen={settingsModalOpen}
+                onClose={() => setSettingsModalOpen(false)}
+                selectedColumns={selectedColumns}
+                onSave={(columns) => setSelectedColumns(columns)}
+            />
         </div>
     );
 }
