@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { TopGainerLoserStock } from '@/lib/mockData';
 import { Lock, MoreVertical, ChevronDown, Settings, ArrowUpDown } from 'lucide-react';
 
@@ -99,18 +100,19 @@ const SparklineChart = ({ data, isGainer }: { data: number[]; isGainer: boolean 
     );
 };
 
+// Category tabs with href for navigation
 const categoryTabs = [
-    { id: 'gainers', label: 'Top Gainers' },
-    { id: 'losers', label: 'Top Losers' },
-    { id: 'onlyBuyers', label: 'Only Buyers' },
-    { id: 'onlySellers', label: 'Only Sellers' },
-    { id: 'priceShockers', label: 'Price Shockers' },
-    { id: 'volumeShockers', label: 'Volume Shockers' },
-    { id: 'mostActiveByValue', label: 'Most Active By Value' },
-    { id: '52wkHigh', label: '52 Wk High' },
-    { id: '52wkLow', label: '52 Wk Low' },
-    { id: 'allTimeHigh', label: 'All Time High' },
-    { id: 'allTimeLow', label: 'All Time Low' },
+    { id: 'gainers', label: 'Top Gainers', href: '/gainers' },
+    { id: 'losers', label: 'Top Losers', href: '/losers' },
+    { id: 'onlyBuyers', label: 'Only Buyers', href: '/only-buyers' },
+    { id: 'onlySellers', label: 'Only Sellers', href: '/only-sellers' },
+    { id: 'priceShockers', label: 'Price Shockers', href: '/price-shockers' },
+    { id: 'volumeShockers', label: 'Volume Shockers', href: '/volume-shockers' },
+    { id: 'mostActiveByValue', label: 'Most Active By Value', href: '/most-active-by-value' },
+    { id: '52wkHigh', label: '52 Wk High', href: '/52-week-high' },
+    { id: '52wkLow', label: '52 Wk Low', href: '/52-week-low' },
+    { id: 'allTimeHigh', label: 'All Time High', href: '/all-time-high' },
+    { id: 'allTimeLow', label: 'All Time Low', href: '/all-time-low' },
 ];
 
 // Sub-tabs for data views
@@ -130,16 +132,20 @@ export default function TopGainersLosersTable({
     index,
     date,
 }: TopGainersLosersTableProps) {
-    const [activeCategory, setActiveCategory] = useState(type);
+    const router = useRouter();
     const [activeSubTab, setActiveSubTab] = useState('overview');
     const [selectedExchange, setSelectedExchange] = useState<'NSE' | 'BSE'>(exchange);
     const [selectedIndex, setSelectedIndex] = useState(index);
     const [selectedPeriod, setSelectedPeriod] = useState('1 Day');
 
-    const currentCategoryInfo = categoryInfo[activeCategory] || categoryInfo.gainers;
+    const currentCategoryInfo = categoryInfo[type] || categoryInfo.gainers;
     const isPositive = currentCategoryInfo.isPositive;
     const title = currentCategoryInfo.title;
     const description = currentCategoryInfo.description;
+
+    const handleCategoryClick = (tab: typeof categoryTabs[0]) => {
+        router.push(tab.href);
+    };
 
     return (
         <div className="w-full bg-white min-h-screen">
@@ -149,8 +155,8 @@ export default function TopGainersLosersTable({
                     {categoryTabs.map((tab) => (
                         <button
                             key={tab.id}
-                            onClick={() => setActiveCategory(tab.id as any)}
-                            className={`px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${activeCategory === tab.id
+                            onClick={() => handleCategoryClick(tab)}
+                            className={`px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${type === tab.id
                                 ? 'bg-gray-900 text-white'
                                 : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
                                 }`}
