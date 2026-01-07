@@ -140,7 +140,7 @@ export default function Navbar() {
     ],
     others: {
       general: [
-        { href: '#', label: 'Results Calendar' },
+        { href: '/market-data/results-calendar', label: 'Results Calendar' },
         { href: '#', label: 'FII & DII Activity' },
         { href: '#', label: 'Promoters Activity' },
         { href: '#', label: 'Mutual Funds Activity' },
@@ -358,7 +358,7 @@ export default function Navbar() {
 
                           {/* Results Calendar */}
                           <Link
-                            href="#"
+                            href="/market-data/results-calendar"
                             className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                           >
                             Results Calendar
