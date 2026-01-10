@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ChevronDown } from 'lucide-react';
-import IPOCard from './ipo/IPOCard';
-import ClosedIPOTable from './ipo/ClosedIPOTable';
-import ListedIPOTable from './ipo/ListedIPOTable';
-import DraftIssuesTable from './ipo/DraftIssuesTable';
+import { ChevronDown, Share2 } from 'lucide-react';
+import IPOCard from './IPOCard';
+import ClosedIPOTable from './ClosedIPOTable';
+import ListedIPOTable from './ListedIPOTable';
+import DraftIssuesTable from './DraftIssuesTable';
 import {
     openIPOData,
     upcomingIPOData,
@@ -20,10 +20,10 @@ import {
 type IPOTabType = 'Open IPO' | 'Upcoming IPO' | 'Closed IPO' | 'Listed IPO' | 'Draft Issues';
 type IPOFilterType = 'All IPO' | 'Mainline IPO' | 'SME IPO';
 
-export default function IPOCalendarView() {
+export default function IPOPage() {
     const [activeTab, setActiveTab] = useState<IPOTabType>('Open IPO');
     const [activeFilter, setActiveFilter] = useState<IPOFilterType>('All IPO');
-    const [visibleCount, setVisibleCount] = useState(5);
+    const [visibleCount, setVisibleCount] = useState(10);
 
     // Filter data based on IPO type
     const filterByType = (type: IPOFilterType) => {
@@ -57,7 +57,7 @@ export default function IPOCalendarView() {
     }, [activeFilter]);
 
     const handleLoadMore = () => {
-        setVisibleCount(prev => prev + 5);
+        setVisibleCount(prev => prev + 10);
     };
 
     const getTitle = () => {
@@ -81,7 +81,7 @@ export default function IPOCalendarView() {
         switch (activeTab) {
             case 'Open IPO':
                 return (
-                    <div className="px-4 py-6">
+                    <div className="py-6">
                         {filteredOpenIPO.length === 0 ? (
                             <div className="py-8 text-center text-gray-400">
                                 No Open IPOs found for this filter.
@@ -96,7 +96,7 @@ export default function IPOCalendarView() {
 
             case 'Upcoming IPO':
                 return (
-                    <div className="px-4 py-6">
+                    <div className="py-6">
                         {filteredUpcomingIPO.length === 0 ? (
                             <div className="py-8 text-center text-gray-400">
                                 No Upcoming IPOs found for this filter.
@@ -111,7 +111,7 @@ export default function IPOCalendarView() {
 
             case 'Closed IPO':
                 return (
-                    <div className="px-4 py-6">
+                    <div className="py-6">
                         {filteredClosedIPO.length === 0 ? (
                             <div className="py-8 text-center text-gray-400">
                                 No Closed IPOs found for this filter.
@@ -124,7 +124,7 @@ export default function IPOCalendarView() {
 
             case 'Listed IPO':
                 return (
-                    <div className="px-4 py-6">
+                    <div className="py-6">
                         {filteredListedIPO.length === 0 ? (
                             <div className="py-8 text-center text-gray-400">
                                 No Listed IPOs found for this filter.
@@ -137,7 +137,7 @@ export default function IPOCalendarView() {
 
             case 'Draft Issues':
                 return (
-                    <div className="px-4 py-6">
+                    <div className="py-6">
                         <DraftIssuesTable data={draftIssuesData.slice(0, visibleCount)} />
                     </div>
                 );
@@ -160,10 +160,13 @@ export default function IPOCalendarView() {
     };
 
     return (
-        <div className="w-full">
-            {/* Page Title */}
-            <div className="px-6 py-4">
+        <div className="w-full min-h-screen bg-white font-sans">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 pt-6 pb-4">
                 <h1 className="text-3xl font-bold text-gray-900">{getTitle()}</h1>
+                <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors">
+                    <Share2 className="w-5 h-5" />
+                </button>
             </div>
 
             {/* Tab Navigation */}
@@ -174,7 +177,7 @@ export default function IPOCalendarView() {
                             key={tab}
                             onClick={() => {
                                 setActiveTab(tab as IPOTabType);
-                                setVisibleCount(5);
+                                setVisibleCount(10);
                             }}
                             className={`py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
                                     ? 'border-gray-900 text-gray-900'
@@ -189,7 +192,7 @@ export default function IPOCalendarView() {
 
             {/* Announcement Banner */}
             {(activeTab === 'Open IPO' || activeTab === 'Upcoming IPO') && (
-                <div className="px-6 py-3 text-sm text-gray-600">
+                <div className="px-6 py-3 text-sm text-gray-600 border-b border-gray-100">
                     The upcoming IPOs in India this week and coming weeks are{' '}
                     {upcomingIPOLinks.map((link, index) => (
                         <span key={link.name}>
@@ -205,7 +208,7 @@ export default function IPOCalendarView() {
             )}
 
             {/* Filter Bar */}
-            <div className="px-6 py-4 flex items-center gap-4">
+            <div className="px-6 py-4 flex items-center gap-6 border-b border-gray-100">
                 {ipoFilters.map((filter) => (
                     <label key={filter} className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -221,13 +224,13 @@ export default function IPOCalendarView() {
             </div>
 
             {/* Content */}
-            <div className="min-h-[400px]">
+            <div className="px-6 min-h-[400px]">
                 {renderContent()}
             </div>
 
             {/* Load More Button */}
             {showLoadMore() && (
-                <div className="flex justify-center py-6">
+                <div className="flex justify-center py-6 border-t border-gray-100">
                     <button
                         onClick={handleLoadMore}
                         className="flex items-center gap-2 px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
