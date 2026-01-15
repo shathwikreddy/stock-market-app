@@ -135,7 +135,7 @@ export default function Navbar() {
       { href: '/price-shockers', label: 'Price Shockers' },
       { href: '/volume-shockers', label: 'Volume Shockers' },
       { href: '/most-active-by-value', label: 'Most Active Stocks' },
-      { href: '#', label: 'ETFs' },
+      { href: '/market-data/etfs', label: 'ETFs' },
       { href: '/market-data/unlisted-shares', label: 'Unlisted Shares' },
     ],
     others: {
