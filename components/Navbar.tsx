@@ -156,7 +156,7 @@ export default function Navbar() {
       ],
       nifty: [
         { href: '#', label: 'Nifty' },
-        { href: '#', label: 'PE' },
+        { href: '/market-data/pe', label: 'PE' },
       ],
     },
   };
@@ -441,7 +441,7 @@ export default function Navbar() {
                               Nifty
                             </Link>
                             <Link
-                              href="#"
+                              href="/market-data/pe"
                               className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               PE
