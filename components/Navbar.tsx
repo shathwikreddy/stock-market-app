@@ -103,6 +103,7 @@ export default function Navbar() {
       totalMarket: [
         { href: '#', label: 'Total Market' },
         { href: '#', label: 'Advances, Decline & Unchange' },
+        { href: '/market', label: 'Total Market Performance' }
       ],
       marketMood: [
         { href: '#', label: 'Market Mood' },
@@ -291,6 +292,12 @@ export default function Navbar() {
                               className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               Advances, Decline & Unchange
+                            </Link>
+                            <Link
+                              href="/market"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
+                            >
+                              Total Market Performance
                             </Link>
                           </div>
 
