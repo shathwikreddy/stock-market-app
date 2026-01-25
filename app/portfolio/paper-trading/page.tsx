@@ -244,7 +244,7 @@ export default function PaperTradingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 md:py-12">
+      <div className="w-full px-4 py-8 md:px-6 md:py-12">
         {/* Header */}
         <motion.div
             initial={{ opacity: 0, y: -20 }}
