@@ -335,29 +335,29 @@ export default function PaperTradingPage() {
                     transition={{ delay: index * 0.05 }}
                     className="hover:bg-muted/5 transition-colors duration-150"
                   >
-                    <td className="px-6 py-2 text-sm font-medium text-foreground">{trade.sNo}</td>
-                    <td className="px-6 py-2 text-sm text-muted-foreground whitespace-nowrap">{trade.date}</td>
-                    <td className="px-6 py-2 text-sm text-muted-foreground">{trade.time}</td>
-                    <td className="px-6 py-2 text-sm">
+                    <td className="px-6 py-2 text-xs font-medium text-foreground">{trade.sNo}</td>
+                    <td className="px-6 py-2 text-xs text-muted-foreground whitespace-nowrap">{trade.date}</td>
+                    <td className="px-6 py-2 text-xs text-muted-foreground">{trade.time}</td>
+                    <td className="px-6 py-2 text-xs">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
                             {trade.instrument}
                         </span>
                     </td>
-                    <td className="px-6 py-2 text-sm font-semibold text-foreground">{trade.tradingSymbol}</td>
-                    <td className="px-6 py-2 text-sm text-muted-foreground">{trade.sector}</td>
-                    <td className="px-6 py-2 text-sm text-muted-foreground">{trade.industry}</td>
-                    <td className="px-6 py-2 text-sm text-right text-foreground font-medium">{trade.quantity}</td>
-                    <td className="px-6 py-2 text-sm text-right font-mono text-muted-foreground">₹{trade.entryPrice.toFixed(2)}</td>
-                    <td className="px-6 py-2 text-sm text-right font-mono text-error font-medium">₹{trade.stopLoss.toFixed(2)}</td>
-                    <td className="px-6 py-2 text-sm text-right font-mono text-success font-medium">₹{trade.target.toFixed(2)}</td>
-                    <td className="px-6 py-2 text-sm text-right font-mono text-muted-foreground">₹{trade.exit.toFixed(2)}</td>
-                    <td className={`px-6 py-2 text-sm text-right font-bold font-mono ${trade.pnl >= 0 ? 'text-success' : 'text-error'}`}>
+                    <td className="px-6 py-2 text-xs font-semibold text-foreground">{trade.tradingSymbol}</td>
+                    <td className="px-6 py-2 text-xs text-muted-foreground">{trade.sector}</td>
+                    <td className="px-6 py-2 text-xs text-muted-foreground">{trade.industry}</td>
+                    <td className="px-6 py-2 text-xs text-right text-foreground font-medium">{trade.quantity}</td>
+                    <td className="px-6 py-2 text-xs text-right font-mono text-muted-foreground">₹{trade.entryPrice.toFixed(2)}</td>
+                    <td className="px-6 py-2 text-xs text-right font-mono text-error font-medium">₹{trade.stopLoss.toFixed(2)}</td>
+                    <td className="px-6 py-2 text-xs text-right font-mono text-success font-medium">₹{trade.target.toFixed(2)}</td>
+                    <td className="px-6 py-2 text-xs text-right font-mono text-muted-foreground">₹{trade.exit.toFixed(2)}</td>
+                    <td className={`px-6 py-2 text-xs text-right font-bold font-mono ${trade.pnl >= 0 ? 'text-success' : 'text-error'}`}>
                       <span className="inline-flex items-center justify-end gap-1">
                         {trade.pnl >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
                         ₹{Math.abs(trade.pnl).toFixed(2)}
                       </span>
                     </td>
-                    <td className={`px-6 py-2 text-sm text-right font-medium font-mono ${trade.pnlPercent >= 0 ? 'text-success' : 'text-error'}`}>
+                    <td className={`px-6 py-2 text-xs text-right font-medium font-mono ${trade.pnlPercent >= 0 ? 'text-success' : 'text-error'}`}>
                       {trade.pnlPercent >= 0 ? '+' : ''}{trade.pnlPercent.toFixed(2)}%
                     </td>
                   </motion.tr>
@@ -365,14 +365,14 @@ export default function PaperTradingPage() {
               </tbody>
               <tfoot className="bg-muted/5 font-semibold border-t border-border">
                 <tr>
-                  <td colSpan={12} className="px-6 py-2 text-sm text-muted-foreground text-right uppercase tracking-wide">Total P&L</td>
-                  <td className={`px-6 py-2 text-sm text-right font-bold font-mono ${totalPnL >= 0 ? 'text-success' : 'text-error'}`}>
+                  <td colSpan={12} className="px-6 py-2 text-xs text-muted-foreground text-right uppercase tracking-wide">Total P&L</td>
+                  <td className={`px-6 py-2 text-xs text-right font-bold font-mono ${totalPnL >= 0 ? 'text-success' : 'text-error'}`}>
                     <span className="inline-flex items-center justify-end gap-1">
                       {totalPnL >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
                       ₹{Math.abs(totalPnL).toFixed(2)}
                     </span>
                   </td>
-                  <td className={`px-6 py-2 text-sm text-right font-bold font-mono ${totalPnLPercent >= 0 ? 'text-success' : 'text-error'}`}>
+                  <td className={`px-6 py-2 text-xs text-right font-bold font-mono ${totalPnLPercent >= 0 ? 'text-success' : 'text-error'}`}>
                     {totalPnLPercent >= 0 ? '+' : ''}{totalPnLPercent.toFixed(2)}%
                   </td>
                 </tr>
