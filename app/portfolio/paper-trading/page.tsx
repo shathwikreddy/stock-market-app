@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { FileText, ArrowUpRight, ArrowDownRight, Clock, Activity, BarChart2 } from 'lucide-react';
+import { FileText, ArrowUpRight, ArrowDownRight, Clock, Activity, BarChart2, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Trade {
@@ -104,6 +104,57 @@ const intradayTrades: Trade[] = [
     pnl: 3300.00,
     pnlPercent: 2.93,
   }
+];
+
+const fnoTrades: Trade[] = [
+  {
+    sNo: 1,
+    date: '2024-12-18',
+    time: '09:20:00',
+    instrument: 'F&O',
+    tradingSymbol: 'NIFTY 21500 CE',
+    sector: 'Index',
+    industry: 'Indices',
+    quantity: 50,
+    entryPrice: 125.00,
+    stopLoss: 100.00,
+    target: 180.00,
+    exit: 175.50,
+    pnl: 2525.00,
+    pnlPercent: 40.40,
+  },
+  {
+    sNo: 2,
+    date: '2024-12-18',
+    time: '12:10:00',
+    instrument: 'F&O',
+    tradingSymbol: 'BANKNIFTY 48000 PE',
+    sector: 'Index',
+    industry: 'Indices',
+    quantity: 30,
+    entryPrice: 320.00,
+    stopLoss: 280.00,
+    target: 400.00,
+    exit: 290.00,
+    pnl: -900.00,
+    pnlPercent: -9.38,
+  },
+   {
+    sNo: 3,
+    date: '2024-12-17',
+    time: '14:30:00',
+    instrument: 'F&O',
+    tradingSymbol: 'RELIANCE JAN FUT',
+    sector: 'Energy',
+    industry: 'Oil & Gas',
+    quantity: 250,
+    entryPrice: 2480.00,
+    stopLoss: 2460.00,
+    target: 2520.00,
+    exit: 2515.00,
+    pnl: 8750.00,
+    pnlPercent: 1.41,
+  },
 ];
 
 const swingTrades: Trade[] = [
@@ -208,7 +259,7 @@ const positionalTrades: Trade[] = [
   },
 ];
 
-type TradingType = 'intraday' | 'swing' | 'positional';
+type TradingType = 'intraday' | 'fno' | 'swing' | 'positional';
 
 export default function PaperTradingPage() {
   const router = useRouter();
@@ -224,6 +275,7 @@ export default function PaperTradingPage() {
   const getActiveData = () => {
     switch (activeTab) {
       case 'intraday': return intradayTrades;
+      case 'fno': return fnoTrades;
       case 'swing': return swingTrades;
       case 'positional': return positionalTrades;
       default: return intradayTrades;
@@ -238,6 +290,7 @@ export default function PaperTradingPage() {
 
   const tabs = [
     { id: 'intraday', label: 'Intraday Trading', icon: Clock },
+    { id: 'fno', label: 'F&O Trading', icon: TrendingUp },
     { id: 'swing', label: 'Swing Trading', icon: Activity },
     { id: 'positional', label: 'Positional Trading', icon: BarChart2 },
   ] as const;

@@ -63,6 +63,7 @@ export default function Navbar() {
   const portfolioLinks = [
     { href: '/portfolio/live-trading', label: 'Live Trading', icon: TrendingUp },
     { href: '/portfolio/paper-trading', label: 'Paper Trading', icon: FileText },
+    { href: '/portfolio/management', label: 'Portfolio Management', icon: PieChart },
   ];
 
   const screenersLinks = {

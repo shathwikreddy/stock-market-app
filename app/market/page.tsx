@@ -3,19 +3,26 @@
 import { useState, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Download } from 'lucide-react';
+import { Download, Calendar } from 'lucide-react';
 
 // Time period tabs
-type TimePeriod = 'days' | 'weeks' | 'months' | 'years';
+type TimePeriod = 'days' | 'weeks' | 'months' | 'years' | 'customize';
+type SubTab = 'custom' | 'seasonality' | 'ytd' | '52weeks' | 'all_time';
 type Exchange = 'NSE' | 'BSE' | 'Both';
 type ViewType = 'all' | 'gainers' | 'losers';
 
-// Column definitions for each time period
-const columnsByPeriod: Record<TimePeriod, string[]> = {
+// Column definitions for each type
+const columnsByPeriod: Record<TimePeriod | SubTab, string[]> = {
   days: ['% Chag', '% 2D Chag', '% 3D Chag', '% 4D Chag', '% 5D Chag', '% 1W Chag', '% Cust Date Chag'],
   weeks: ['% 1W Chag', '% 2W Chag', '% 3W Chag', '% 4W Chag', '% 5W Chag', '% 1M Chag', '% Cust Date Chag'],
   months: ['% 1M Chag', '% 2M Chag', '% 3M Chag', '% 4M Chag', '% 5M Chag', '% 6M Chag', '% 1Y Chag'],
   years: ['% 1Y Chag', '% 2Y Chag', '% 3Y Chag', '% 4Y Chag', '% 5Y Chag', '% 10Y Chag', '% Max Chag'],
+  customize: [], // Handled by sub-tabs
+  custom: ['% Chag', '% Cust Date Chag'],
+  seasonality: ['% Chag', '% Cust Date Chag'],
+  ytd: ['% YTD Chag', '% 2YTD Chag', '% 3YTD Chag', '% 4YTD Chag', '% 5YTD Chag', '% 10 YTD Chag', '% Cust Date Chag'],
+  '52weeks': ['% 52W Chag', '% Cust Date Chag'],
+  all_time: ['% ATH&L Chag', '% Cust Date Chag'],
 };
 
 // Base columns that are always shown
@@ -84,6 +91,15 @@ const generateMockData = (count: number, isGainer: boolean): StockData[] => {
         '% 10Y Chag': Math.round((changePercent + (Math.random() - 0.5) * 300) * 100) / 100,
         '% Max Chag': Math.round((changePercent + (Math.random() - 0.5) * 500) * 100) / 100,
         '% Cust Date Chag': Math.round((changePercent + (Math.random() - 0.5) * 10) * 100) / 100,
+        // New fields
+        '% YTD Chag': Math.round((changePercent + (Math.random() - 0.5) * 20) * 100) / 100,
+        '% 2YTD Chag': Math.round((changePercent + (Math.random() - 0.5) * 35) * 100) / 100,
+        '% 3YTD Chag': Math.round((changePercent + (Math.random() - 0.5) * 50) * 100) / 100,
+        '% 4YTD Chag': Math.round((changePercent + (Math.random() - 0.5) * 65) * 100) / 100,
+        '% 5YTD Chag': Math.round((changePercent + (Math.random() - 0.5) * 80) * 100) / 100,
+        '% 10 YTD Chag': Math.round((changePercent + (Math.random() - 0.5) * 150) * 100) / 100,
+        '% 52W Chag': Math.round((changePercent + (Math.random() - 0.5) * 40) * 100) / 100,
+        '% ATH&L Chag': Math.round((changePercent + (Math.random() - 0.5) * 600) * 100) / 100,
       },
     };
   });
@@ -171,23 +187,38 @@ function TopGainersLosersContent() {
   const currentView: ViewType = viewParam === 'gainers' || viewParam === 'losers' ? viewParam : 'all';
   
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('days');
+  const [selectedSubTab, setSelectedSubTab] = useState<SubTab>('custom');
   const [selectedExchange, setSelectedExchange] = useState<Exchange>('Both');
 
   // Generate data with useMemo for stability
   const gainersData = useMemo(() => generateMockData(10, true), []);
   const losersData = useMemo(() => generateMockData(10, false), []);
 
-  const timePeriods: { id: TimePeriod; label: string }[] = [
+  const timePeriods: { id: TimePeriod; label: string; isSpecial?: boolean }[] = [
     { id: 'days', label: 'Days Wise' },
     { id: 'weeks', label: 'Weeks Wise' },
     { id: 'months', label: 'Months Wise' },
     { id: 'years', label: 'Years Wise' },
+    { id: 'customize', label: 'Customize Date', isSpecial: true },
+  ];
+
+  const subTabs: { id: SubTab; label: string }[] = [
+    { id: 'custom', label: 'Choose Your Choice of Data' },
+    { id: 'seasonality', label: 'Seasonality' },
+    { id: 'ytd', label: 'Year to Date' },
+    { id: '52weeks', label: '52 Weeks Gainers & Losers' },
+    { id: 'all_time', label: 'All Time Gainers & Losers' },
   ];
 
   const exchanges: Exchange[] = ['NSE', 'BSE', 'Both'];
 
-  const currentColumns = columnsByPeriod[selectedPeriod];
-  const periodLabel = timePeriods.find(p => p.id === selectedPeriod)?.label || 'Days Wise';
+  const currentColumns = selectedPeriod === 'customize' 
+    ? columnsByPeriod[selectedSubTab]
+    : columnsByPeriod[selectedPeriod as Exclude<TimePeriod, 'customize'>];
+    
+  const periodLabel = selectedPeriod === 'customize'
+    ? subTabs.find(t => t.id === selectedSubTab)?.label
+    : timePeriods.find(p => p.id === selectedPeriod)?.label;
 
   // CSV Download function
   const downloadCSV = () => {
@@ -267,17 +298,41 @@ function TopGainersLosersContent() {
           {timePeriods.map((period) => (
             <button
               key={period.id}
-              onClick={() => setSelectedPeriod(period.id)}
+              onClick={() => {
+                setSelectedPeriod(period.id);
+                if (period.id === 'customize') {
+                  setSelectedSubTab('custom');
+                }
+              }}
               className={`px-6 py-2 text-sm font-medium border-t border-l border-r border-black -mb-[2px] ${
                 selectedPeriod === period.id
-                  ? 'bg-white text-black border-b-2 border-b-white'
+                  ? 'bg-white border-b-2 border-b-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              } ${selectedPeriod === period.id ? 'text-black' : ''}`}
             >
               {period.label}
             </button>
           ))}
         </div>
+
+        {/* Sub Tabs for Customize Date */}
+        {selectedPeriod === 'customize' && (
+          <div className="flex border-b border-gray-300 mb-4 bg-gray-50">
+            {subTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSelectedSubTab(tab.id)}
+                className={`px-4 py-1.5 text-ss font-semibold transition-colors ${
+                  selectedSubTab === tab.id
+                    ? 'text-black border-b-2 border-black'
+                    : 'text-gray-600 hover:text-black'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Exchange Tabs & Actions Row */}
         <div className="flex items-center justify-between mb-4">
@@ -303,7 +358,6 @@ function TopGainersLosersContent() {
 
           {/* Right side actions */}
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600 font-medium">Choose Your Choice of Data</span>
             <button 
               onClick={downloadCSV}
               className="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium"

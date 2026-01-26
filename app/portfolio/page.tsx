@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { Briefcase, TrendingUp, FileText, ArrowRight } from 'lucide-react';
+import { Briefcase, TrendingUp, FileText, ArrowRight, PieChart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
@@ -47,6 +47,15 @@ const portfolioOptions = [
     bgColor: 'bg-blue-500/10',
     iconColor: 'text-blue-500',
   },
+  {
+    href: '/portfolio/management',
+    icon: PieChart,
+    title: 'Portfolio Management',
+    description: 'Analyze and manage your portfolio allocation and risk',
+    gradient: 'from-violet-500 to-purple-600',
+    bgColor: 'bg-violet-500/10',
+    iconColor: 'text-violet-500',
+  },
 ];
 
 export default function PortfolioPage() {
@@ -86,7 +95,7 @@ export default function PortfolioPage() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="grid md:grid-cols-2 gap-6 max-w-4xl"
+          className="grid md:grid-cols-3 gap-6 max-w-6xl"
         >
           {portfolioOptions.map((option) => (
             <motion.div key={option.href} variants={itemVariants}>
