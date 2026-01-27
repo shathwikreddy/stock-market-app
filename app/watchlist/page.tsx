@@ -137,10 +137,10 @@ export default function WatchlistPage() {
   };
 
   const tabs = [
-    { id: 'intraday', label: 'Intraday Trading', icon: Clock },
-    { id: 'fno', label: 'F&O Trading', icon: TrendingUp },
-    { id: 'swing', label: 'Swing Trading', icon: Activity },
-    { id: 'positional', label: 'Positional Trading', icon: BarChart2 },
+    { id: 'intraday', label: 'Intraday Trading', icon: Clock, isSpecial: false },
+    { id: 'fno', label: 'F&O Trading', icon: TrendingUp, isSpecial: false },
+    { id: 'swing', label: 'Swing Trading', icon: Activity, isSpecial: false },
+    { id: 'positional', label: 'Positional Trading', icon: BarChart2, isSpecial: false },
     { id: 'multibagger', label: 'Multi Bagger Stocks', icon: Zap, isSpecial: true },
   ] as const;
 
