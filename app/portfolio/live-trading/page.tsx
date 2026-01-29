@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { TrendingUp, ArrowUpRight, ArrowDownRight, Clock, Activity, BarChart2 } from 'lucide-react';
+import { TrendingUp, ArrowUpRight, ArrowDownRight, Clock, Activity, BarChart2, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Trade {
@@ -259,7 +259,42 @@ const positionalTrades: Trade[] = [
   },
 ];
 
-type TradingType = 'intraday' | 'fno' | 'swing' | 'positional';
+const multibaggerTrades: Trade[] = [
+  {
+    sNo: 1,
+    date: '2024-10-10',
+    time: '09:15:00',
+    instrument: 'EQUITY',
+    tradingSymbol: 'ZOMATO',
+    sector: 'Tech',
+    industry: 'Internet',
+    quantity: 1000,
+    entryPrice: 60.00,
+    stopLoss: 40.00,
+    target: 200.00,
+    exit: 125.00,
+    pnl: 65000.00,
+    pnlPercent: 108.33,
+  },
+   {
+    sNo: 2,
+    date: '2024-09-01',
+    time: '10:00:00',
+    instrument: 'EQUITY',
+    tradingSymbol: 'SUZLON',
+    sector: 'Power',
+    industry: 'Wind Energy',
+    quantity: 5000,
+    entryPrice: 8.00,
+    stopLoss: 5.00,
+    target: 45.00,
+    exit: 38.00,
+    pnl: 150000.00,
+    pnlPercent: 375.00,
+  }
+];
+
+type TradingType = 'intraday' | 'fno' | 'swing' | 'positional' | 'multibagger';
 
 export default function LiveTradingPage() {
   const router = useRouter();
@@ -278,6 +313,7 @@ export default function LiveTradingPage() {
       case 'fno': return fnoTrades;
       case 'swing': return swingTrades;
       case 'positional': return positionalTrades;
+      case 'multibagger': return multibaggerTrades;
       default: return intradayTrades;
     }
   };
@@ -289,10 +325,11 @@ export default function LiveTradingPage() {
   const totalPnLPercent = totalInvestment > 0 ? (totalPnL / totalInvestment) * 100 : 0;
 
   const tabs = [
-    { id: 'intraday', label: 'Intraday Trading', icon: Clock },
-    { id: 'fno', label: 'F&O Trading', icon: TrendingUp },
-    { id: 'swing', label: 'Swing Trading', icon: Activity },
-    { id: 'positional', label: 'Positional Trading', icon: BarChart2 },
+    { id: 'intraday', label: 'Intraday Trading', icon: Clock, isSpecial: false },
+    { id: 'fno', label: 'F&O Trading', icon: TrendingUp, isSpecial: false },
+    { id: 'swing', label: 'Swing Trading', icon: Activity, isSpecial: false },
+    { id: 'positional', label: 'Positional Trading', icon: BarChart2, isSpecial: false },
+    { id: 'multibagger', label: 'Multi Bagger Stocks', icon: Zap, isSpecial: true },
   ] as const;
 
   return (
@@ -323,6 +360,8 @@ export default function LiveTradingPage() {
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
+              const isSpecial = tab.isSpecial;
+              
               return (
                 <button
                   key={tab.id}
@@ -330,8 +369,12 @@ export default function LiveTradingPage() {
                   className={`
                     flex items-center space-x-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200
                     ${isActive 
-                      ? 'bg-primary text-primary-foreground shadow-md scale-105' 
-                      : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      ? isSpecial 
+                        ? 'bg-red-500 text-white shadow-md scale-105' 
+                        : 'bg-primary text-primary-foreground shadow-md scale-105'
+                      : isSpecial
+                        ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
+                        : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
                     }
                   `}
                 >
@@ -352,9 +395,9 @@ export default function LiveTradingPage() {
         >
         {/* Header for the specific table section */}
         <div className="px-6 py-2 border-b border-border bg-muted/5">
-            <h2 className="text-lg font-semibold text-foreground capitalize flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-primary mb-0.5"></span>
-                {activeTab} Positions
+            <h2 className={`text-lg font-semibold capitalize flex items-center gap-2 ${activeTab === 'multibagger' ? 'text-red-500' : 'text-foreground'}`}>
+                {activeTab === 'multibagger' ? <Zap className="w-5 h-5 fill-current" /> : <span className="w-2 h-2 rounded-full bg-primary mb-0.5"></span>}
+                {tabs.find(t => t.id === activeTab)?.label || activeTab} Positions
             </h2>
         </div>
           <div className="overflow-x-auto">

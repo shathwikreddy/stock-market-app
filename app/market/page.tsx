@@ -186,39 +186,32 @@ function TopGainersLosersContent() {
   const viewParam = searchParams.get('view') as ViewType | null;
   const currentView: ViewType = viewParam === 'gainers' || viewParam === 'losers' ? viewParam : 'all';
   
-  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('days');
-  const [selectedSubTab, setSelectedSubTab] = useState<SubTab>('custom');
   const [selectedExchange, setSelectedExchange] = useState<Exchange>('Both');
 
   // Generate data with useMemo for stability
   const gainersData = useMemo(() => generateMockData(10, true), []);
   const losersData = useMemo(() => generateMockData(10, false), []);
 
-  const timePeriods: { id: TimePeriod; label: string; isSpecial?: boolean }[] = [
+  const exchanges: Exchange[] = ['NSE', 'BSE', 'Both'];
+
+  // Combined tabs list
+  const allTabs: { id: string; label: string }[] = [
     { id: 'days', label: 'Days Wise' },
     { id: 'weeks', label: 'Weeks Wise' },
     { id: 'months', label: 'Months Wise' },
     { id: 'years', label: 'Years Wise' },
-    { id: 'customize', label: 'Customize Date', isSpecial: true },
-  ];
-
-  const subTabs: { id: SubTab; label: string }[] = [
-    { id: 'custom', label: 'Choose Your Choice of Data' },
+    { id: 'custom', label: 'Customize Date' },
     { id: 'seasonality', label: 'Seasonality' },
     { id: 'ytd', label: 'Year to Date' },
     { id: '52weeks', label: '52 Weeks Gainers & Losers' },
     { id: 'all_time', label: 'All Time Gainers & Losers' },
   ];
 
-  const exchanges: Exchange[] = ['NSE', 'BSE', 'Both'];
+  const [activeTab, setActiveTab] = useState<string>('days');
 
-  const currentColumns = selectedPeriod === 'customize' 
-    ? columnsByPeriod[selectedSubTab]
-    : columnsByPeriod[selectedPeriod as Exclude<TimePeriod, 'customize'>];
+  const currentColumns = columnsByPeriod[activeTab as TimePeriod | SubTab] || [];
     
-  const periodLabel = selectedPeriod === 'customize'
-    ? subTabs.find(t => t.id === selectedSubTab)?.label
-    : timePeriods.find(p => p.id === selectedPeriod)?.label;
+  const periodLabel = allTabs.find(t => t.id === activeTab)?.label;
 
   // CSV Download function
   const downloadCSV = () => {
@@ -280,7 +273,7 @@ function TopGainersLosersContent() {
     const url = URL.createObjectURL(blob);
     
     link.setAttribute('href', url);
-    link.setAttribute('download', `top_gainers_losers_${selectedPeriod}_${selectedExchange}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `top_gainers_losers_${activeTab}_${selectedExchange}_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     
     document.body.appendChild(link);
@@ -293,45 +286,34 @@ function TopGainersLosersContent() {
   return (
     <div className="min-h-screen bg-white">
       <div className="w-full px-4 py-4">
-        {/* Time Period Tabs */}
-        <div className="flex border-b-2 border-black mb-4">
-          {timePeriods.map((period) => (
+        {/* All Tabs in Single Line */}
+        <div className="flex border-b-2 border-black mb-4 overflow-x-auto">
+          {allTabs.map((tab) => (
             <button
-              key={period.id}
-              onClick={() => {
-                setSelectedPeriod(period.id);
-                if (period.id === 'customize') {
-                  setSelectedSubTab('custom');
-                }
-              }}
-              className={`px-6 py-2 text-sm font-medium border-t border-l border-r border-black -mb-[2px] ${
-                selectedPeriod === period.id
-                  ? 'bg-white border-b-2 border-b-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              } ${selectedPeriod === period.id ? 'text-black' : ''}`}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 text-sm font-medium border-t border-l last:border-r border-black -mb-[2px] whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'bg-white border-b-2 border-b-white text-black'
+                  : 'bg-gray-100 text-black hover:bg-gray-200'
+              }`}
             >
-              {period.label}
+              {tab.label}
             </button>
           ))}
         </div>
 
-        {/* Sub Tabs for Customize Date */}
-        {selectedPeriod === 'customize' && (
-          <div className="flex border-b border-gray-300 mb-4 bg-gray-50">
-            {subTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setSelectedSubTab(tab.id)}
-                className={`px-4 py-1.5 text-ss font-semibold transition-colors ${
-                  selectedSubTab === tab.id
-                    ? 'text-black border-b-2 border-black'
-                    : 'text-gray-600 hover:text-black'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        {/* Content for 'Customize Date' specifically */}
+        {activeTab === 'custom' && (
+            <div className="mb-4 border border-black p-4 bg-gray-50">
+                <div className="flex items-center gap-4">
+                    <span className="font-bold text-sm">Choose Your Choice of Data:</span>
+                    {/* Placeholder for actual date picker or custom logic */}
+                    <div className="border border-gray-400 px-2 py-1 bg-white w-64 text-sm text-gray-500">
+                        Select date range...
+                    </div>
+                </div>
+            </div>
         )}
 
         {/* Exchange Tabs & Actions Row */}

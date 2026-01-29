@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { FileText, ArrowUpRight, ArrowDownRight, Clock, Activity, BarChart2, TrendingUp } from 'lucide-react';
+import { FileText, ArrowUpRight, ArrowDownRight, Clock, Activity, BarChart2, TrendingUp, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Trade {
@@ -259,7 +259,42 @@ const positionalTrades: Trade[] = [
   },
 ];
 
-type TradingType = 'intraday' | 'fno' | 'swing' | 'positional';
+const multibaggerTrades: Trade[] = [
+  {
+    sNo: 1,
+    date: '2024-11-15',
+    time: '09:30:00',
+    instrument: 'EQUITY',
+    tradingSymbol: 'VARUNBEV',
+    sector: 'FMCG',
+    industry: 'Beverages',
+    quantity: 200,
+    entryPrice: 800.00,
+    stopLoss: 600.00,
+    target: 1500.00,
+    exit: 1200.00,
+    pnl: 80000.00,
+    pnlPercent: 50.00,
+  },
+   {
+    sNo: 2,
+    date: '2024-10-05',
+    time: '11:15:00',
+    instrument: 'EQUITY',
+    tradingSymbol: 'TRENT',
+    sector: 'Retail',
+    industry: 'Fashion',
+    quantity: 150,
+    entryPrice: 2000.00,
+    stopLoss: 1800.00,
+    target: 4000.00,
+    exit: 3500.00,
+    pnl: 225000.00,
+    pnlPercent: 75.00,
+  }
+];
+
+type TradingType = 'intraday' | 'fno' | 'swing' | 'positional' | 'multibagger';
 
 export default function PaperTradingPage() {
   const router = useRouter();
@@ -278,6 +313,7 @@ export default function PaperTradingPage() {
       case 'fno': return fnoTrades;
       case 'swing': return swingTrades;
       case 'positional': return positionalTrades;
+      case 'multibagger': return multibaggerTrades;
       default: return intradayTrades;
     }
   };
@@ -289,10 +325,11 @@ export default function PaperTradingPage() {
   const totalPnLPercent = totalInvestment > 0 ? (totalPnL / totalInvestment) * 100 : 0;
 
   const tabs = [
-    { id: 'intraday', label: 'Intraday Trading', icon: Clock },
-    { id: 'fno', label: 'F&O Trading', icon: TrendingUp },
-    { id: 'swing', label: 'Swing Trading', icon: Activity },
-    { id: 'positional', label: 'Positional Trading', icon: BarChart2 },
+    { id: 'intraday', label: 'Intraday Trading', icon: Clock, isSpecial: false },
+    { id: 'fno', label: 'F&O Trading', icon: TrendingUp, isSpecial: false },
+    { id: 'swing', label: 'Swing Trading', icon: Activity, isSpecial: false },
+    { id: 'positional', label: 'Positional Trading', icon: BarChart2, isSpecial: false },
+    { id: 'multibagger', label: 'Multi Bagger Stocks', icon: Zap, isSpecial: true },
   ] as const;
 
   return (
@@ -323,6 +360,8 @@ export default function PaperTradingPage() {
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
+              const isSpecial = tab.isSpecial;
+              
               return (
                 <button
                   key={tab.id}
@@ -330,8 +369,12 @@ export default function PaperTradingPage() {
                   className={`
                     flex items-center space-x-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200
                     ${isActive 
-                      ? 'bg-primary text-primary-foreground shadow-md scale-105' 
-                      : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      ? isSpecial 
+                        ? 'bg-red-500 text-white shadow-md scale-105' 
+                        : 'bg-primary text-primary-foreground shadow-md scale-105'
+                      : isSpecial
+                        ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20'
+                        : 'bg-secondary/50 text-muted-foreground hover:bg-secondary hover:text-foreground'
                     }
                   `}
                 >
@@ -352,9 +395,9 @@ export default function PaperTradingPage() {
         >
         {/* Header for the specific table section */}
         <div className="px-6 py-2 border-b border-border bg-muted/5">
-            <h2 className="text-lg font-semibold text-foreground capitalize flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-primary mb-0.5"></span>
-                {activeTab} Positions
+            <h2 className={`text-lg font-semibold capitalize flex items-center gap-2 ${activeTab === 'multibagger' ? 'text-red-500' : 'text-foreground'}`}>
+                {activeTab === 'multibagger' ? <Zap className="w-5 h-5 fill-current" /> : <span className="w-2 h-2 rounded-full bg-primary mb-0.5"></span>}
+                {tabs.find(t => t.id === activeTab)?.label || activeTab} Positions
             </h2>
         </div>
           <div className="overflow-x-auto">
