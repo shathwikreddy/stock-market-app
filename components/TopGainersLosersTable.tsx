@@ -7,7 +7,7 @@ import { Lock, MoreVertical, ChevronDown, Settings, ArrowUpDown } from 'lucide-r
 
 interface TopGainersLosersTableProps {
     data: TopGainerLoserStock[];
-    type: 'gainers' | 'losers' | '52wkHigh' | '52wkLow' | 'onlyBuyers' | 'onlySellers' | 'priceShockers' | 'volumeShockers' | 'mostActiveByValue' | 'allTimeHigh' | 'allTimeLow';
+    type: 'gainers' | 'losers' | '52wkHigh' | '52wkLow' | 'onlyBuyers' | 'onlySellers' | 'priceShockers' | 'volumeShockers' | 'mostActiveByValue' | 'allTimeHigh' | 'allTimeLow' | 'stocks' | 'sectors' | 'industry' | 'fnoStocks';
     exchange: 'NSE' | 'BSE';
     index: string;
     date: string;
@@ -69,6 +69,26 @@ const categoryInfo: Record<string, { title: string; description: string; isPosit
         title: 'ALL TIME LOW',
         description: 'Stocks that have reached their lowest price ever recorded. These stocks may present deep value opportunities or could indicate fundamental issues with the company....',
         isPositive: false,
+    },
+    stocks: {
+        title: 'ALL STOCKS',
+        description: 'Comprehensive listing of all stocks trading on NSE/BSE with real-time prices, market capitalization, sector classification, and detailed performance metrics. Filter by exchange, index, and various parameters....',
+        isPositive: true,
+    },
+    sectors: {
+        title: 'SECTOR-WISE PERFORMANCE',
+        description: 'Sector indices showing aggregate performance of stocks grouped by sectors like Banking, IT, Pharma, Auto, FMCG, and more. Track sector rotation and identify trending industries....',
+        isPositive: true,
+    },
+    industry: {
+        title: 'INDUSTRY-WISE PERFORMANCE',
+        description: 'Industry-wise market performance showing granular classification within sectors. Analyze sub-sector trends like Software Services, Private Banks, Steel Products, and more for detailed insights....',
+        isPositive: true,
+    },
+    fnoStocks: {
+        title: 'F&O ELIGIBLE STOCKS',
+        description: 'Stocks eligible for Futures and Options trading with higher liquidity and institutional participation. These stocks meet NSE/BSE criteria for derivatives trading....',
+        isPositive: true,
     },
 };
 
