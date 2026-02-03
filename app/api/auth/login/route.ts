@@ -2,53 +2,36 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { createAccessToken, createRefreshToken } from '@/lib/auth';
+import { handleApiError, badRequest } from '@/lib/api-response';
+import { validateRequest, loginSchema } from '@/lib/validations';
 
 export async function POST(request: Request) {
   try {
     await connectDB();
 
-    const body = await request.json();
-    const { username, password } = body;
-
-    if (!username || !password) {
-      return NextResponse.json(
-        { success: false, message: 'Username and password are required' },
-        { status: 400 }
-      );
-    }
+    const { username, password } = await validateRequest(request, loginSchema);
 
     const user = await User.findOne({ username });
 
     if (!user) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid credentials' },
-        { status: 401 }
-      );
+      return badRequest('Invalid credentials');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid credentials' },
-        { status: 401 }
-      );
+      return badRequest('Invalid credentials');
     }
 
-    const accessToken = jwt.sign(
-      { userId: user._id, username: user.username },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    const accessToken = createAccessToken({
+      userId: user._id.toString(),
+      username: user.username,
+    });
 
-    const refreshToken = jwt.sign(
-      { userId: user._id },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const refreshToken = createRefreshToken({
+      userId: user._id.toString(),
+    });
 
     return NextResponse.json(
       {
@@ -57,7 +40,7 @@ export async function POST(request: Request) {
         accessToken,
         refreshToken,
         user: {
-          id: user._id,
+          id: user._id.toString(),
           username: user.username,
           email: user.email,
           firstName: user.firstName,
@@ -66,10 +49,11 @@ export async function POST(request: Request) {
       },
       { status: 200 }
     );
-  } catch (error: unknown) {
-    return NextResponse.json(
-      { success: false, message: 'Login failed' },
-      { status: 500 }
-    );
+  } catch (error) {
+    // If it's already a NextResponse (from validation), return it
+    if (error instanceof NextResponse) {
+      return error;
+    }
+    return handleApiError(error);
   }
 }

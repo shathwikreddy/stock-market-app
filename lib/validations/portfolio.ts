@@ -1,0 +1,33 @@
+import { z } from 'zod';
+
+export const marketConditions = [
+  'Bull Market',
+  'Bullish to Bearish',
+  'Side Ways Market',
+  'Bear Market',
+  'Bearish to Bullish',
+] as const;
+
+export const marketConditionSchema = z.enum(marketConditions);
+
+export const strategySchema = z.object({
+  name: z.string().min(1, 'Strategy name is required'),
+  allocationPercent: z.number().min(0).max(100).default(0),
+  allocationRupees: z.number().min(0).default(0),
+  usedFunds: z.number().min(0).default(0),
+  unusedFunds: z.number().min(0).default(0),
+});
+
+export const getPortfolioSchema = z.object({
+  marketCondition: marketConditionSchema,
+});
+
+export const updatePortfolioSchema = z.object({
+  marketCondition: marketConditionSchema,
+  strategies: z.array(strategySchema).min(1, 'At least one strategy is required'),
+});
+
+export type MarketCondition = z.infer<typeof marketConditionSchema>;
+export type Strategy = z.infer<typeof strategySchema>;
+export type GetPortfolioInput = z.infer<typeof getPortfolioSchema>;
+export type UpdatePortfolioInput = z.infer<typeof updatePortfolioSchema>;

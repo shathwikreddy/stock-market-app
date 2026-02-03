@@ -107,7 +107,7 @@ export default function Navbar() {
         { href: '/market', label: 'Total Market Performance' }
       ],
       marketMood: [
-        { href: '#', label: 'Market Mood' },
+        { href: '/market-mood', label: 'Market Mood' },
       ],
       futuresSupport: [
         { href: '#', label: 'Futures Support & Resistance' },
@@ -306,7 +306,7 @@ export default function Navbar() {
                           {/* Market Mood */}
                           <div className="border-b border-gray-300">
                             <Link
-                              href="#"
+                              href="/market-mood"
                               className="block px-4 py-1.5 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300"
                             >
                               Market Mood

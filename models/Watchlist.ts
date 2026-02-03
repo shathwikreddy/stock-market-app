@@ -1,6 +1,9 @@
-import mongoose, { Schema, models } from 'mongoose';
+import mongoose, { Schema, models, Document } from 'mongoose';
+
+export type WatchlistCategory = 'intraday' | 'fno' | 'swing' | 'positional' | 'multibagger';
 
 export interface IWatchlistStock {
+  _id?: mongoose.Types.ObjectId;
   sNo: number;
   date: Date;
   sourceFrom: string;
@@ -14,38 +17,46 @@ export interface IWatchlistStock {
   target: number;
   redFlags: string;
   note: string;
+  category: WatchlistCategory;
   addedAt: Date;
 }
 
-export interface IWatchlist {
-  userId: string;
+export interface IWatchlist extends Document {
+  _id: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
   name: string;
   stocks: IWatchlistStock[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-const WatchlistStockSchema = new Schema({
-  sNo: Number,
+const WatchlistStockSchema = new Schema<IWatchlistStock>({
+  sNo: { type: Number, required: true },
   date: { type: Date, default: Date.now },
-  sourceFrom: String,
-  segments: String,
-  tradingSymbol: String,
-  sector: String,
-  industry: String,
-  ltp: Number,
-  entryPrice: Number,
-  stopLoss: Number,
-  target: Number,
-  redFlags: String,
-  note: String,
+  sourceFrom: { type: String, required: true },
+  segments: { type: String, required: true },
+  tradingSymbol: { type: String, required: true },
+  sector: { type: String, required: true },
+  industry: { type: String, required: true },
+  ltp: { type: Number, required: true },
+  entryPrice: { type: Number, required: true },
+  stopLoss: { type: Number, required: true },
+  target: { type: Number, required: true },
+  redFlags: { type: String, default: '' },
+  note: { type: String, default: '' },
+  category: {
+    type: String,
+    required: true,
+    enum: ['intraday', 'fno', 'swing', 'positional', 'multibagger'],
+  },
   addedAt: { type: Date, default: Date.now },
 });
 
 const WatchlistSchema = new Schema<IWatchlist>(
   {
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
       unique: true,
     },

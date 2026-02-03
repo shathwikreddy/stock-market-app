@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { TrendingUp, TrendingDown, Eye, Wallet, Activity, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { AuthGuard, LoadingSpinner } from '@/components/common';
 
 interface Stats {
   totalGainers: number;
@@ -49,19 +49,15 @@ const itemVariants = {
   },
 };
 
-export default function DashboardPage() {
-  const router = useRouter();
-  const { isAuthenticated, user, accessToken } = useAuthStore();
+function DashboardContent() {
+  const { user, accessToken } = useAuthStore();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
     fetchStats();
-  }, [isAuthenticated, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchStats = async () => {
     try {
@@ -77,14 +73,7 @@ export default function DashboardPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading dashboard..." />;
   }
 
   const quickActions = [
@@ -264,5 +253,13 @@ export default function DashboardPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <AuthGuard loadingMessage="Loading dashboard...">
+      <DashboardContent />
+    </AuthGuard>
   );
 }

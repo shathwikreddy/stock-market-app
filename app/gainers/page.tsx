@@ -1,49 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useMemo } from 'react';
 import TopGainersLosersTable from '@/components/TopGainersLosersTable';
-import { topGainersNSE, TopGainerLoserStock } from '@/lib/mockData';
+import { topGainersNSE } from '@/lib/mockData';
+import { AuthGuard } from '@/components/common';
 
-export default function GainersPage() {
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-  const [stocks, setStocks] = useState<TopGainerLoserStock[]>([]);
-  const [loading, setLoading] = useState(true);
+function GainersContent() {
+  const stocks = useMemo(() => topGainersNSE, []);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
-
-    // Using the new mock data directly for now
-    setStocks(topGainersNSE);
-    setLoading(false);
-  }, [isAuthenticated, router]);
-
-  if (loading) {
+  const dateStr = useMemo(() => {
+    const now = new Date();
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-2 border-gray-900 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm text-gray-500">Loading top gainers...</p>
-        </div>
-      </div>
+      now.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      }) +
+      ', ' +
+      now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
     );
-  }
-
-  // Get current date in the format: Dec 30, 16:09
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric'
-  }) + ', ' + now.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  });
+  }, []);
 
   return (
     <TopGainersLosersTable
@@ -53,5 +32,13 @@ export default function GainersPage() {
       index="NIFTY 500"
       date={dateStr}
     />
+  );
+}
+
+export default function GainersPage() {
+  return (
+    <AuthGuard loadingMessage="Loading top gainers...">
+      <GainersContent />
+    </AuthGuard>
   );
 }

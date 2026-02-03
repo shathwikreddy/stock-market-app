@@ -1,28 +1,23 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
-import Watchlist from '@/models/Watchlist';
-import { headers } from 'next/headers';
-import jwt from 'jsonwebtoken';
+import Watchlist, { IWatchlistStock } from '@/models/Watchlist';
+import { getUserIdFromToken } from '@/lib/auth';
+import {
+  handleApiError,
+  badRequest,
+  notFound,
+} from '@/lib/api-response';
+import {
+  validateRequest,
+  addStockSchema,
+  removeStockSchema,
+} from '@/lib/validations';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-async function getUserIdFromToken(authorization: string | null) {
-  if (!authorization || !authorization.startsWith('Bearer ')) {
-    throw new Error('Unauthorized');
-  }
-
-  const token = authorization.split(' ')[1];
-  const decoded: any = jwt.verify(token, JWT_SECRET);
-  return decoded.userId;
-}
-
-export async function GET(request: Request) {
+export async function GET() {
   try {
     await connectDB();
 
-    const headersList = await headers();
-    const authorization = headersList.get('authorization');
-    const userId = await getUserIdFromToken(authorization);
+    const userId = await getUserIdFromToken();
 
     let watchlist = await Watchlist.findOne({ userId });
 
@@ -30,15 +25,12 @@ export async function GET(request: Request) {
       watchlist = await Watchlist.create({ userId, stocks: [] });
     }
 
-    return NextResponse.json(
-      { success: true, watchlist },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: error.message === 'Unauthorized' ? 401 : 500 }
-    );
+    return NextResponse.json({
+      success: true,
+      watchlist,
+    });
+  } catch (error) {
+    return handleApiError(error);
   }
 }
 
@@ -46,42 +38,42 @@ export async function POST(request: Request) {
   try {
     await connectDB();
 
-    const headersList = await headers();
-    const authorization = headersList.get('authorization');
-    const userId = await getUserIdFromToken(authorization);
+    const userId = await getUserIdFromToken();
 
-    const body = await request.json();
-    const stockData = body;
+    const stockData = await validateRequest(request, addStockSchema);
 
     let watchlist = await Watchlist.findOne({ userId });
 
     if (!watchlist) {
-      watchlist = await Watchlist.create({ userId, stocks: [stockData] });
+      watchlist = await Watchlist.create({
+        userId,
+        stocks: [{ ...stockData, addedAt: new Date() }],
+      });
     } else {
       const exists = watchlist.stocks.some(
-        (stock: any) => stock.company === stockData.company
+        (stock: IWatchlistStock) =>
+          stock.tradingSymbol === stockData.tradingSymbol &&
+          stock.category === stockData.category
       );
 
       if (exists) {
-        return NextResponse.json(
-          { success: false, message: 'Stock already in watchlist' },
-          { status: 400 }
-        );
+        return badRequest('Stock already in this watchlist category');
       }
 
-      watchlist.stocks.push(stockData);
+      watchlist.stocks.push({ ...stockData, addedAt: new Date() } as IWatchlistStock);
       await watchlist.save();
     }
 
-    return NextResponse.json(
-      { success: true, message: 'Stock added to watchlist', watchlist },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: true,
+      message: 'Stock added to watchlist',
+      watchlist,
+    });
+  } catch (error) {
+    if (error instanceof NextResponse) {
+      return error;
+    }
+    return handleApiError(error);
   }
 }
 
@@ -89,36 +81,36 @@ export async function DELETE(request: Request) {
   try {
     await connectDB();
 
-    const headersList = await headers();
-    const authorization = headersList.get('authorization');
-    const userId = await getUserIdFromToken(authorization);
+    const userId = await getUserIdFromToken();
 
-    const body = await request.json();
-    const { company } = body;
+    const { stockId } = await validateRequest(request, removeStockSchema);
 
     const watchlist = await Watchlist.findOne({ userId });
 
     if (!watchlist) {
-      return NextResponse.json(
-        { success: false, message: 'Watchlist not found' },
-        { status: 404 }
-      );
+      return notFound('Watchlist not found');
     }
 
-    watchlist.stocks = watchlist.stocks.filter(
-      (stock: any) => stock.company !== company
+    const stockIndex = watchlist.stocks.findIndex(
+      (stock: IWatchlistStock) => stock._id?.toString() === stockId
     );
 
+    if (stockIndex === -1) {
+      return notFound('Stock not found in watchlist');
+    }
+
+    watchlist.stocks.splice(stockIndex, 1);
     await watchlist.save();
 
-    return NextResponse.json(
-      { success: true, message: 'Stock removed from watchlist', watchlist },
-      { status: 200 }
-    );
-  } catch (error: any) {
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: true,
+      message: 'Stock removed from watchlist',
+      watchlist,
+    });
+  } catch (error) {
+    if (error instanceof NextResponse) {
+      return error;
+    }
+    return handleApiError(error);
   }
 }

@@ -1,51 +1,54 @@
-import mongoose, { Schema, models } from 'mongoose';
+import mongoose, { Schema, models, Document } from 'mongoose';
 
-export interface INote {
-    _id: string;
-    userId: string;
-    title: string;
-    content: string;
-    color: string;
-    isPinned: boolean;
-    tags: string[];
-    createdAt: Date;
-    updatedAt: Date;
+export type NoteColor = 'slate' | 'zinc' | 'stone' | 'neutral' | 'gray' | 'dark';
+
+export interface INote extends Document {
+  _id: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  title: string;
+  content: string;
+  color: NoteColor;
+  isPinned: boolean;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const NoteSchema = new Schema<INote>(
-    {
-        userId: {
-            type: String,
-            required: true,
-            index: true,
-        },
-        title: {
-            type: String,
-            required: [true, 'Title is required'],
-            trim: true,
-            maxlength: 200,
-        },
-        content: {
-            type: String,
-            default: '',
-        },
-        color: {
-            type: String,
-            default: 'slate',
-            enum: ['slate', 'zinc', 'stone', 'neutral', 'gray', 'dark'],
-        },
-        isPinned: {
-            type: Boolean,
-            default: false,
-        },
-        tags: {
-            type: [String],
-            default: [],
-        },
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
     },
-    {
-        timestamps: true,
-    }
+    title: {
+      type: String,
+      required: [true, 'Title is required'],
+      trim: true,
+      maxlength: 200,
+    },
+    content: {
+      type: String,
+      default: '',
+    },
+    color: {
+      type: String,
+      default: 'slate',
+      enum: ['slate', 'zinc', 'stone', 'neutral', 'gray', 'dark'],
+    },
+    isPinned: {
+      type: Boolean,
+      default: false,
+    },
+    tags: {
+      type: [String],
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
 
 // Compound index for efficient queries
