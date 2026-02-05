@@ -16,7 +16,7 @@ interface Stock {
 }
 
 type TabType = 'advance' | 'decline' | 'unchanged';
-type SortField = 'symbol' | 'ltp' | 'changePercent' | 'mktCap' | 'volume' | 'value';
+type SortField = 'symbol' | 'series' | 'ltp' | 'changePercent' | 'mktCap' | 'volume' | 'value';
 type SortOrder = 'asc' | 'desc' | null;
 
 // Generate dummy data
