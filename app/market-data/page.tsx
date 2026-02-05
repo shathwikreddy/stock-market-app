@@ -37,7 +37,12 @@ function isBold(text: string): boolean {
 
 function getHref(text: string): string {
     if (!text) return '#';
-    const slug = text.toLowerCase().replace(/\s+/g, '-').replace(/[&'()]/g, '');
+    const slug = text
+        .toLowerCase()
+        .replace(/[&',()]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
     return `/market-data/${slug}`;
 }
 

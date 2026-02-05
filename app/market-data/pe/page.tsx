@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import AdvancesDeclineTable from '@/components/AdvancesDeclineTable';
 
 // Seeded random number generator for consistent values
 const seededRandom = (seed: number): number => {
@@ -109,83 +110,85 @@ export default function PEPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1a1a2e]">
-      <div className="w-full px-4 py-6">
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto px-6 py-6">
         {/* Header */}
-        <div className="bg-white border-2 border-black mb-4">
-          <div className="flex items-center justify-between px-4 py-3 border-b-2 border-black">
+        <div className="bg-white border border-gray-300 rounded-lg mb-6 shadow-sm">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
             <div className="flex items-center gap-6">
-              <span className="text-lg font-bold text-black">Nifty PE Ratio</span>
+              <span className="text-xl font-bold text-gray-900">Nifty PE Ratio</span>
               <span className="text-2xl font-bold text-green-600">{currentPE.toFixed(2)}</span>
             </div>
             <div className="text-sm text-gray-600">
-              Nifty PE Ratio Heat Map Last Updated: {lastUpdated}
+              Last Updated: {lastUpdated}
             </div>
           </div>
         </div>
 
         {/* PE Ratio Heatmap Table */}
-        <div className="bg-white border-2 border-black overflow-x-auto">
-          <table className="w-full border-collapse text-xs">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-400 px-2 py-2 text-black font-bold text-center sticky left-0 bg-gray-100 z-10">Year</th>
-                {months.map((month) => (
-                  <th key={month} className="border border-gray-400 px-2 py-2 text-black font-bold text-center min-w-[55px]">
-                    {month}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {years.map((year) => (
-                <tr key={year}>
-                  <td className="border border-gray-400 px-2 py-1 text-black font-bold text-center sticky left-0 bg-gray-100 z-10">
-                    {year.toString().slice(-2)}
-                  </td>
-                  {months.map((month, monthIndex) => {
-                    const cellData = peData.find(d => d.year === year && d.monthIndex === monthIndex);
-                    const pe = cellData?.pe || 0;
-                    const quarter = cellData?.quarter || 'Q1';
-                    
-                    // Skip future dates
-                    const now = new Date();
-                    const isValidDate = year < now.getFullYear() || 
-                      (year === now.getFullYear() && monthIndex <= now.getMonth());
-                    
-                    if (!isValidDate) {
+        <div className="bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-xs">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="border border-gray-300 px-2 py-2 text-gray-700 font-semibold text-center sticky left-0 bg-gray-50 z-10">Year</th>
+                  {months.map((month) => (
+                    <th key={month} className="border border-gray-300 px-2 py-2 text-gray-700 font-semibold text-center min-w-[55px]">
+                      {month}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {years.map((year) => (
+                  <tr key={year}>
+                    <td className="border border-gray-300 px-2 py-1 text-gray-900 font-semibold text-center sticky left-0 bg-gray-50 z-10">
+                      {year.toString().slice(-2)}
+                    </td>
+                    {months.map((month, monthIndex) => {
+                      const cellData = peData.find(d => d.year === year && d.monthIndex === monthIndex);
+                      const pe = cellData?.pe || 0;
+                      const quarter = cellData?.quarter || 'Q1';
+
+                      // Skip future dates
+                      const now = new Date();
+                      const isValidDate = year < now.getFullYear() ||
+                        (year === now.getFullYear() && monthIndex <= now.getMonth());
+
+                      if (!isValidDate) {
+                        return (
+                          <td key={`${year}-${month}`} className="border border-gray-300 px-2 py-1 text-center bg-gray-100 text-gray-400">
+                            -
+                          </td>
+                        );
+                      }
+
                       return (
-                        <td key={`${year}-${month}`} className="border border-gray-400 px-2 py-1 text-center bg-gray-50">
-                          -
+                        <td
+                          key={`${year}-${month}`}
+                          className="border border-gray-300 px-2 py-1 text-center cursor-pointer transition-all duration-150 hover:ring-2 hover:ring-blue-500 hover:z-20 relative"
+                          style={{
+                            backgroundColor: getPEColor(pe),
+                            color: getTextColor(pe),
+                          }}
+                          onMouseEnter={(e) => handleMouseEnter({ month, quarter, year, pe }, e)}
+                          onMouseLeave={handleMouseLeave}
+                        >
+                          <span className="font-medium">{pe.toFixed(2)}</span>
                         </td>
                       );
-                    }
-                    
-                    return (
-                      <td
-                        key={`${year}-${month}`}
-                        className="border border-gray-400 px-2 py-1 text-center cursor-pointer transition-all duration-150 hover:outline hover:outline-2 hover:outline-black hover:z-20 relative"
-                        style={{
-                          backgroundColor: getPEColor(pe),
-                          color: getTextColor(pe),
-                        }}
-                        onMouseEnter={(e) => handleMouseEnter({ month, quarter, year, pe }, e)}
-                        onMouseLeave={handleMouseLeave}
-                      >
-                        <span className="font-medium">{pe.toFixed(2)}</span>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Legend */}
-        <div className="mt-4 bg-white border-2 border-black p-4">
-          <div className="flex items-center justify-center gap-1 flex-wrap">
-            <span className="text-sm font-semibold text-black mr-2">PE Scale:</span>
+        <div className="mt-6 bg-white border border-gray-300 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <span className="text-sm font-semibold text-gray-900 mr-2">PE Scale:</span>
             {[
               { label: '≤15', color: '#1a9850' },
               { label: '15-17', color: '#66bd63' },
@@ -197,20 +200,32 @@ export default function PEPage() {
               { label: '28-32', color: '#d73027' },
               { label: '≥32', color: '#a50026' },
             ].map((item) => (
-              <div key={item.label} className="flex items-center gap-1">
+              <div key={item.label} className="flex items-center gap-1.5 px-2">
                 <div
-                  className="w-6 h-4 border border-gray-400"
+                  className="w-7 h-5 border border-gray-300 rounded shadow-sm"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="text-xs text-black">{item.label}</span>
+                <span className="text-xs text-gray-700 font-medium">{item.label}</span>
               </div>
             ))}
           </div>
-          <div className="text-center mt-2 text-sm text-gray-600">
-            <span className="text-green-700 font-medium">Green</span> = Undervalued | 
-            <span className="text-yellow-600 font-medium ml-1">Yellow</span> = Fair Value | 
-            <span className="text-red-600 font-medium ml-1">Red</span> = Overvalued
+          <div className="text-center mt-4 text-sm text-gray-600 border-t border-gray-200 pt-4">
+            <span className="text-green-700 font-semibold">Green</span> = Undervalued
+            <span className="mx-2">•</span>
+            <span className="text-yellow-600 font-semibold">Yellow</span> = Fair Value
+            <span className="mx-2">•</span>
+            <span className="text-red-600 font-semibold">Red</span> = Overvalued
           </div>
+        </div>
+
+        {/* Advances, Declines & Unchanged Section */}
+        <div id="advances-decline" className="mt-10 scroll-mt-20">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 border-b-2 border-gray-300 pb-3">
+              Advances, Declines & Unchanged
+            </h2>
+          </div>
+          <AdvancesDeclineTable />
         </div>
       </div>
 
@@ -224,27 +239,23 @@ export default function PEPage() {
             transform: 'translate(-50%, -100%)',
           }}
         >
-          <div className="bg-white border-2 border-gray-400 shadow-lg rounded px-4 py-3 min-w-[180px]">
-            <div className="flex items-center justify-between gap-4 mb-2 pb-2 border-b border-gray-200">
-              <span className="text-sm text-green-700 font-medium cursor-pointer hover:underline">✓ Keep Only</span>
-              <span className="text-sm text-gray-500">⊘ Exclude</span>
-            </div>
-            <div className="space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Month of Date:</span>
-                <span className="font-medium text-black">{tooltip.month}</span>
+          <div className="bg-white border border-gray-300 shadow-xl rounded-lg px-4 py-3 min-w-[200px]">
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Month:</span>
+                <span className="font-semibold text-gray-900">{tooltip.month}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Quarter of Date:</span>
-                <span className="font-medium text-black">{tooltip.quarter}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Quarter:</span>
+                <span className="font-semibold text-gray-900">{tooltip.quarter}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Year of Date:</span>
-                <span className="font-medium text-black">{tooltip.year.toString().slice(-2)}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Year:</span>
+                <span className="font-semibold text-gray-900">{tooltip.year}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">P/E:</span>
-                <span className="font-medium text-black">{tooltip.pe.toFixed(2)}</span>
+              <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                <span className="text-gray-600">P/E Ratio:</span>
+                <span className="font-bold text-blue-600 text-base">{tooltip.pe.toFixed(2)}</span>
               </div>
             </div>
           </div>

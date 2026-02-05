@@ -113,7 +113,7 @@ export default function Navbar() {
         { href: '#', label: 'Futures Support & Resistance' },
       ],
       globalMarkets: [
-        { href: '#', label: 'Global Markets' },
+        { href: '/market-data/global-markets', label: 'Global Markets' },
       ],
       filterings: [
         { href: '#', label: 'Filterings' },
@@ -290,10 +290,10 @@ export default function Navbar() {
                               Total Market
                             </div>
                             <Link
-                              href="#"
+                              href="/market-data/pe#advances-decline"
                               className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
-                              Advances, Decline & Unchange
+                              Advances, Decline & Unchanged
                             </Link>
                             <Link
                               href="/market"
@@ -325,9 +325,12 @@ export default function Navbar() {
 
                           {/* Global Markets */}
                           <div className="border-b border-gray-300">
-                            <div className="px-4 py-1.5 text-sm font-bold text-black">
+                            <Link
+                              href="/market-data/global-markets"
+                              className="block px-4 py-1.5 text-sm font-bold text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300"
+                            >
                               Global Markets
-                            </div>
+                            </Link>
                           </div>
 
                           {/* Filterings */}
