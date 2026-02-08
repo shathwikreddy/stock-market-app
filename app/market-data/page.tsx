@@ -3,27 +3,28 @@
 import Link from 'next/link';
 
 const marketDataRows = [
-    ['Indices', 'Stocks', 'Results Calendar'],
-    ['NSE Indices', 'Sectors', 'FII & DII Activity'],
-    ['BSE Indices', 'Industry', 'Promoters Activity'],
-    ['', "IPO's", 'Mutual Funds Activity'],
-    ['Sectors', 'F&O Stocks', 'Super Investors'],
-    ['NSE Sectors', 'All Statistics', 'Corporate Action'],
-    ['BSE Sectors', 'Top Gainers', 'Deals'],
-    ['', 'Top Losers', 'Bulk Deals'],
-    ['Total Market', 'Only Buyers', 'Block Deals'],
-    ['Advances, Decline & Unchanged', 'Only Sellers', 'Intraday Large Deals'],
-    ['', '52 Week High', 'Monthly'],
-    ['Market Mood', '52 Week Low', 'Nifty'],
-    ['', 'All Time High (ATH)', 'PE'],
-    ['Futures Support & Resistance', 'All Time Low (ATL)', ''],
+    ['Indices', 'Indices in F&O', 'Results Calendar'],
+    ['NSE Indices', 'Broad Market Indices', 'FII & DII Activity'],
+    ['BSE Indices', 'Sectoral Indices', 'Promoters Activity'],
+    ['', 'Stocks', 'Mutual Funds Activity'],
+    ['Sectors', 'Sectors', 'Super Investors'],
+    ['NSE Sectors', 'Industry', 'Corporate Action'],
+    ['BSE Sectors', 'F&O Stocks', 'Deals'],
+    ['', "IPO's", 'Bulk Deals'],
+    ['Total Market', 'All Statistics', 'Block Deals'],
+    ['Advances, Decline & Unchanged', 'Top Gainers', 'Intraday Large Deals'],
+    ['', 'Top Losers', 'Monthly'],
+    ['Market Mood', 'Only Buyers', 'Nifty'],
+    ['', 'Only Sellers', 'PE'],
+    ['Futures Support & Resistance', '52 Week High', ''],
+    ['', '52 Week Low', ''],
+    ['Global Markets', 'All Time High (ATH)', ''],
+    ['', 'All Time Low (ATL)', ''],
     ['', 'Price Shockers', ''],
-    ['Global Markets', 'Volume Shockers', ''],
+    ['', 'Volume Shockers', ''],
     ['', 'Most Active Stocks', ''],
     ['', 'ETFs', ''],
-    ['', '', ''],
     ['', 'Unlisted Shares', ''],
-    ['', '', ''],
     ['Filterings', 'Filterings', 'Filterings'],
 ];
 
@@ -35,8 +36,15 @@ function isBold(text: string): boolean {
     return boldItems.includes(text);
 }
 
+const customHrefs: Record<string, string> = {
+    'Indices in F&O': '/market-data/indices-fno',
+    'Broad Market Indices': '/market-data/broad-market-indices',
+    'Sectoral Indices': '/market-data/sectoral-indices',
+};
+
 function getHref(text: string): string {
     if (!text) return '#';
+    if (customHrefs[text]) return customHrefs[text];
     const slug = text
         .toLowerCase()
         .replace(/[&',()]/g, '')

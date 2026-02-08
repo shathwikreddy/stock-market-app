@@ -5,9 +5,13 @@ import { ChevronDown, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { allStocksNSE, sectorDataNSE, industryDataNSE, fnoStocksNSE, TopGainerLoserStock } from '@/lib/mockData';
+import IndicesDataTable from '@/components/IndicesDataTable';
+import { indicesFnOData, broadMarketData, sectoralIndicesData } from '@/lib/indicesData';
+
+type TabType = 'indicesFno' | 'broadMarket' | 'sectoralIndices' | 'stocks' | 'sectors' | 'industry' | 'fnoStocks';
 
 interface MarketDataTabbedViewProps {
-  initialTab?: 'stocks' | 'sectors' | 'industry' | 'fnoStocks';
+  initialTab?: TabType;
 }
 
 // Sparkline Chart Component (matching TopGainersLosersTable)
@@ -38,7 +42,19 @@ const SparklineChart = ({ data }: { data: number[] }) => {
   );
 };
 
-const categoryInfo = {
+const categoryInfo: Record<TabType, { title: string; description: string }> = {
+  indicesFno: {
+    title: 'INDICES IN F&O',
+    description: 'Indices eligible for Futures and Options trading on NSE. These derivative-eligible indices include benchmark indices like NIFTY 50, NIFTY BANK and other key indices with active derivatives contracts....',
+  },
+  broadMarket: {
+    title: 'BROAD MARKET INDICES',
+    description: 'Broad market indices covering large-cap, mid-cap, small-cap and multi-cap segments. Track overall market breadth and performance across different market capitalization segments....',
+  },
+  sectoralIndices: {
+    title: 'SECTORAL INDICES',
+    description: 'NSE sectoral indices tracking performance of specific sectors like Auto, IT, Pharma, Banking, FMCG, Metal, Realty and more. Identify sector trends and rotation patterns....',
+  },
   stocks: {
     title: 'ALL STOCKS',
     description: 'Comprehensive listing of all stocks trading on NSE/BSE with real-time prices, market capitalization, sector classification, and detailed performance metrics. Filter by exchange, index, and various parameters....',
@@ -68,14 +84,19 @@ const subTabs = [
 
 export default function MarketDataTabbedView({ initialTab = 'stocks' }: MarketDataTabbedViewProps) {
   const router = useRouter();
-  const [activeCategory, setActiveCategory] = useState<'stocks' | 'sectors' | 'industry' | 'fnoStocks'>(initialTab);
+  const [activeCategory, setActiveCategory] = useState<TabType>(initialTab);
   const [activeSubTab, setActiveSubTab] = useState('overview');
   const [selectedExchange, setSelectedExchange] = useState<'NSE' | 'BSE'>('NSE');
   const [selectedIndex, setSelectedIndex] = useState('NIFTY 500');
   const [selectedPeriod, setSelectedPeriod] = useState('1 Day');
 
+  const isIndicesTab = activeCategory === 'indicesFno' || activeCategory === 'broadMarket' || activeCategory === 'sectoralIndices';
+
   // Category tabs matching TopGainersLosersTable style
   const categoryTabs = [
+    { id: 'indicesFno', label: 'Indices in F&O' },
+    { id: 'broadMarket', label: 'Broad Market Indices' },
+    { id: 'sectoralIndices', label: 'Sectoral Indices' },
     { id: 'stocks', label: 'Stocks' },
     { id: 'sectors', label: 'Sectors' },
     { id: 'industry', label: 'Industry' },
@@ -122,7 +143,7 @@ export default function MarketDataTabbedView({ initialTab = 'stocks' }: MarketDa
           {categoryTabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveCategory(tab.id as any)}
+              onClick={() => setActiveCategory(tab.id as TabType)}
               className={`px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                 activeCategory === tab.id
                   ? 'bg-gray-900 text-white'
@@ -143,163 +164,195 @@ export default function MarketDataTabbedView({ initialTab = 'stocks' }: MarketDa
         </p>
       </div>
 
-      {/* Title & Filters Section */}
-      <div className="px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-gray-100">
-        <div className="flex items-center space-x-3">
-          <h1 className="text-xl font-bold text-gray-900">{title} - {selectedExchange}</h1>
-          <span className="text-sm text-gray-900">{dateStr}</span>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          {/* Exchange Toggle */}
-          <div className="flex items-center space-x-3">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="exchange"
-                checked={selectedExchange === 'NSE'}
-                onChange={() => setSelectedExchange('NSE')}
-                className="w-4 h-4 text-gray-900 border-gray-300 focus:ring-gray-900"
-              />
-              <span className="ml-2 text-sm font-medium text-gray-900">NSE</span>
-            </label>
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="exchange"
-                checked={selectedExchange === 'BSE'}
-                onChange={() => setSelectedExchange('BSE')}
-                className="w-4 h-4 text-gray-900 border-gray-300 focus:ring-gray-900"
-              />
-              <span className="ml-2 text-sm font-medium text-gray-900">BSE</span>
-            </label>
+      {isIndicesTab ? (
+        <>
+          {/* Title for indices tabs */}
+          <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100">
+            <div className="flex items-center space-x-3">
+              <h1 className="text-xl font-bold text-gray-900">{title}</h1>
+              <span className="text-sm text-gray-500">{dateStr}</span>
+            </div>
           </div>
 
-          {/* Index Dropdown */}
-          <button className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
-            <span className="text-sm font-medium text-gray-900">{selectedIndex}</span>
-            <ChevronDown className="w-4 h-4 text-gray-900" />
-          </button>
+          {/* Indices Table */}
+          <IndicesDataTable
+            title={
+              activeCategory === 'indicesFno'
+                ? 'Indices Eligible in Derivatives'
+                : activeCategory === 'broadMarket'
+                ? 'Broad Market Indices'
+                : 'Sectoral Indices'
+            }
+            data={
+              activeCategory === 'indicesFno'
+                ? indicesFnOData
+                : activeCategory === 'broadMarket'
+                ? broadMarketData
+                : sectoralIndicesData
+            }
+          />
+        </>
+      ) : (
+        <>
+          {/* Title & Filters Section */}
+          <div className="px-6 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-gray-100">
+            <div className="flex items-center space-x-3">
+              <h1 className="text-xl font-bold text-gray-900">{title} - {selectedExchange}</h1>
+              <span className="text-sm text-gray-900">{dateStr}</span>
+            </div>
 
-          {/* Period Dropdown */}
-          <button className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
-            <span className="text-sm font-medium text-gray-900">{selectedPeriod}</span>
-            <ChevronDown className="w-4 h-4 text-gray-900" />
-          </button>
+            <div className="flex items-center space-x-4">
+              {/* Exchange Toggle */}
+              <div className="flex items-center space-x-3">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="exchange"
+                    checked={selectedExchange === 'NSE'}
+                    onChange={() => setSelectedExchange('NSE')}
+                    className="w-4 h-4 text-gray-900 border-gray-300 focus:ring-gray-900"
+                  />
+                  <span className="ml-2 text-sm font-medium text-gray-900">NSE</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="exchange"
+                    checked={selectedExchange === 'BSE'}
+                    onChange={() => setSelectedExchange('BSE')}
+                    className="w-4 h-4 text-gray-900 border-gray-300 focus:ring-gray-900"
+                  />
+                  <span className="ml-2 text-sm font-medium text-gray-900">BSE</span>
+                </label>
+              </div>
 
-          {/* Settings Icon */}
-          <button className="p-2 hover:bg-gray-100 rounded-md">
-            <Settings className="w-5 h-5 text-gray-900" />
-          </button>
-        </div>
-      </div>
+              {/* Index Dropdown */}
+              <button className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                <span className="text-sm font-medium text-gray-900">{selectedIndex}</span>
+                <ChevronDown className="w-4 h-4 text-gray-900" />
+              </button>
 
-      {/* Sub-tabs */}
-      <div className="px-6 border-b border-gray-200">
-        <div className="flex space-x-1 overflow-x-auto">
-          {subTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
-              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-all border-b-2 ${
-                activeSubTab === tab.id
-                  ? 'border-gray-900 text-gray-900'
-                  : 'border-transparent text-gray-900 hover:text-gray-900'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+              {/* Period Dropdown */}
+              <button className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                <span className="text-sm font-medium text-gray-900">{selectedPeriod}</span>
+                <ChevronDown className="w-4 h-4 text-gray-900" />
+              </button>
 
-      {/* Table - Exact styling from TopGainersLosersTable */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-[13px]">
-          <thead>
-            <tr className="border-b border-gray-300 bg-gray-50">
-              <th className="px-2 py-2 text-left font-semibold text-gray-900 uppercase tracking-wide">
-                #
-              </th>
-              <th className="px-2 py-2 text-left font-semibold text-gray-900 uppercase tracking-wide">
-                Company
-              </th>
-              <th className="px-2 py-2 text-left font-semibold text-gray-900 uppercase tracking-wide">
-                Sector
-              </th>
-              <th className="px-2 py-2 text-left font-semibold text-gray-900 uppercase tracking-wide">
-                Industry
-              </th>
-              <th className="px-2 py-2 text-center font-semibold text-gray-900 uppercase tracking-wide">
-                Group
-              </th>
-              <th className="px-2 py-2 text-center font-semibold text-gray-900 uppercase tracking-wide">
-                Face Value
-              </th>
-              <th className="px-2 py-2 text-center font-semibold text-gray-900 uppercase tracking-wide">
-                Price Band
-              </th>
-              <th className="px-2 py-2 text-right font-semibold text-gray-900 uppercase tracking-wide">
-                Mkt Cap
-              </th>
-              <th className="px-2 py-2 text-right font-semibold text-gray-900 uppercase tracking-wide">
-                Pre Close
-              </th>
-              <th className="px-2 py-2 text-right font-semibold text-gray-900 uppercase tracking-wide">
-                LTP
-              </th>
-              <th className="px-2 py-2 text-right font-semibold text-gray-900 uppercase tracking-wide">
-                Net Change
-              </th>
-              <th className="px-2 py-2 text-right font-semibold text-gray-900 uppercase tracking-wide">
-                % Change
-              </th>
-              <th className="px-2 py-2 text-center font-semibold text-gray-900 uppercase tracking-wide">
-                Trend
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white">
-            {data.map((stock, index) => (
-              <tr
-                key={stock.id}
-                className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-              >
-                <td className="px-2 py-3 text-gray-900">{index + 1}</td>
-                <td className="px-2 py-3">
-                  <Link
-                    href="#"
-                    className="text-blue-600 hover:text-blue-700 font-medium"
+              {/* Settings Icon */}
+              <button className="p-2 hover:bg-gray-100 rounded-md">
+                <Settings className="w-5 h-5 text-gray-900" />
+              </button>
+            </div>
+          </div>
+
+          {/* Sub-tabs */}
+          <div className="px-6 border-b border-gray-200">
+            <div className="flex space-x-1 overflow-x-auto">
+              {subTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveSubTab(tab.id)}
+                  className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-all border-b-2 ${
+                    activeSubTab === tab.id
+                      ? 'border-gray-900 text-gray-900'
+                      : 'border-transparent text-gray-900 hover:text-gray-900'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Stock Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px]">
+              <thead>
+                <tr className="border-b border-gray-300 bg-gray-50">
+                  <th className="px-2 py-2 text-left font-semibold text-gray-900 uppercase tracking-wide">
+                    #
+                  </th>
+                  <th className="px-2 py-2 text-left font-semibold text-gray-900 uppercase tracking-wide">
+                    Company
+                  </th>
+                  <th className="px-2 py-2 text-left font-semibold text-gray-900 uppercase tracking-wide">
+                    Sector
+                  </th>
+                  <th className="px-2 py-2 text-left font-semibold text-gray-900 uppercase tracking-wide">
+                    Industry
+                  </th>
+                  <th className="px-2 py-2 text-center font-semibold text-gray-900 uppercase tracking-wide">
+                    Group
+                  </th>
+                  <th className="px-2 py-2 text-center font-semibold text-gray-900 uppercase tracking-wide">
+                    Face Value
+                  </th>
+                  <th className="px-2 py-2 text-center font-semibold text-gray-900 uppercase tracking-wide">
+                    Price Band
+                  </th>
+                  <th className="px-2 py-2 text-right font-semibold text-gray-900 uppercase tracking-wide">
+                    Mkt Cap
+                  </th>
+                  <th className="px-2 py-2 text-right font-semibold text-gray-900 uppercase tracking-wide">
+                    Pre Close
+                  </th>
+                  <th className="px-2 py-2 text-right font-semibold text-gray-900 uppercase tracking-wide">
+                    LTP
+                  </th>
+                  <th className="px-2 py-2 text-right font-semibold text-gray-900 uppercase tracking-wide">
+                    Net Change
+                  </th>
+                  <th className="px-2 py-2 text-right font-semibold text-gray-900 uppercase tracking-wide">
+                    % Change
+                  </th>
+                  <th className="px-2 py-2 text-center font-semibold text-gray-900 uppercase tracking-wide">
+                    Trend
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                {data.map((stock, index) => (
+                  <tr
+                    key={stock.id}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
                   >
-                    {stock.stockName}
-                  </Link>
-                </td>
-                <td className="px-2 py-3 text-gray-900">{stock.sector || 'IT Services'}</td>
-                <td className="px-2 py-3 text-gray-900">{stock.industry || 'Software Services'}</td>
-                <td className="px-2 py-3 text-center text-gray-900">{stock.group || 'A'}</td>
-                <td className="px-2 py-3 text-center text-gray-900">₹{stock.faceValue || 1}</td>
-                <td className="px-2 py-3 text-center text-gray-900">{stock.priceBand || 5}</td>
-                <td className="px-2 py-3 text-right text-gray-900">{stock.mktCap || '₹1,20,000 Cr'}</td>
-                <td className="px-2 py-3 text-right text-gray-900">₹{stock.preClose?.toFixed(2) || stock.price.toFixed(2)}</td>
-                <td className="px-2 py-3 text-right font-bold text-gray-900">₹{stock.price.toFixed(2)}</td>
-                <td className={`px-2 py-3 text-right font-semibold ${
-                  stock.change >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {stock.change >= 0 ? '+' : ''}₹{stock.change.toFixed(2)}
-                </td>
-                <td className={`px-2 py-3 text-right font-semibold ${
-                  stock.changePercent >= 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
-                </td>
-                <td className="px-2 py-3 text-center">
-                  <SparklineChart data={stock.sparklineData} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    <td className="px-2 py-3 text-gray-900">{index + 1}</td>
+                    <td className="px-2 py-3">
+                      <Link
+                        href="#"
+                        className="text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        {stock.stockName}
+                      </Link>
+                    </td>
+                    <td className="px-2 py-3 text-gray-900">{stock.sector || 'IT Services'}</td>
+                    <td className="px-2 py-3 text-gray-900">{stock.industry || 'Software Services'}</td>
+                    <td className="px-2 py-3 text-center text-gray-900">{stock.group || 'A'}</td>
+                    <td className="px-2 py-3 text-center text-gray-900">₹{stock.faceValue || 1}</td>
+                    <td className="px-2 py-3 text-center text-gray-900">{stock.priceBand || 5}</td>
+                    <td className="px-2 py-3 text-right text-gray-900">{stock.mktCap || '₹1,20,000 Cr'}</td>
+                    <td className="px-2 py-3 text-right text-gray-900">₹{stock.preClose?.toFixed(2) || stock.price.toFixed(2)}</td>
+                    <td className="px-2 py-3 text-right font-bold text-gray-900">₹{stock.price.toFixed(2)}</td>
+                    <td className={`px-2 py-3 text-right font-semibold ${
+                      stock.change >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {stock.change >= 0 ? '+' : ''}₹{stock.change.toFixed(2)}
+                    </td>
+                    <td className={`px-2 py-3 text-right font-semibold ${
+                      stock.changePercent >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                    </td>
+                    <td className="px-2 py-3 text-center">
+                      <SparklineChart data={stock.sparklineData} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   );
 }

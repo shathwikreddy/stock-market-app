@@ -120,6 +120,9 @@ export default function Navbar() {
       ],
     },
     equity: [
+      { href: '/market-data/indices-fno', label: 'Indices in F&O' },
+      { href: '/market-data/broad-market-indices', label: 'Broad Market Indices' },
+      { href: '/market-data/sectoral-indices', label: 'Sectoral Indices' },
       { href: '/market-data/stocks', label: 'Stocks' },
       { href: '/market-data/sectors-data', label: 'Sectors' },
       { href: '/market-data/industry', label: 'Industry' },
@@ -290,7 +293,7 @@ export default function Navbar() {
                               Total Market
                             </div>
                             <Link
-                              href="/market-data/pe#advances-decline"
+                              href="/market-data/advances-decline-unchanged"
                               className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               Advances, Decline & Unchanged

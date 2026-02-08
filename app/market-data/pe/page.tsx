@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import AdvancesDeclineTable from '@/components/AdvancesDeclineTable';
 
 // Seeded random number generator for consistent values
 const seededRandom = (seed: number): number => {
@@ -218,15 +217,6 @@ export default function PEPage() {
           </div>
         </div>
 
-        {/* Advances, Declines & Unchanged Section */}
-        <div id="advances-decline" className="mt-10 scroll-mt-20">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 border-b-2 border-gray-300 pb-3">
-              Advances, Declines & Unchanged
-            </h2>
-          </div>
-          <AdvancesDeclineTable />
-        </div>
       </div>
 
       {/* Tooltip */}
