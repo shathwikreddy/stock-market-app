@@ -197,7 +197,7 @@ function TopGainersLosersContent() {
   
   // Get view from query params (gainers, losers, or all)
   const viewParam = searchParams.get('view') as ViewType | null;
-  const currentView: ViewType = viewParam === 'gainers' || viewParam === 'losers' ? viewParam : 'gainers';
+  const currentView: ViewType = viewParam === 'gainers' || viewParam === 'losers' ? viewParam : 'all';
   
   const [selectedExchange, setSelectedExchange] = useState<Exchange>('Both');
 
