@@ -6,16 +6,17 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { Download, Calendar } from 'lucide-react';
 
 // Time period tabs
-type TimePeriod = 'days' | 'weeks' | 'months' | 'years' | 'customize';
+type TimePeriod = 'intraday' | 'days' | 'weeks' | 'months' | 'years' | 'customize';
 type SubTab = 'custom' | 'seasonality' | 'ytd' | '52weeks' | 'all_time';
 type Exchange = 'NSE' | 'BSE' | 'Both';
 type ViewType = 'all' | 'gainers' | 'losers';
 
 // Column definitions for each type
 const columnsByPeriod: Record<TimePeriod | SubTab, string[]> = {
+  intraday: ['% 5Min Chag', '% 15Min Chag', '% 30Min Chag', '% 1Hour Chag', '% 2Hours Chag', '% Cust Date Chag'],
   days: ['% Chag', '% 2D Chag', '% 3D Chag', '% 4D Chag', '% 5D Chag', '% 1W Chag', '% Cust Date Chag'],
   weeks: ['% 1W Chag', '% 2W Chag', '% 3W Chag', '% 4W Chag', '% 5W Chag', '% 1M Chag', '% Cust Date Chag'],
-  months: ['% 1M Chag', '% 2M Chag', '% 3M Chag', '% 4M Chag', '% 5M Chag', '% 6M Chag', '% 1Y Chag'],
+  months: ['% 1M Chag', '% 2M Chag', '% 3M Chag', '% 4M Chag', '% 5M Chag', '% 6M Chag', '% 7M Chag', '% 8M Chag', '% 9M Chag', '% 10M Chag', '% 11M Chag', '% 1Y Chag'],
   years: ['% 1Y Chag', '% 2Y Chag', '% 3Y Chag', '% 4Y Chag', '% 5Y Chag', '% 10Y Chag', '% Max Chag'],
   customize: [], // Handled by sub-tabs
   custom: ['% Chag', '% Cust Date Chag'],
@@ -67,6 +68,13 @@ const generateMockData = (count: number, isGainer: boolean): StockData[] => {
       cmp: Math.round(basePrice * 100) / 100,
       netChange: Math.round((basePrice - preClose) * 100) / 100,
       percentChanges: {
+        // Intraday changes
+        '% 5Min Chag': Math.round((changePercent * 0.05 + (Math.random() - 0.5) * 0.5) * 100) / 100,
+        '% 15Min Chag': Math.round((changePercent * 0.15 + (Math.random() - 0.5) * 1) * 100) / 100,
+        '% 30Min Chag': Math.round((changePercent * 0.3 + (Math.random() - 0.5) * 2) * 100) / 100,
+        '% 1Hour Chag': Math.round((changePercent * 0.5 + (Math.random() - 0.5) * 3) * 100) / 100,
+        '% 2Hours Chag': Math.round((changePercent * 0.8 + (Math.random() - 0.5) * 4) * 100) / 100,
+        // Daily changes
         '% Chag': Math.round(changePercent * 100) / 100,
         '% 2D Chag': Math.round((changePercent + (Math.random() - 0.5) * 5) * 100) / 100,
         '% 3D Chag': Math.round((changePercent + (Math.random() - 0.5) * 8) * 100) / 100,
@@ -83,6 +91,11 @@ const generateMockData = (count: number, isGainer: boolean): StockData[] => {
         '% 4M Chag': Math.round((changePercent + (Math.random() - 0.5) * 40) * 100) / 100,
         '% 5M Chag': Math.round((changePercent + (Math.random() - 0.5) * 45) * 100) / 100,
         '% 6M Chag': Math.round((changePercent + (Math.random() - 0.5) * 50) * 100) / 100,
+        '% 7M Chag': Math.round((changePercent + (Math.random() - 0.5) * 55) * 100) / 100,
+        '% 8M Chag': Math.round((changePercent + (Math.random() - 0.5) * 60) * 100) / 100,
+        '% 9M Chag': Math.round((changePercent + (Math.random() - 0.5) * 65) * 100) / 100,
+        '% 10M Chag': Math.round((changePercent + (Math.random() - 0.5) * 70) * 100) / 100,
+        '% 11M Chag': Math.round((changePercent + (Math.random() - 0.5) * 75) * 100) / 100,
         '% 1Y Chag': Math.round((changePercent + (Math.random() - 0.5) * 80) * 100) / 100,
         '% 2Y Chag': Math.round((changePercent + (Math.random() - 0.5) * 100) * 100) / 100,
         '% 3Y Chag': Math.round((changePercent + (Math.random() - 0.5) * 120) * 100) / 100,
@@ -91,7 +104,7 @@ const generateMockData = (count: number, isGainer: boolean): StockData[] => {
         '% 10Y Chag': Math.round((changePercent + (Math.random() - 0.5) * 300) * 100) / 100,
         '% Max Chag': Math.round((changePercent + (Math.random() - 0.5) * 500) * 100) / 100,
         '% Cust Date Chag': Math.round((changePercent + (Math.random() - 0.5) * 10) * 100) / 100,
-        // New fields
+        // Year to date fields
         '% YTD Chag': Math.round((changePercent + (Math.random() - 0.5) * 20) * 100) / 100,
         '% 2YTD Chag': Math.round((changePercent + (Math.random() - 0.5) * 35) * 100) / 100,
         '% 3YTD Chag': Math.round((changePercent + (Math.random() - 0.5) * 50) * 100) / 100,
@@ -184,7 +197,7 @@ function TopGainersLosersContent() {
   
   // Get view from query params (gainers, losers, or all)
   const viewParam = searchParams.get('view') as ViewType | null;
-  const currentView: ViewType = viewParam === 'gainers' || viewParam === 'losers' ? viewParam : 'all';
+  const currentView: ViewType = viewParam === 'gainers' || viewParam === 'losers' ? viewParam : 'gainers';
   
   const [selectedExchange, setSelectedExchange] = useState<Exchange>('Both');
 
@@ -196,6 +209,7 @@ function TopGainersLosersContent() {
 
   // Combined tabs list
   const allTabs: { id: string; label: string }[] = [
+    { id: 'intraday', label: 'Intraday Wise' },
     { id: 'days', label: 'Days Wise' },
     { id: 'weeks', label: 'Weeks Wise' },
     { id: 'months', label: 'Months Wise' },
@@ -207,7 +221,7 @@ function TopGainersLosersContent() {
     { id: 'all_time', label: 'All Time Gainers & Losers' },
   ];
 
-  const [activeTab, setActiveTab] = useState<string>('days');
+  const [activeTab, setActiveTab] = useState<string>('intraday');
 
   const currentColumns = columnsByPeriod[activeTab as TimePeriod | SubTab] || [];
     
