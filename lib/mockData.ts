@@ -2273,3 +2273,151 @@ export const fnoStocksNSE: TopGainerLoserStock[] = [
     sparklineData: [12326, 12360, 12395, 12425, 12460, 12450, 12478, 12483, 12485.2],
   },
 ];
+
+// Price Band Hitters data interface
+export interface PriceBandHitterStock {
+  symbol: string;
+  series: string;
+  ltp: number;
+  percentChange: number;
+  priceBandPercent: number;
+  volumeLakhs: number;
+  valueCrores: number;
+}
+
+// Upper Band Hitters
+export const upperBandHitters: PriceBandHitterStock[] = [
+  { symbol: "AVANTIFEED", series: "EQ", ltp: 1432.20, percentChange: 20.00, priceBandPercent: 20, volumeLakhs: 125.70, valueCrores: 1703.07 },
+  { symbol: "APEX", series: "EQ", ltp: 447.60, percentChange: 20.00, priceBandPercent: 20, volumeLakhs: 128.25, valueCrores: 548.64 },
+  { symbol: "RATNAMANI", series: "EQ", ltp: 2314.90, percentChange: 18.93, priceBandPercent: 20, volumeLakhs: 10.37, valueCrores: 232.63 },
+  { symbol: "SMLMAH", series: "EQ", ltp: 4862.80, percentChange: 10.00, priceBandPercent: 10, volumeLakhs: 3.41, valueCrores: 160.36 },
+  { symbol: "LINCOLN", series: "EQ", ltp: 604.00, percentChange: 14.21, priceBandPercent: 20, volumeLakhs: 15.24, valueCrores: 92.87 },
+  { symbol: "GVPIL", series: "EQ", ltp: 399.75, percentChange: 19.99, priceBandPercent: 20, volumeLakhs: 22.17, valueCrores: 87.50 },
+  { symbol: "AXISCADES", series: "EQ", ltp: 1365.40, percentChange: 5.00, priceBandPercent: 5, volumeLakhs: 3.96, valueCrores: 54.10 },
+  { symbol: "HAPPYFORGE", series: "EQ", ltp: 1286.60, percentChange: 9.99, priceBandPercent: 10, volumeLakhs: 3.67, valueCrores: 45.90 },
+  { symbol: "BOROSCI", series: "EQ", ltp: 116.50, percentChange: 10.43, priceBandPercent: 20, volumeLakhs: 17.88, valueCrores: 22.23 },
+  { symbol: "BRANDMAN", series: "ST", ltp: 201.75, percentChange: 5.00, priceBandPercent: 5, volumeLakhs: 6.86, valueCrores: 13.76 },
+  { symbol: "GKENERGY", series: "EQ", ltp: 116.68, percentChange: 2.34, priceBandPercent: 5, volumeLakhs: 9.28, valueCrores: 10.91 },
+  { symbol: "MAZDA", series: "EQ", ltp: 223.50, percentChange: 5.12, priceBandPercent: 20, volumeLakhs: 3.49, valueCrores: 8.40 },
+  { symbol: "CKKRETAIL", series: "ST", ltp: 207.95, percentChange: 5.00, priceBandPercent: 5, volumeLakhs: 3.44, valueCrores: 7.15 },
+  { symbol: "FLYSBS", series: "SM", ltp: 541.80, percentChange: 4.84, priceBandPercent: 5, volumeLakhs: 1.28, valueCrores: 6.93 },
+  { symbol: "HINGSNGBEES", series: "EQ", ltp: 551.22, percentChange: 0.21, priceBandPercent: 20, volumeLakhs: 1.04, valueCrores: 5.74 },
+  { symbol: "MAFANG", series: "EQ", ltp: 157.75, percentChange: -0.44, priceBandPercent: 20, volumeLakhs: 2.78, valueCrores: 4.38 },
+  { symbol: "SIKKO", series: "EQ", ltp: 5.38, percentChange: 6.11, priceBandPercent: 10, volumeLakhs: 72.06, valueCrores: 3.83 },
+  { symbol: "CROWN", series: "EQ", ltp: 155.47, percentChange: 20.00, priceBandPercent: 20, volumeLakhs: 2.47, valueCrores: 3.70 },
+  { symbol: "JITFINFRA", series: "EQ", ltp: 356.45, percentChange: 4.99, priceBandPercent: 5, volumeLakhs: 0.97, valueCrores: 3.46 },
+  { symbol: "MAXVOLT", series: "ST", ltp: 293.25, percentChange: 4.99, priceBandPercent: 5, volumeLakhs: 1.01, valueCrores: 2.91 },
+  { symbol: "KESORAMIND", series: "BE", ltp: 10.27, percentChange: 4.90, priceBandPercent: 5, volumeLakhs: 25.32, valueCrores: 2.58 },
+  { symbol: "JPASSOCIAT", series: "BE", ltp: 3.52, percentChange: 4.76, priceBandPercent: 5, volumeLakhs: 62.32, valueCrores: 2.18 },
+  { symbol: "MAHKTECH", series: "EQ", ltp: 25.35, percentChange: 0.36, priceBandPercent: 20, volumeLakhs: 8.36, valueCrores: 2.12 },
+  { symbol: "LAXMICOT", series: "EQ", ltp: 22.22, percentChange: 10.00, priceBandPercent: 10, volumeLakhs: 8.25, valueCrores: 1.81 },
+  { symbol: "PRAXIS", series: "EQ", ltp: 8.99, percentChange: 4.90, priceBandPercent: 5, volumeLakhs: 11.86, valueCrores: 1.02 },
+  { symbol: "TECHERA", series: "SM", ltp: 224.05, percentChange: 4.99, priceBandPercent: 5, volumeLakhs: 0.34, valueCrores: 0.76 },
+  { symbol: "MASPTOP50", series: "EQ", ltp: 71.20, percentChange: -0.29, priceBandPercent: 20, volumeLakhs: 0.65, valueCrores: 0.46 },
+];
+
+// Lower Band Hitters
+export const lowerBandHitters: PriceBandHitterStock[] = [
+  { symbol: "LEXUS", series: "EQ", ltp: 33.90, percentChange: -3.47, priceBandPercent: 10, volumeLakhs: 6.61, valueCrores: 2.32 },
+  { symbol: "GANESHIN", series: "SM", ltp: 103.75, percentChange: -4.99, priceBandPercent: 5, volumeLakhs: 1.82, valueCrores: 1.89 },
+  { symbol: "PURPLEUTED", series: "SM", ltp: 336.00, percentChange: -4.29, priceBandPercent: 5, volumeLakhs: 0.56, valueCrores: 1.88 },
+  { symbol: "UEL", series: "EQ", ltp: 199.36, percentChange: -5.00, priceBandPercent: 5, volumeLakhs: 0.68, valueCrores: 1.44 },
+  { symbol: "TERASOFT", series: "EQ", ltp: 400.40, percentChange: -4.50, priceBandPercent: 5, volumeLakhs: 0.29, valueCrores: 1.17 },
+  { symbol: "MANAKALUCO", series: "BE", ltp: 31.64, percentChange: -4.98, priceBandPercent: 5, volumeLakhs: 3.57, valueCrores: 1.14 },
+  { symbol: "PANACHE", series: "EQ", ltp: 338.40, percentChange: -5.00, priceBandPercent: 5, volumeLakhs: 0.23, valueCrores: 0.80 },
+  { symbol: "GRAPHISAD", series: "SM", ltp: 49.55, percentChange: -4.99, priceBandPercent: 5, volumeLakhs: 1.42, valueCrores: 0.71 },
+  { symbol: "AKIKO", series: "ST", ltp: 223.00, percentChange: -4.58, priceBandPercent: 5, volumeLakhs: 0.28, valueCrores: 0.63 },
+  { symbol: "KDL", series: "ST", ltp: 144.25, percentChange: -4.97, priceBandPercent: 5, volumeLakhs: 0.37, valueCrores: 0.54 },
+  { symbol: "TECHLABS", series: "SM", ltp: 188.50, percentChange: -4.99, priceBandPercent: 5, volumeLakhs: 0.25, valueCrores: 0.47 },
+  { symbol: "RHFL", series: "BZ", ltp: 2.64, percentChange: -4.69, priceBandPercent: 5, volumeLakhs: 14.45, valueCrores: 0.39 },
+  { symbol: "AURIGROW", series: "BE", ltp: 0.35, percentChange: -2.78, priceBandPercent: 5, volumeLakhs: 85.37, valueCrores: 0.30 },
+  { symbol: "MCON", series: "ST", ltp: 46.55, percentChange: -5.00, priceBandPercent: 5, volumeLakhs: 0.58, valueCrores: 0.27 },
+  { symbol: "NEWJAISA", series: "SM", ltp: 19.75, percentChange: -4.82, priceBandPercent: 5, volumeLakhs: 1.11, valueCrores: 0.23 },
+  { symbol: "ARVINDPORT", series: "SM", ltp: 31.30, percentChange: -3.84, priceBandPercent: 5, volumeLakhs: 0.53, valueCrores: 0.17 },
+  { symbol: "PARASPETRO", series: "BE", ltp: 2.50, percentChange: -3.47, priceBandPercent: 5, volumeLakhs: 5.75, valueCrores: 0.15 },
+  { symbol: "TGL", series: "ST", ltp: 48.00, percentChange: 0.00, priceBandPercent: 5, volumeLakhs: 0.28, valueCrores: 0.13 },
+  { symbol: "GVKPIL", series: "BE", ltp: 3.04, percentChange: -1.94, priceBandPercent: 2, volumeLakhs: 3.34, valueCrores: 0.10 },
+  { symbol: "MHHL", series: "SM", ltp: 41.50, percentChange: 0.00, priceBandPercent: 5, volumeLakhs: 0.24, valueCrores: 0.10 },
+];
+
+// Both Band Hitters
+export const bothBandHitters: PriceBandHitterStock[] = [
+  { symbol: "COOLCAPS", series: "SM", ltp: 27.15, percentChange: 4.83, priceBandPercent: 5, volumeLakhs: 7.53, valueCrores: 1.91 },
+  { symbol: "DHARAN", series: "BZ", ltp: 0.19, percentChange: 5.56, priceBandPercent: 5, volumeLakhs: 640.06, valueCrores: 1.15 },
+  { symbol: "VILINBIO", series: "ST", ltp: 32.35, percentChange: 4.69, priceBandPercent: 5, volumeLakhs: 0.72, valueCrores: 0.22 },
+  { symbol: "PRECISION", series: "SM", ltp: 11.15, percentChange: 4.69, priceBandPercent: 5, volumeLakhs: 1.44, valueCrores: 0.15 },
+  { symbol: "MEDIORG", series: "SM", ltp: 27.45, percentChange: -4.85, priceBandPercent: 5, volumeLakhs: 0.42, valueCrores: 0.12 },
+  { symbol: "ARSHIYA", series: "BZ", ltp: 1.36, percentChange: 3.03, priceBandPercent: 5, volumeLakhs: 2.16, valueCrores: 0.03 },
+  { symbol: "FEL", series: "BZ", ltp: 0.44, percentChange: -2.22, priceBandPercent: 2, volumeLakhs: 1.37, valueCrores: 0.01 },
+  { symbol: "SETUINFRA", series: "BZ", ltp: 0.47, percentChange: 2.17, priceBandPercent: 5, volumeLakhs: 0.19, valueCrores: 0.00 },
+];
+
+// Circuit Changes (NSE - Historical Surveillance Actions)
+export interface CircuitChangeNSE {
+  srNo: number;
+  effectiveDate: string;
+  symbol: string;
+  securityName: string;
+  from: number;
+  to: number;
+}
+
+export const circuitChangesNSE: CircuitChangeNSE[] = [
+  { srNo: 1, effectiveDate: "12-FEB-2026", symbol: "LOYALTEX", securityName: "LOYAL TEXTILE MILLS LIMITED", from: 10, to: 5 },
+  { srNo: 2, effectiveDate: "12-FEB-2026", symbol: "LEXUS", securityName: "LEXUS GRANITO (INDIA) LIMITED", from: 20, to: 10 },
+  { srNo: 3, effectiveDate: "12-FEB-2026", symbol: "LAXMICOT", securityName: "LAXMI COTSPIN LIMITED", from: 20, to: 10 },
+  { srNo: 4, effectiveDate: "12-FEB-2026", symbol: "KSHITIJPOL", securityName: "KSHITIJ POLYLINE LIMITED", from: 20, to: 10 },
+  { srNo: 5, effectiveDate: "12-FEB-2026", symbol: "JITFINFRA", securityName: "JITF INFRALOGISTICS LIMITED", from: 10, to: 5 },
+  { srNo: 6, effectiveDate: "12-FEB-2026", symbol: "GRAPHISAD", securityName: "GRAPHISADS LIMITED", from: 10, to: 5 },
+  { srNo: 7, effectiveDate: "12-FEB-2026", symbol: "CLEDUCATE", securityName: "CL EDUCATE LIMITED", from: 20, to: 10 },
+  { srNo: 8, effectiveDate: "12-FEB-2026", symbol: "CBAZAAR", securityName: "NET AVENUE TECHNOLOGIES LIMITED", from: 5, to: 2 },
+  { srNo: 9, effectiveDate: "12-FEB-2026", symbol: "ABMINTLLTD", securityName: "ABM INTERNATIONAL LIMITED", from: 20, to: 10 },
+  { srNo: 10, effectiveDate: "11-FEB-2026", symbol: "VIJAYPD", securityName: "VIJAYPD CEUTICAL LIMITED", from: 20, to: 5 },
+  { srNo: 11, effectiveDate: "11-FEB-2026", symbol: "STLTECH", securityName: "STERLITE TECHNOLOGIES LIMITED", from: 20, to: 10 },
+  { srNo: 12, effectiveDate: "11-FEB-2026", symbol: "REXPRO", securityName: "REXPRO ENTERPRISES LIMITED", from: 10, to: 5 },
+  { srNo: 13, effectiveDate: "11-FEB-2026", symbol: "NIRAJISPAT", securityName: "NIRAJ ISPAT INDUSTRIES LIMITED", from: 10, to: 5 },
+  { srNo: 14, effectiveDate: "11-FEB-2026", symbol: "MEDISTEP", securityName: "MEDISTEP HEALTHCARE LIMITED", from: 20, to: 5 },
+  { srNo: 15, effectiveDate: "11-FEB-2026", symbol: "KRMAYURVED", securityName: "KRM AYURVEDA LIMITED", from: 5, to: 20 },
+  { srNo: 16, effectiveDate: "10-FEB-2026", symbol: "WOMANCART", securityName: "WOMANCART LIMITED", from: 20, to: 10 },
+  { srNo: 17, effectiveDate: "10-FEB-2026", symbol: "TATAMOTORS", securityName: "TATA MOTORS LIMITED", from: 20, to: 10 },
+  { srNo: 18, effectiveDate: "10-FEB-2026", symbol: "SURYODAY", securityName: "SURYODAY SMALL FINANCE BANK LIMITED", from: 10, to: 5 },
+  { srNo: 19, effectiveDate: "10-FEB-2026", symbol: "RAJESHEXPO", securityName: "RAJESH EXPORTS LIMITED", from: 20, to: 10 },
+  { srNo: 20, effectiveDate: "07-FEB-2026", symbol: "PLASTENE", securityName: "PLASTENE INDIA LIMITED", from: 5, to: 2 },
+  { srNo: 21, effectiveDate: "07-FEB-2026", symbol: "ORIENTPPR", securityName: "ORIENT PAPER & INDUSTRIES LIMITED", from: 10, to: 5 },
+  { srNo: 22, effectiveDate: "07-FEB-2026", symbol: "NDTV", securityName: "NEW DELHI TELEVISION LIMITED", from: 20, to: 10 },
+  { srNo: 23, effectiveDate: "06-FEB-2026", symbol: "MUKANDLTD", securityName: "MUKAND LIMITED", from: 5, to: 10 },
+  { srNo: 24, effectiveDate: "06-FEB-2026", symbol: "MAHLIFE", securityName: "MAHINDRA LIFESPACE DEVELOPERS LIMITED", from: 20, to: 10 },
+  { srNo: 25, effectiveDate: "05-FEB-2026", symbol: "INVENTURE", securityName: "INVENTURE GROWTH & SECURITIES LIMITED", from: 10, to: 5 },
+  { srNo: 26, effectiveDate: "05-FEB-2026", symbol: "HINDPETRO", securityName: "HINDUSTAN PETROLEUM CORPORATION LIMITED", from: 20, to: 10 },
+  { srNo: 27, effectiveDate: "04-FEB-2026", symbol: "GREAVESCOT", securityName: "GREAVES COTTON LIMITED", from: 10, to: 5 },
+  { srNo: 28, effectiveDate: "04-FEB-2026", symbol: "GATEWAY", securityName: "GATEWAY DISTRIPARKS LIMITED", from: 20, to: 10 },
+  { srNo: 29, effectiveDate: "03-FEB-2026", symbol: "FIEMIND", securityName: "FIEM INDUSTRIES LIMITED", from: 10, to: 5 },
+  { srNo: 30, effectiveDate: "03-FEB-2026", symbol: "ELGIEQUIP", securityName: "ELGI EQUIPMENTS LIMITED", from: 20, to: 10 },
+];
+
+// Circuit Changes (BSE - Notices & Circulars)
+export interface CircuitChangeBSE {
+  noticeNo: string;
+  subject: string;
+  segmentName: string;
+  categoryName: string;
+  department: string;
+}
+
+export const circuitChangesBSE: CircuitChangeBSE[] = [
+  { noticeNo: "20260212-46", subject: "Clarifications received from the companies", segmentName: "Equity", categoryName: "Company related", department: "DOSS" },
+  { noticeNo: "20260212-45", subject: "CHANGES IN PRICE BAND", segmentName: "Equity", categoryName: "Trading", department: "DOSS" },
+  { noticeNo: "20260212-44", subject: "Applicability of Short Term Additional Surveillance Measure (ST-ASM)", segmentName: "Equity", categoryName: "Trading", department: "DOSS" },
+  { noticeNo: "20260212-43", subject: "Discontinuation of RTRMS Direct Link and Mandatory Access via MemberSSO Portal", segmentName: "General", categoryName: "Trading", department: "Trading Operations" },
+  { noticeNo: "20260212-42", subject: "Graded Surveillance Measure (GSM) - List of securities moving into their respective GSM Stages", segmentName: "Equity", categoryName: "Trading", department: "DOSS" },
+  { noticeNo: "20260212-41", subject: "Applicability of Long Term Additional Surveillance Measure (LT-ASM)", segmentName: "Equity", categoryName: "Trading", department: "DOSS" },
+  { noticeNo: "20260212-40", subject: "Enhanced Surveillance Measure (ESM)", segmentName: "Equity", categoryName: "Trading", department: "DOSS" },
+  { noticeNo: "20260212-39", subject: "Change in Minimum Sip Amount of AXIS SILVER FUND OF FUND on BSE StAR MF platform", segmentName: "Mutual Fund", categoryName: "Trading", department: "Trading Operations" },
+  { noticeNo: "20260212-38", subject: "Launch of NFO with SIP facility of ITI Mutual Fund on BSE StAR MF Platform", segmentName: "Mutual Fund", categoryName: "Trading", department: "Trading Operations" },
+  { noticeNo: "20260212-37", subject: "Availability of SAMCO MID CAP FUND for ongoing transactions on BSE StAR MF Platform", segmentName: "Mutual Fund", categoryName: "Trading", department: "Trading Operations" },
+  { noticeNo: "20260212-36", subject: "Launch of NFO with SIP facility of OLD BRIDGE Mutual Fund on BSE StAR MF Platform", segmentName: "Mutual Fund", categoryName: "Trading", department: "Trading Operations" },
+  { noticeNo: "20260212-35", subject: "Listing of privately placed securities on the debt market segment of the Exchange", segmentName: "Debt", categoryName: "Company related", department: "Listing Operations" },
+  { noticeNo: "20260211-28", subject: "Revision in Market Lot of Securities", segmentName: "Equity", categoryName: "Trading", department: "DOSS" },
+  { noticeNo: "20260211-27", subject: "Trading Members granted / surrendered membership", segmentName: "General", categoryName: "Membership", department: "Membership" },
+  { noticeNo: "20260211-26", subject: "Suspension of Trading - Non compliance of Listing Regulations", segmentName: "Equity", categoryName: "Company related", department: "Listing Operations" },
+];

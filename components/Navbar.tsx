@@ -127,6 +127,7 @@ export default function Navbar() {
       { href: '/market-data/sectors-data', label: 'Sectors' },
       { href: '/market-data/industry', label: 'Industry' },
       { href: '/market-data/fno-stocks', label: 'F&O Stocks' },
+      { href: '/market-data/price-band-hitters', label: 'Price Band Hitters' },
       { href: '/market-data/fno', label: 'F&O Data' },
       { href: '/market-data/ipo', label: "IPO's" },
       { href: '#', label: 'All Statistics' },
@@ -158,6 +159,7 @@ export default function Navbar() {
         { href: '#', label: 'Bulk Deals' },
         { href: '#', label: 'Block Deals' },
         { href: '#', label: 'Intraday Large Deals' },
+        { href: '/market-data/circuit-changes', label: 'Circuit Changes' },
         { href: '#', label: 'Monthly' },
       ],
       nifty: [
@@ -441,6 +443,12 @@ export default function Navbar() {
                               className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
                             >
                               Intraday Large Deals
+                            </Link>
+                            <Link
+                              href="/market-data/circuit-changes"
+                              className="block px-4 py-1 text-sm text-black hover:bg-gray-100 hover:outline hover:outline-1 hover:outline-gray-300 border-b border-gray-200"
+                            >
+                              Circuit Changes
                             </Link>
                             <div className="px-4 py-1.5 text-sm font-bold text-black">
                               Monthly Wise
