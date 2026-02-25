@@ -379,7 +379,14 @@ export default function PortfolioManagementPage() {
                 <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground">
                   Portfolio Management
                 </h1>
-                <p className="text-muted-foreground mt-1">
+                <p className={`mt-1 font-semibold ${
+                  activeTab === 'Bull Market' ? 'text-[#00FF00]' :
+                  activeTab === 'Bullish to Bearish' ? 'text-[#FF00FF]' :
+                  activeTab === 'Side Ways Market' ? 'text-[#FFA500]' :
+                  activeTab === 'Bear Market' ? 'text-[#FF0000]' :
+                  activeTab === 'Bearish to Bullish' ? 'text-[#0000FF]' :
+                  'text-muted-foreground'
+                }`}>
                   Keep Rebalancing Your Portfolio Actively
                 </p>
               </div>
@@ -587,7 +594,7 @@ export default function PortfolioManagementPage() {
         {/* Experience Notes Table */}
         <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden mt-8">
           <div className="p-4 border-b border-border flex justify-between items-center bg-muted/10">
-            <h2 className="text-xl font-bold text-center flex-1 text-red-500">
+            <h2 className="text-xl font-bold text-center flex-1 text-yellow-500">
               Note Down the Experience Time to Time
             </h2>
             <Button
@@ -604,13 +611,13 @@ export default function PortfolioManagementPage() {
           <Table>
             <TableHeader>
               <TableRow className="bg-white hover:bg-white border-b-2 border-black">
-                <TableHead className="w-1/2 text-center text-red-500 font-bold border-r border-black">
+                <TableHead className="w-1/2 text-center text-green-500 font-bold border-r border-black">
                   Positives
                 </TableHead>
                 <TableHead className="w-1/2 text-center text-red-500 font-bold border-r border-black">
                   Negatives
                 </TableHead>
-                <TableHead className="w-24 text-center text-red-500 font-bold"></TableHead>
+                <TableHead className="w-24 text-center font-bold"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
