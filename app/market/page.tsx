@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuthStore } from '@/store/useAuthStore';
-import { Download, RefreshCw } from 'lucide-react';
+import { Download, RefreshCw, Search } from 'lucide-react';
 
 // Time period tabs
 type TimePeriod = 'intraday' | 'days' | 'weeks' | 'months' | 'years' | 'customize';
 type SubTab = 'custom' | 'seasonality' | 'ytd' | '52weeks' | 'all_time';
 type Exchange = 'NSE' | 'BSE' | 'Both';
-type ViewType = 'all' | 'gainers' | 'losers';
+type ViewType = 'all' | 'gainers' | 'losers' | 'unchanged';
 
 // Column definitions for each type
 const columnsByPeriod: Record<TimePeriod | SubTab, string[]> = {
@@ -32,6 +31,7 @@ const baseColumns = ['S No', 'Company Name', 'Sector', 'Industry', 'Group', 'F V
 interface StockData {
   id: string;
   companyName: string;
+  tradingSymbol?: string;
   sector: string;
   industry: string;
   group: string;
@@ -41,7 +41,17 @@ interface StockData {
   preClose: number;
   cmp: number;
   netChange: number;
-  percentChanges: Record<string, number>;
+  percentChange?: number;
+  percentChanges: Record<string, number | null>;
+  volume?: number;
+  week52High?: number;
+  week52Low?: number;
+}
+
+interface HistoricalStatus {
+  isPopulating: boolean;
+  progress: { completed: number; total: number };
+  cachedCount: number;
 }
 
 // Stock Table Component
@@ -49,27 +59,37 @@ const StockTable = ({
   data,
   columns,
   title,
-  isGainer
+  isGainer,
+  searchQuery,
 }: {
   data: StockData[];
   columns: string[];
   title: string;
   isGainer: boolean;
+  searchQuery: string;
 }) => {
+  const filteredData = searchQuery
+    ? data.filter(
+        (s) =>
+          s.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (s.tradingSymbol && s.tradingSymbol.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+    : data;
+
   return (
     <div className="border border-black">
       {/* Section Title */}
       <div className="text-center py-2 font-bold text-black border-b border-black bg-gray-50">
-        {title}
+        {title} ({filteredData.length})
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
         <table className="w-full text-xs border-collapse">
-          <thead>
+          <thead className="sticky top-0 z-10">
             <tr className="bg-gray-100">
               {baseColumns.map((col) => (
-                <th key={col} className="border border-gray-400 px-2 py-1 text-black font-semibold text-center whitespace-nowrap">
+                <th key={col} className="border border-gray-400 px-2 py-1 text-black font-semibold text-center whitespace-nowrap bg-gray-100">
                   {col}
                 </th>
               ))}
@@ -81,41 +101,48 @@ const StockTable = ({
             </tr>
           </thead>
           <tbody>
-            {data.length === 0 ? (
+            {filteredData.length === 0 ? (
               <tr>
                 <td colSpan={baseColumns.length + columns.length} className="border border-gray-300 px-4 py-8 text-center text-gray-500">
                   No data available
                 </td>
               </tr>
             ) : (
-              data.map((stock, index) => (
-                <tr key={stock.id} className="hover:bg-gray-50">
-                  <td className="border border-gray-300 px-2 py-1 text-center text-black">{index + 1}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-black font-medium whitespace-nowrap">{stock.companyName}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-black whitespace-nowrap">{stock.sector}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-black whitespace-nowrap">{stock.industry}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-center text-black">{stock.group}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-center text-black">{stock.faceValue}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-center text-black">{stock.priceBand}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-right text-black whitespace-nowrap">{stock.marketCap}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-right text-black">{stock.preClose.toFixed(2)}</td>
-                  <td className="border border-gray-300 px-2 py-1 text-right text-black font-medium">{stock.cmp.toFixed(2)}</td>
-                  <td className={`border border-gray-300 px-2 py-1 text-right font-medium ${isGainer ? 'text-green-600' : 'text-red-600'}`}>
-                    {isGainer ? '+' : ''}{stock.netChange.toFixed(2)}
-                  </td>
-                  {columns.map((col) => {
-                    const value = stock.percentChanges[col] || 0;
-                    return (
-                      <td
-                        key={col}
-                        className={`border border-gray-300 px-2 py-1 text-right font-medium ${value >= 0 ? 'text-green-600' : 'text-red-600'}`}
-                      >
-                        {value >= 0 ? '+' : ''}{value.toFixed(2)}%
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))
+              filteredData.map((stock, index) => {
+                const isPositive = stock.netChange > 0;
+                const isNegative = stock.netChange < 0;
+                const colorClass = isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-gray-600';
+
+                return (
+                  <tr key={`${stock.id}-${stock.companyName}`} className="hover:bg-gray-50">
+                    <td className="border border-gray-300 px-2 py-1 text-center text-black">{index + 1}</td>
+                    <td className="border border-gray-300 px-2 py-1 text-black font-medium whitespace-nowrap">{stock.companyName}</td>
+                    <td className="border border-gray-300 px-2 py-1 text-black whitespace-nowrap">{stock.sector}</td>
+                    <td className="border border-gray-300 px-2 py-1 text-black whitespace-nowrap">{stock.industry}</td>
+                    <td className="border border-gray-300 px-2 py-1 text-center text-black">{stock.group}</td>
+                    <td className="border border-gray-300 px-2 py-1 text-center text-black">{stock.faceValue}</td>
+                    <td className="border border-gray-300 px-2 py-1 text-center text-black">{stock.priceBand}</td>
+                    <td className="border border-gray-300 px-2 py-1 text-right text-black whitespace-nowrap">{stock.marketCap}</td>
+                    <td className="border border-gray-300 px-2 py-1 text-right text-black">{stock.preClose.toFixed(2)}</td>
+                    <td className="border border-gray-300 px-2 py-1 text-right text-black font-medium">{stock.cmp.toFixed(2)}</td>
+                    <td className={`border border-gray-300 px-2 py-1 text-right font-medium ${colorClass}`}>
+                      {isPositive ? '+' : ''}{stock.netChange.toFixed(2)}
+                    </td>
+                    {columns.map((col) => {
+                      const value = stock.percentChanges[col];
+                      const isNull = value === null || value === undefined;
+                      return (
+                        <td
+                          key={col}
+                          className={`border border-gray-300 px-2 py-1 text-right font-medium ${isNull ? 'text-gray-400' : value > 0 ? 'text-green-600' : value < 0 ? 'text-red-600' : 'text-gray-600'}`}
+                        >
+                          {isNull ? '-' : `${value > 0 ? '+' : ''}${value.toFixed(2)}%`}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -127,19 +154,22 @@ const StockTable = ({
 function TopGainersLosersContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated } = useAuthStore();
 
-  // Get view from query params (gainers, losers, or all)
+  // Get view from query params
   const viewParam = searchParams.get('view') as ViewType | null;
-  const currentView: ViewType = viewParam === 'gainers' || viewParam === 'losers' ? viewParam : 'all';
+  const currentView: ViewType = viewParam === 'gainers' || viewParam === 'losers' || viewParam === 'unchanged' ? viewParam : 'all';
 
   const [selectedExchange, setSelectedExchange] = useState<Exchange>('NSE');
   const [gainersData, setGainersData] = useState<StockData[]>([]);
   const [losersData, setLosersData] = useState<StockData[]>([]);
+  const [unchangedData, setUnchangedData] = useState<StockData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [totalStocks, setTotalStocks] = useState(0);
+  const [historicalStatus, setHistoricalStatus] = useState<HistoricalStatus | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const exchanges: Exchange[] = ['NSE', 'BSE', 'Both'];
 
@@ -156,16 +186,20 @@ function TopGainersLosersContent() {
       const response = await fetch(`/api/market/live?exchange=${selectedExchange}`);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch market data');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.details || 'Failed to fetch market data');
       }
 
       const data = await response.json();
       setGainersData(data.gainers || []);
       setLosersData(data.losers || []);
+      setUnchangedData(data.unchanged || []);
       setLastUpdated(data.lastUpdated);
+      setTotalStocks(data.totalStocks || 0);
+      setHistoricalStatus(data.historicalStatus || null);
     } catch (err) {
       console.error('Error fetching market data:', err);
-      setError('Failed to load live market data. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to load live market data. Please try again.');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -177,11 +211,11 @@ function TopGainersLosersContent() {
     fetchMarketData();
   }, [fetchMarketData]);
 
-  // Auto-refresh every 60 seconds
+  // Auto-refresh every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       fetchMarketData(true);
-    }, 60000);
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [fetchMarketData]);
@@ -227,8 +261,8 @@ function TopGainersLosersContent() {
       ];
 
       const percentData = currentColumns.map(col => {
-        const value = stock.percentChanges[col] || 0;
-        return value.toFixed(2);
+        const value = stock.percentChanges[col];
+        return value === null || value === undefined ? '-' : value.toFixed(2);
       });
 
       return [...baseData, ...percentData].join(',');
@@ -237,6 +271,7 @@ function TopGainersLosersContent() {
     const csvLines: string[] = [];
     csvLines.push(`Top Gainers and Losers - ${periodLabel} - ${selectedExchange}`);
     csvLines.push(`Generated on: ${new Date().toLocaleString()}`);
+    csvLines.push(`Total Stocks: ${totalStocks}`);
     csvLines.push('');
 
     csvLines.push('GAINERS');
@@ -252,6 +287,15 @@ function TopGainersLosersContent() {
     losersData.forEach((stock, index) => {
       csvLines.push(createRow(stock, index));
     });
+
+    if (unchangedData.length > 0) {
+      csvLines.push('');
+      csvLines.push('UNCHANGED');
+      csvLines.push(headers);
+      unchangedData.forEach((stock, index) => {
+        csvLines.push(createRow(stock, index));
+      });
+    }
 
     const csvContent = csvLines.join('\n');
 
@@ -303,8 +347,8 @@ function TopGainersLosersContent() {
         )}
 
         {/* Exchange Tabs & Actions Row */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div className="flex items-center gap-4 flex-wrap">
             {/* Exchange Selection */}
             <div className="flex items-center gap-4">
               {exchanges.map((exchange) => (
@@ -330,14 +374,35 @@ function TopGainersLosersContent() {
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
               </span>
               <span className="text-xs text-gray-500">
-                Live Data
+                Live Data · {totalStocks} Stocks
                 {lastUpdated && ` · Updated ${new Date(lastUpdated).toLocaleTimeString()}`}
               </span>
             </div>
+
+            {/* Historical cache status */}
+            {historicalStatus && historicalStatus.isPopulating && (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
+                <span className="text-xs text-blue-600">
+                  Syncing historical: {historicalStatus.progress.completed}/{historicalStatus.progress.total} ({historicalStatus.cachedCount} cached)
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Right side actions */}
           <div className="flex items-center gap-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search company..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-7 pr-3 py-1.5 text-sm border border-gray-300 rounded w-48 focus:outline-none focus:border-black text-black"
+              />
+            </div>
             <button
               onClick={() => fetchMarketData(true)}
               disabled={refreshing}
@@ -360,7 +425,8 @@ function TopGainersLosersContent() {
         {loading && (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mb-4"></div>
-            <p className="text-gray-600 text-sm">Loading live market data...</p>
+            <p className="text-gray-600 text-sm">Loading live market data from Dhan...</p>
+            <p className="text-gray-400 text-xs mt-1">Fetching all listed companies</p>
           </div>
         )}
 
@@ -380,33 +446,55 @@ function TopGainersLosersContent() {
         {/* Data Tables */}
         {!loading && !error && (
           <>
+            {/* View toggle buttons */}
+            <div className="flex border-b border-black mb-0">
+              <button
+                onClick={() => router.push('/market?view=all')}
+                className={`flex-1 text-center py-2 font-bold border-r border-black ${
+                  currentView === 'all' ? 'text-black bg-gray-50' : 'text-gray-400 bg-gray-100'
+                }`}
+              >
+                All ({totalStocks})
+              </button>
+              <button
+                onClick={() => router.push('/market?view=gainers')}
+                className={`flex-1 text-center py-2 font-bold border-r border-black ${
+                  currentView === 'gainers' ? 'text-green-600 bg-green-50' : 'text-gray-400 bg-gray-100'
+                }`}
+              >
+                Gainers ({gainersData.length})
+              </button>
+              <button
+                onClick={() => router.push('/market?view=losers')}
+                className={`flex-1 text-center py-2 font-bold border-r border-black ${
+                  currentView === 'losers' ? 'text-red-600 bg-red-50' : 'text-gray-400 bg-gray-100'
+                }`}
+              >
+                Losers ({losersData.length})
+              </button>
+              <button
+                onClick={() => router.push('/market?view=unchanged')}
+                className={`flex-1 text-center py-2 font-bold ${
+                  currentView === 'unchanged' ? 'text-gray-700 bg-gray-50' : 'text-gray-400 bg-gray-100'
+                }`}
+              >
+                Unchanged ({unchangedData.length})
+              </button>
+            </div>
+
+            <div className="text-center py-2 border border-t-0 border-black bg-gray-50 font-semibold text-black mb-4">
+              {periodLabel} · Powered by Dhan API
+            </div>
+
             {/* Gainers Section */}
             {(currentView === 'all' || currentView === 'gainers') && (
               <div className="mb-6">
-                <div className="flex border-b border-black mb-0">
-                  <button
-                    onClick={() => router.push('/market?view=gainers')}
-                    className="flex-1 text-center py-2 font-bold border-r border-black text-black bg-gray-50"
-                  >
-                    Gainers ({gainersData.length})
-                  </button>
-                  <button
-                    onClick={() => router.push('/market?view=losers')}
-                    className="flex-1 text-center py-2 font-bold text-gray-400 bg-gray-100"
-                  >
-                    Losers ({losersData.length})
-                  </button>
-                </div>
-
-                <div className="text-center py-2 border border-t-0 border-black bg-gray-50 font-semibold text-black">
-                  Filtering Options for {periodLabel}
-                </div>
-
                 <StockTable
                   data={gainersData}
                   columns={currentColumns}
                   title="Gainers"
                   isGainer={true}
+                  searchQuery={searchQuery}
                 />
               </div>
             )}
@@ -414,30 +502,25 @@ function TopGainersLosersContent() {
             {/* Losers Section */}
             {(currentView === 'all' || currentView === 'losers') && (
               <div className="mb-6">
-                <div className="flex border-b border-black mb-0">
-                  <button
-                    onClick={() => router.push('/market?view=gainers')}
-                    className="flex-1 text-center py-2 font-bold border-r border-black text-gray-400 bg-gray-100"
-                  >
-                    Gainers ({gainersData.length})
-                  </button>
-                  <button
-                    onClick={() => router.push('/market?view=losers')}
-                    className="flex-1 text-center py-2 font-bold text-black bg-gray-50"
-                  >
-                    Losers ({losersData.length})
-                  </button>
-                </div>
-
-                <div className="text-center py-2 border border-t-0 border-black bg-gray-50 font-semibold text-black">
-                  Filtering Options for {periodLabel}
-                </div>
-
                 <StockTable
                   data={losersData}
                   columns={currentColumns}
                   title="Losers"
                   isGainer={false}
+                  searchQuery={searchQuery}
+                />
+              </div>
+            )}
+
+            {/* Unchanged Section */}
+            {(currentView === 'all' || currentView === 'unchanged') && unchangedData.length > 0 && (
+              <div className="mb-6">
+                <StockTable
+                  data={unchangedData}
+                  columns={currentColumns}
+                  title="Unchanged"
+                  isGainer={false}
+                  searchQuery={searchQuery}
                 />
               </div>
             )}
