@@ -2,10 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
-import IPOCard from './ipo/IPOCard';
-import ClosedIPOTable from './ipo/ClosedIPOTable';
-import ListedIPOTable from './ipo/ListedIPOTable';
-import DraftIssuesTable from './ipo/DraftIssuesTable';
+import IPOCard from '@/components/ipo/IPOCard';
+import ClosedIPOTable from '@/components/ipo/ClosedIPOTable';
+import ListedIPOTable from '@/components/ipo/ListedIPOTable';
+import DraftIssuesTable from '@/components/ipo/DraftIssuesTable';
 import {
     openIPOData,
     upcomingIPOData,

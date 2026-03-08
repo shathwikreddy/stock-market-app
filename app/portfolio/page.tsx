@@ -1,8 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore, useHasHydrated } from '@/store/useAuthStore';
+import { AuthGuard } from '@/components/common';
 import { Briefcase, TrendingUp, FileText, ArrowRight, PieChart } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -59,17 +57,14 @@ const portfolioOptions = [
 ];
 
 export default function PortfolioPage() {
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-  const hydrated = useHasHydrated();
+  return (
+    <AuthGuard loadingMessage="Loading portfolio...">
+      <PortfolioContent />
+    </AuthGuard>
+  );
+}
 
-  useEffect(() => {
-    if (!hydrated) return;
-    if (!isAuthenticated) {
-      router.push('/login');
-    }
-  }, [hydrated, isAuthenticated, router]);
-
+function PortfolioContent() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 md:py-12">

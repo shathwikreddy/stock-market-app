@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore, useHasHydrated } from '@/store/useAuthStore';
+import { AuthGuard } from '@/components/common';
 import { motion } from 'framer-motion';
 import { PieChart, Save, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -130,9 +129,14 @@ function NumberInput({
 }
 
 export default function PortfolioManagementPage() {
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-  const hydrated = useHasHydrated();
+  return (
+    <AuthGuard loadingMessage="Loading portfolio management...">
+      <PortfolioManagementContent />
+    </AuthGuard>
+  );
+}
+
+function PortfolioManagementContent() {
   const [activeTab, setActiveTab] = useState(MARKET_CONDITIONS[0]);
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [experienceNotes, setExperienceNotes] = useState<ExperienceNote[]>([]);
@@ -141,12 +145,6 @@ export default function PortfolioManagementPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
-
-  useEffect(() => {
-    if (hydrated && !isAuthenticated) {
-      router.push('/login');
-    }
-  }, [hydrated, isAuthenticated, router]);
 
   const initializeDefaults = useCallback(() => {
     const initialStrategies = DEFAULT_STRATEGIES.map((name) => makeStrategy({ name }));
@@ -200,10 +198,8 @@ export default function PortfolioManagementPage() {
   }, [activeTab, initializeDefaults]);
 
   useEffect(() => {
-    if (hydrated && isAuthenticated) {
-      fetchPortfolioData();
-    }
-  }, [hydrated, isAuthenticated, fetchPortfolioData]);
+    fetchPortfolioData();
+  }, [fetchPortfolioData]);
 
   const handleTotalCapitalChange = (newTotal: number) => {
     setTotalCapital(newTotal);
@@ -359,8 +355,6 @@ export default function PortfolioManagementPage() {
       setSavingNotes(false);
     }
   };
-
-  if (!hydrated) return null;
 
   return (
     <div className="min-h-screen bg-background pb-20">

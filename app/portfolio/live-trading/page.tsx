@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore, useHasHydrated } from '@/store/useAuthStore';
+import { useState } from 'react';
+import { AuthGuard } from '@/components/common';
 import { TrendingUp, ArrowUpRight, ArrowDownRight, Clock, Activity, BarChart2, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -297,17 +296,15 @@ const multibaggerTrades: Trade[] = [
 type TradingType = 'intraday' | 'fno' | 'swing' | 'positional' | 'multibagger';
 
 export default function LiveTradingPage() {
-  const router = useRouter();
-  const { isAuthenticated } = useAuthStore();
-  const hydrated = useHasHydrated();
-  const [activeTab, setActiveTab] = useState<TradingType>('intraday');
+  return (
+    <AuthGuard loadingMessage="Loading live trading...">
+      <LiveTradingContent />
+    </AuthGuard>
+  );
+}
 
-  useEffect(() => {
-    if (!hydrated) return;
-    if (!isAuthenticated) {
-      router.push('/login');
-    }
-  }, [hydrated, isAuthenticated, router]);
+function LiveTradingContent() {
+  const [activeTab, setActiveTab] = useState<TradingType>('intraday');
 
   const getActiveData = () => {
     switch (activeTab) {
