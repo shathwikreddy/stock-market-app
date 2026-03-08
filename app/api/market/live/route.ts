@@ -14,6 +14,7 @@ import {
   getPopulationStatus,
   storeSnapshot,
 } from '@/lib/dhan/historicalService';
+import { classifyMarketCap, startEnrichment } from '@/lib/dhan/stockEnrichment';
 
 interface StockQuote {
   id: string;
@@ -55,12 +56,12 @@ function build(s: ScripInfo, q: QuoteData): StockQuote {
     id: '0',
     companyName: s.displayName,
     tradingSymbol: s.tradingSymbol,
-    sector: '-',
-    industry: '-',
+    sector: s.sector || '-',
+    industry: s.industry || '-',
     group: s.series,
     faceValue: s.faceValue,
     priceBand: priceBand(q.upper_circuit_limit, q.lower_circuit_limit, prev),
-    marketCap: '-',
+    marketCap: classifyMarketCap(s.marketCapValue || 0),
     preClose: Math.round(prev * 100) / 100,
     cmp: Math.round(cmp * 100) / 100,
     netChange: net,
@@ -124,6 +125,9 @@ export async function GET(request: NextRequest) {
 
     // -- 6. Trigger background population for missing historical data --
     startPopulation(stocks.map((s) => ({ securityId: s.securityId, exchangeSegment: s.exchangeSegment })));
+
+    // -- 6b. Background enrich stocks with sector/industry/marketCap --
+    startEnrichment(50).catch(() => {});
 
     // -- 7. Build response --
     const scripMap = new Map<number, ScripInfo>();

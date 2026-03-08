@@ -12,6 +12,9 @@ export interface ScripInfo {
   instrumentType: string;
   isin: string;
   faceValue: number;
+  sector: string;
+  industry: string;
+  marketCapValue: number;
 }
 
 // In-memory cache per exchange
@@ -102,12 +105,16 @@ async function downloadScripMaster(
     if (exchange === 'NSE' && series !== 'EQ') continue;
 
     const securityId = parseInt(vals[col['SECURITY_ID']]) || 0;
-    const tradingSymbol = vals[col['SYMBOL_NAME']] || '';
+    // UNDERLYING_SYMBOL has the actual ticker (e.g. "RELIANCE", "TCS")
+    // SYMBOL_NAME has the full name (e.g. "RELIANCE INDUSTRIES LTD")
+    const ticker = (vals[col['UNDERLYING_SYMBOL']] || '').trim();
+    const symbolName = vals[col['SYMBOL_NAME']] || '';
+    const tradingSymbol = ticker || symbolName;
     const displayName = vals[col['DISPLAY_NAME']] || tradingSymbol;
     const isin = vals[col['ISIN']] || '';
     if (!securityId || !tradingSymbol) continue;
 
-    const fv = faceValues.get(tradingSymbol) || faceValues.get(isin) || 1;
+    const fv = faceValues.get(ticker) || faceValues.get(symbolName) || faceValues.get(isin) || 1;
 
     stocks.push({
       securityId,
@@ -119,6 +126,9 @@ async function downloadScripMaster(
       instrumentType: instType,
       isin,
       faceValue: fv,
+      sector: '-',
+      industry: '-',
+      marketCapValue: 0,
     });
   }
 
@@ -135,11 +145,11 @@ async function persistToDb(stocks: ScripInfo[]): Promise<void> {
 
     const values = batch.map((s) => {
       const id = randomUUID();
-      return `('${id}', ${s.securityId}, '${s.tradingSymbol.replace(/'/g, "''")}', '${s.displayName.replace(/'/g, "''")}', '${s.exchange}', '${s.exchangeSegment}', '${s.series.replace(/'/g, "''")}', '${s.instrumentType}', '${s.isin}', ${s.faceValue}, '${now.toISOString()}'::timestamp, '${now.toISOString()}'::timestamp, '${now.toISOString()}'::timestamp)`;
+      return `('${id}', ${s.securityId}, '${s.tradingSymbol.replace(/'/g, "''")}', '${s.displayName.replace(/'/g, "''")}', '${s.exchange}', '${s.exchangeSegment}', '${s.series.replace(/'/g, "''")}', '${s.instrumentType}', '${s.isin}', ${s.faceValue}, '${s.sector.replace(/'/g, "''")}', '${s.industry.replace(/'/g, "''")}', ${s.marketCapValue}, '${now.toISOString()}'::timestamp, '${now.toISOString()}'::timestamp, '${now.toISOString()}'::timestamp)`;
     }).join(',\n');
 
     await prisma.$executeRawUnsafe(`
-      INSERT INTO "StockMaster" (id, "securityId", "tradingSymbol", "displayName", exchange, "exchangeSegment", series, "instrumentType", isin, "faceValue", "refreshedAt", "createdAt", "updatedAt")
+      INSERT INTO "StockMaster" (id, "securityId", "tradingSymbol", "displayName", exchange, "exchangeSegment", series, "instrumentType", isin, "faceValue", sector, industry, "marketCapValue", "refreshedAt", "createdAt", "updatedAt")
       VALUES ${values}
       ON CONFLICT ("securityId", exchange) DO UPDATE SET
         "tradingSymbol" = EXCLUDED."tradingSymbol",
@@ -167,7 +177,7 @@ async function loadFromDb(exchange?: string): Promise<ScripInfo[]> {
     orderBy: { displayName: 'asc' },
   });
 
-  return docs.map((d: { securityId: number; tradingSymbol: string; displayName: string; exchange: string; exchangeSegment: string; series: string; instrumentType: string; isin: string; faceValue: number }) => ({
+  return docs.map((d: { securityId: number; tradingSymbol: string; displayName: string; exchange: string; exchangeSegment: string; series: string; instrumentType: string; isin: string; faceValue: number; sector: string; industry: string; marketCapValue: number }) => ({
     securityId: d.securityId,
     tradingSymbol: d.tradingSymbol,
     displayName: d.displayName,
@@ -177,6 +187,9 @@ async function loadFromDb(exchange?: string): Promise<ScripInfo[]> {
     instrumentType: d.instrumentType,
     isin: d.isin,
     faceValue: d.faceValue,
+    sector: d.sector || '-',
+    industry: d.industry || '-',
+    marketCapValue: d.marketCapValue || 0,
   }));
 }
 
@@ -220,15 +233,8 @@ export async function getScripMaster(exchange: 'NSE' | 'BSE' | 'Both' = 'NSE'): 
 
   await persistToDb(allStocks);
 
-  // Filter for requested exchange
-  let result: ScripInfo[];
-  if (exchange === 'Both') {
-    result = allStocks;
-  } else {
-    result = allStocks.filter((s) => s.exchange === exchange);
-  }
-  result.sort((a, b) => a.displayName.localeCompare(b.displayName));
-
+  // Reload from DB to pick up enriched sector/industry/marketCap
+  const result = await loadFromDb(exchange);
   memCache[exchange] = { data: result, timestamp: Date.now() };
   return result;
 }

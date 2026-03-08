@@ -8,6 +8,7 @@ import {
   syncDailyFromQuotes,
   startPopulation,
 } from '@/lib/dhan/historicalService';
+import { startEnrichment } from '@/lib/dhan/stockEnrichment';
 
 const CRON_SECRET = process.env.CRON_SECRET || '';
 
@@ -76,6 +77,9 @@ export async function GET(request: NextRequest) {
 
     // 5. Background populate missing historical data (fire-and-forget)
     startPopulation(stocks.map((s) => ({ securityId: s.securityId, exchangeSegment: s.exchangeSegment })));
+
+    // 6. Background enrich stocks with sector/industry/marketCap from Yahoo Finance
+    startEnrichment(50).catch(() => {});
 
     const elapsed = Date.now() - t0;
 

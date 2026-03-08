@@ -133,19 +133,23 @@ model ExperienceNote {
 }
 
 model StockMaster {
-  id              String   @id @default(uuid())
+  id              String    @id @default(uuid())
   securityId      Int
   tradingSymbol   String
   displayName     String
   exchange        String
   exchangeSegment String
-  series          String   @default("")
-  instrumentType  String   @default("ES")
-  isin            String   @default("")
-  faceValue       Float    @default(1)
-  refreshedAt     DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  series          String    @default("")
+  instrumentType  String    @default("ES")
+  isin            String    @default("")
+  faceValue       Float     @default(1)
+  sector          String    @default("-")
+  industry        String    @default("-")
+  marketCapValue  Float     @default(0)
+  enrichedAt      DateTime?
+  refreshedAt     DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@unique([securityId, exchange])
   @@index([exchange])
