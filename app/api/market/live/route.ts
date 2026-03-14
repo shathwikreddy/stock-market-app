@@ -18,6 +18,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ensureDataReady, getSyncStatus } from '@/lib/sync/engine';
 import type { Exchange, StockQuoteDTO, MarketStatsDTO } from '@/lib/sync/types';
+import { formatMarketCap } from '@/lib/format';
 
 export const maxDuration = 10;
 
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
       // Select only columns the frontend needs (no id, securityId, exchangeSegment, open, high, low, circuits, syncedAt)
       prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
         `SELECT "displayName", "tradingSymbol", sector, industry, series, "faceValue",
-                "priceBand", "marketCapLabel", "prevClose", "lastPrice", "netChange",
+                "priceBand", "marketCapValue", "prevClose", "lastPrice", "netChange",
                 "pctChange", "percentChanges", "week52High", "week52Low", volume
          FROM "LiveQuote" ${whereClause} ORDER BY ${orderClause} LIMIT ${pageSize} OFFSET ${offset}`
       ),
@@ -118,7 +119,7 @@ export async function GET(request: NextRequest) {
       group: (row.series as string) || '',
       faceValue: Number(row.faceValue) || 1,
       priceBand: (row.priceBand as string) || 'No Band',
-      marketCap: (row.marketCapLabel as string) || '-',
+      marketCap: formatMarketCap(Number(row.marketCapValue) || 0),
       preClose: Math.round(Number(row.prevClose) * 100) / 100,
       cmp: Math.round(Number(row.lastPrice) * 100) / 100,
       netChange: Math.round(Number(row.netChange) * 100) / 100,

@@ -22,6 +22,13 @@ const memCache: Record<string, { data: ScripInfo[]; timestamp: number }> = {};
 const MEM_CACHE_TTL = 60 * 60 * 1000; // 1 hour in-memory
 const DB_REFRESH_TTL = 24 * 60 * 60 * 1000; // 24 hours DB refresh
 
+/** Clear in-memory scrip master cache so next sync reads fresh sector/industry from DB. */
+export function clearScripMasterCache(): void {
+  for (const key of Object.keys(memCache)) {
+    delete memCache[key];
+  }
+}
+
 // Parse CSV line handling commas in quoted fields
 function parseCSVLine(line: string): string[] {
   const result: string[] = [];

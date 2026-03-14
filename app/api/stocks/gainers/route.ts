@@ -10,6 +10,7 @@ import { prisma } from '@/lib/prisma';
 import { getUserIdFromToken } from '@/lib/auth';
 import { handleApiError } from '@/lib/api-response';
 import { ensureDataReady } from '@/lib/sync/engine';
+import { formatMarketCap } from '@/lib/format';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
         take: pageSize,
         select: {
           displayName: true, tradingSymbol: true, sector: true, industry: true,
-          series: true, faceValue: true, priceBand: true, marketCapLabel: true,
+          series: true, faceValue: true, priceBand: true, marketCapValue: true,
           prevClose: true, lastPrice: true, netChange: true, pctChange: true,
           percentChanges: true, week52High: true, week52Low: true, volume: true,
         },
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
       group: row.series || '',
       faceValue: row.faceValue,
       priceBand: row.priceBand || 'No Band',
-      marketCap: row.marketCapLabel || '-',
+      marketCap: formatMarketCap(row.marketCapValue || 0),
       preClose: Math.round(row.prevClose * 100) / 100,
       cmp: Math.round(row.lastPrice * 100) / 100,
       netChange: Math.round(row.netChange * 100) / 100,

@@ -14,7 +14,6 @@
 import { getState } from './state';
 import { fetchQuotes } from './dhan-api';
 import { getScripMaster, deduplicateByIsin, type ScripInfo } from '@/lib/dhan/scripMaster';
-import { startEnrichment } from '@/lib/dhan/stockEnrichment';
 import { ensureHistoricalLoaded, syncDailyFromQuotes, startPopulation, getPopulationStatus } from './historical';
 import { ensureSnapshotsLoaded, storeSnapshot } from './snapshots';
 import { writeLiveQuotes, writeMarketStats } from './writer';
@@ -79,9 +78,8 @@ export async function runSingleSync(exchange: Exchange): Promise<SyncResult> {
     if (bseComputed.length > 0) await writeMarketStats('BSE', bseComputed);
   }
 
-  // 9. Trigger background jobs (non-blocking)
+  // 9. Trigger background historical population (non-blocking)
   startPopulation(stocks.map((s) => ({ securityId: s.securityId, exchangeSegment: s.exchangeSegment })));
-  startEnrichment(50).catch(() => {});
 
   // Update sync timestamp
   const state = getState();
