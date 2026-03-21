@@ -10,7 +10,7 @@ type SubTab = 'custom' | 'seasonality' | 'ytd' | '52weeks' | 'all_time';
 type Exchange = 'NSE' | 'BSE' | 'Both';
 type ViewType = 'all' | 'gainers' | 'losers' | 'unchanged';
 
-const PAGE_SIZE = 150;
+const PAGE_SIZE = 200;
 
 // Column definitions for each type
 const columnsByPeriod: Record<TimePeriod | SubTab, string[]> = {

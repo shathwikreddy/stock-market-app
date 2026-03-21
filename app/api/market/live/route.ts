@@ -8,7 +8,7 @@
  *   exchange  = NSE | BSE | Both (default: NSE)
  *   filter    = all | gainers | losers | unchanged (default: all)
  *   page      = 1-based page number (default: 1)
- *   pageSize  = items per page (default: 150, max: 500)
+ *   pageSize  = items per page (default: 200, max: 500)
  *   sort      = column to sort by (default: pctChange)
  *   order     = asc | desc (default: desc)
  *   search    = search company name or symbol
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     const exchange = (sp.get('exchange') || 'NSE') as Exchange;
     const filter = (sp.get('filter') || 'all') as 'all' | 'gainers' | 'losers' | 'unchanged';
     const page = Math.max(1, parseInt(sp.get('page') || '1'));
-    const pageSize = Math.min(500, Math.max(1, parseInt(sp.get('pageSize') || '150')));
+    const pageSize = Math.min(500, Math.max(1, parseInt(sp.get('pageSize') || '200')));
     const sort = sp.get('sort') || 'pctChange';
     const order = (sp.get('order') || 'desc') as 'asc' | 'desc';
     const search = sp.get('search')?.trim() || '';

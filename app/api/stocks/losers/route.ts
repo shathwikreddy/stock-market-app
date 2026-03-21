@@ -2,7 +2,7 @@
  * GET /api/stocks/losers
  *
  * Paginated top losers from LiveQuote table.
- * Query: ?page=1&pageSize=150&exchange=NSE
+ * Query: ?page=1&pageSize=200&exchange=NSE
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const sp = request.nextUrl.searchParams;
     const exchange = sp.get('exchange') || 'NSE';
     const page = Math.max(1, parseInt(sp.get('page') || '1'));
-    const pageSize = Math.min(500, Math.max(1, parseInt(sp.get('pageSize') || '150')));
+    const pageSize = Math.min(500, Math.max(1, parseInt(sp.get('pageSize') || '200')));
 
     await ensureDataReady(exchange as 'NSE' | 'BSE' | 'Both');
 
