@@ -50,57 +50,104 @@ export async function ensureHistoricalLoaded(segment: string): Promise<void> {
 }
 
 /**
- * Daily sync: append today's close from live quotes. Zero Dhan historical API calls.
+ * Daily sync: append/update today's close from live quotes.
+ * Uses efficient bulk SQL (single UPDATE per batch, not per stock).
+ * Also creates stub entries for stocks missing historical data.
  */
 export async function syncDailyFromQuotes(
   quotes: Map<number, DhanQuote>,
   segment: string
 ): Promise<number> {
   const g = getState();
-  const updates: { securityId: number; segment: string; close: number; ts: number; tradeDate: string }[] = [];
+  const appends: { securityId: number; close: number; ts: number; tradeDate: string }[] = [];
+  const newStubs: { securityId: number; close: number; ts: number; tradeDate: string }[] = [];
+  let updatedInMemory = 0;
 
   for (const [id, q] of quotes.entries()) {
+    if (!q.last_price || q.last_price <= 0) continue;
+
     const key = ckey(id, segment);
     const hist = g.historicalMem.get(key);
-    if (!hist || hist.closes.length === 0) continue;
 
     const ltt = q.last_trade_time;
     if (!ltt) continue;
     const parts = ltt.split(' ')[0]?.split('/');
     if (!parts || parts.length !== 3) continue;
     const tradeDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    const ts = Math.floor(new Date(tradeDate).getTime() / 1000);
+
+    if (!hist || hist.closes.length === 0) {
+      // Create stub entry so this stock starts accumulating daily closes
+      g.historicalMem.set(key, { closes: [q.last_price], timestamps: [ts] });
+      newStubs.push({ securityId: id, close: q.last_price, ts, tradeDate });
+      continue;
+    }
 
     const lastTs = hist.timestamps[hist.timestamps.length - 1];
     const lastStr = lastTs ? new Date(lastTs * 1000).toISOString().split('T')[0] : '';
-    if (tradeDate <= lastStr) continue;
 
-    const ts = Math.floor(new Date(tradeDate).getTime() / 1000);
+    if (tradeDate === lastStr) {
+      // Same day — update in-memory close to latest price (keeps calcChanges accurate)
+      hist.closes[hist.closes.length - 1] = q.last_price;
+      updatedInMemory++;
+      continue;
+    }
+
+    if (tradeDate < lastStr) continue;
+
+    // New trading day — append close
     hist.closes.push(q.last_price);
     hist.timestamps.push(ts);
-
-    updates.push({ securityId: id, segment, close: q.last_price, ts, tradeDate });
+    appends.push({ securityId: id, close: q.last_price, ts, tradeDate });
   }
 
-  if (updates.length > 0) {
+  // ── Efficient bulk DB writes (single SQL per batch, not per stock) ──
+  const BATCH = 500;
+
+  // 1. Bulk append for existing stocks (new day)
+  for (let i = 0; i < appends.length; i += BATCH) {
+    const batch = appends.slice(i, i + BATCH);
+    const values = batch
+      .map((u) => `(${u.securityId}, '${segment}', ${u.close}, ${u.ts}, '${u.tradeDate}')`)
+      .join(',');
     try {
-      await prisma.$transaction(
-        updates.map((u) =>
-          prisma.$executeRawUnsafe(
-            `UPDATE "HistoricalPrice"
-             SET closes = array_cat(closes, ARRAY[$1::double precision]),
-                 timestamps = array_cat(timestamps, ARRAY[$2::double precision]),
-                 "lastDate" = $3,
-                 "updatedAt" = NOW()
-             WHERE "securityId" = $4 AND "exchangeSegment" = $5`,
-            u.close, u.ts, u.tradeDate, u.securityId, u.segment
-          )
-        )
-      );
-      console.log(`[Sync:Hist] Daily sync: ${updates.length} stocks updated for ${segment}`);
-    } catch { /* non-critical */ }
+      await prisma.$executeRawUnsafe(`
+        UPDATE "HistoricalPrice" AS hp
+        SET closes = array_cat(hp.closes, ARRAY[v.close::double precision]),
+            timestamps = array_cat(hp.timestamps, ARRAY[v.ts::double precision]),
+            "lastDate" = v.trade_date,
+            "updatedAt" = NOW()
+        FROM (VALUES ${values}) AS v(security_id, seg, close, ts, trade_date)
+        WHERE hp."securityId" = v.security_id::int AND hp."exchangeSegment" = v.seg
+      `);
+    } catch (e) {
+      console.error(`[Sync:Hist] Append batch ${Math.floor(i / BATCH) + 1} error:`, e instanceof Error ? e.message : e);
+    }
   }
 
-  return updates.length;
+  // 2. Bulk insert stubs for stocks without historical data
+  for (let i = 0; i < newStubs.length; i += BATCH) {
+    const batch = newStubs.slice(i, i + BATCH);
+    const values = batch
+      .map((u) => `(gen_random_uuid(), ${u.securityId}, '${segment}', ARRAY[${u.close}::double precision], ARRAY[${u.ts}::double precision], '${u.tradeDate}', NOW(), NOW())`)
+      .join(',');
+    try {
+      await prisma.$executeRawUnsafe(`
+        INSERT INTO "HistoricalPrice" (id, "securityId", "exchangeSegment", closes, timestamps, "lastDate", "createdAt", "updatedAt")
+        VALUES ${values}
+        ON CONFLICT ("securityId", "exchangeSegment") DO NOTHING
+      `);
+    } catch (e) {
+      console.error(`[Sync:Hist] Stub insert batch ${Math.floor(i / BATCH) + 1} error:`, e instanceof Error ? e.message : e);
+    }
+  }
+
+  const total = appends.length + newStubs.length;
+  if (total > 0 || updatedInMemory > 0) {
+    console.log(`[Sync:Hist] Daily sync ${segment}: ${appends.length} appended, ${newStubs.length} new stubs, ${updatedInMemory} in-memory updates`);
+  }
+
+  return total + updatedInMemory;
 }
 
 /**

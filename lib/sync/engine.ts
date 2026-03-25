@@ -16,7 +16,7 @@ import { fetchQuotes } from './dhan-api';
 import { getScripMaster, deduplicateByIsin, type ScripInfo } from '@/lib/dhan/scripMaster';
 import { ensureHistoricalLoaded, syncDailyFromQuotes, startPopulation, getPopulationStatus } from './historical';
 import { ensureSnapshotsLoaded, storeSnapshot } from './snapshots';
-import { writeLiveQuotes, writeMarketStats } from './writer';
+import { writeLiveQuotes, writeMarketStats, writeCombinedMarketStats } from './writer';
 import type { Exchange, Segment, SyncResult, DhanQuote } from './types';
 
 /**
@@ -55,27 +55,35 @@ export async function runSingleSync(exchange: Exchange): Promise<SyncResult> {
   // 5. Store price snapshot for intraday % changes
   storeSnapshot(allQuotes);
 
-  // 6. Daily close sync (fire-and-forget per segment)
+  // 6. Daily close sync — awaited for data integrity (bulk SQL, fast on Neon)
   for (const seg of segments) {
     const segQuotes = new Map<number, DhanQuote>();
     for (const s of stocks.filter((st) => st.exchangeSegment === seg)) {
       const q = allQuotes.get(s.securityId);
       if (q) segQuotes.set(s.securityId, q);
     }
-    syncDailyFromQuotes(segQuotes, seg).catch(() => {});
+    try {
+      await syncDailyFromQuotes(segQuotes, seg);
+    } catch (e) {
+      console.error(`[Sync:Engine] Daily sync error for ${seg}:`, e instanceof Error ? e.message : e);
+    }
   }
 
   // 7. Compute all % changes + write to LiveQuote table (the core of the redesign)
   const computed = await writeLiveQuotes(stocks, allQuotes);
 
-  // 8. Write pre-computed market stats
-  //    For "Both" mode, also write individual exchange stats
-  await writeMarketStats(exchange, computed);
-  if (exchange === 'Both') {
-    const nseComputed = computed.filter((c) => c.stock.exchange === 'NSE');
-    const bseComputed = computed.filter((c) => c.stock.exchange === 'BSE');
-    if (nseComputed.length > 0) await writeMarketStats('NSE', nseComputed);
-    if (bseComputed.length > 0) await writeMarketStats('BSE', bseComputed);
+  // 8. Write pre-computed market stats (skip if no quotes — protects against after-hours zeroing)
+  if (computed.length > 0) {
+    await writeMarketStats(exchange, computed);
+    if (exchange === 'Both') {
+      const nseComputed = computed.filter((c) => c.stock.exchange === 'NSE');
+      const bseComputed = computed.filter((c) => c.stock.exchange === 'BSE');
+      if (nseComputed.length > 0) await writeMarketStats('NSE', nseComputed);
+      if (bseComputed.length > 0) await writeMarketStats('BSE', bseComputed);
+    }
+
+    // Always update combined 'Both' stats from latest NSE + BSE data
+    await writeCombinedMarketStats();
   }
 
   // 9. Trigger background historical population (non-blocking)
@@ -98,11 +106,9 @@ export async function runSingleSync(exchange: Exchange): Promise<SyncResult> {
 }
 
 /**
- * Run sync in a LOOP until the deadline.
- * Designed for cron endpoints: maximizes the number of refresh cycles
- * within the allowed execution time (typically 55s of a 60s cron window).
- *
- * NSE is synced every cycle. BSE every 3rd cycle (less critical).
+ * Run a single sync cycle for the cron endpoint.
+ * Alternates NSE/BSE based on IST minute (deterministic, survives cold starts).
+ * BSE on even minutes, NSE on odd → each exchange synced every 2 minutes.
  */
 export async function runSyncLoop(
   maxDurationMs: number = 8_000
@@ -116,32 +122,26 @@ export async function runSyncLoop(
   }
   state.syncLock = true;
 
-  // Track invocation count to alternate NSE/BSE across cron calls
-  state.syncCycleCount = (state.syncCycleCount || 0) + 1;
-  const cycleCount = state.syncCycleCount;
-
   const results: SyncResult[] = [];
   let cycle = 0;
 
   try {
-    // Single sync per invocation to fit Vercel free tier 10s timeout.
-    // NSE every call, BSE every 3rd call (saves bandwidth + time).
-    if (cycleCount % 3 === 0) {
-      const bseResult = await runSingleSync('BSE');
-      bseResult.cycle = ++cycle;
-      results.push(bseResult);
-    } else {
-      const nseResult = await runSingleSync('NSE');
-      nseResult.cycle = ++cycle;
-      results.push(nseResult);
-    }
+    // Determine exchange from IST minute — deterministic, survives cold starts.
+    // BSE on even minutes, NSE on odd → each gets synced every 2 minutes.
+    const now = new Date();
+    const istMinute = new Date(now.getTime() + 5.5 * 60 * 60 * 1000).getUTCMinutes();
+    const exchange: Exchange = istMinute % 2 === 0 ? 'BSE' : 'NSE';
+
+    const result = await runSingleSync(exchange);
+    result.cycle = ++cycle;
+    results.push(result);
   } catch (e) {
     console.error('[Sync:Engine] Loop error:', e instanceof Error ? e.message : e);
   } finally {
     state.syncLock = false;
   }
 
-  console.log(`[Sync:Engine] Cycle #${cycleCount} complete: synced ${results[0]?.quotesUpdated || 0} stocks`);
+  console.log(`[Sync:Engine] Cycle complete: synced ${results[0]?.quotesUpdated || 0} stocks`);
   return { cycles: cycle, results };
 }
 

@@ -108,8 +108,11 @@ async function downloadScripMaster(
     if (exchange !== 'NSE' && exchange !== 'BSE') continue;
 
     const series = vals[col['SERIES']] || '';
-    // NSE: only EQ series. BSE: all equity groups (A, B, T, X, etc.) except debt
-    if (exchange === 'NSE' && series !== 'EQ') continue;
+    // Include all equity series for both exchanges:
+    //   NSE: EQ (regular), BE (book entry), BZ (trade-to-trade), SM (SME), etc.
+    //   BSE: A, B, T, X, XT, Z, etc.
+    // Only exclude 'W' (when-issued, temporary pre-listing securities)
+    if (series === 'W') continue;
 
     const securityId = parseInt(vals[col['SECURITY_ID']]) || 0;
     // UNDERLYING_SYMBOL has the actual ticker (e.g. "RELIANCE", "TCS")

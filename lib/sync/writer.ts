@@ -205,3 +205,93 @@ export async function writeMarketStats(
     console.error('[Sync:Writer] MarketStats upsert error:', e instanceof Error ? e.message : e);
   }
 }
+
+/**
+ * Compute and write combined 'Both' market stats from NSE + BSE individual stats.
+ * Called after each exchange sync so 'Both' stays fresh regardless of which exchange just synced.
+ */
+export async function writeCombinedMarketStats(): Promise<void> {
+  try {
+    const [nse, bse] = await Promise.all([
+      prisma.marketStats.findUnique({ where: { exchange: 'NSE' } }),
+      prisma.marketStats.findUnique({ where: { exchange: 'BSE' } }),
+    ]);
+
+    if (!nse && !bse) return;
+
+    const totalStocks = (nse?.totalStocks ?? 0) + (bse?.totalStocks ?? 0);
+    const totalGainers = (nse?.totalGainers ?? 0) + (bse?.totalGainers ?? 0);
+    const totalLosers = (nse?.totalLosers ?? 0) + (bse?.totalLosers ?? 0);
+    const totalUnchanged = (nse?.totalUnchanged ?? 0) + (bse?.totalUnchanged ?? 0);
+
+    // Weighted average gain/loss
+    const gNse = nse?.totalGainers ?? 0;
+    const gBse = bse?.totalGainers ?? 0;
+    const avgGain = (gNse + gBse) > 0
+      ? Math.round(((nse?.avgGain ?? 0) * gNse + (bse?.avgGain ?? 0) * gBse) / (gNse + gBse) * 100) / 100
+      : 0;
+
+    const lNse = nse?.totalLosers ?? 0;
+    const lBse = bse?.totalLosers ?? 0;
+    const avgLoss = (lNse + lBse) > 0
+      ? Math.round(((nse?.avgLoss ?? 0) * lNse + (bse?.avgLoss ?? 0) * lBse) / (lNse + lBse) * 100) / 100
+      : 0;
+
+    // Pick top gainer (highest pct across exchanges)
+    const nseGPct = nse?.topGainerPct ?? -Infinity;
+    const bseGPct = bse?.topGainerPct ?? -Infinity;
+    const gSrc = nseGPct >= bseGPct ? nse : bse;
+
+    // Pick top loser (lowest pct across exchanges)
+    const nseLPct = nse?.topLoserPct ?? Infinity;
+    const bseLPct = bse?.topLoserPct ?? Infinity;
+    const lSrc = nseLPct <= bseLPct ? nse : bse;
+
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO "MarketStats" (
+        id, exchange, "totalStocks", "totalGainers", "totalLosers", "totalUnchanged",
+        "avgGain", "avgLoss",
+        "topGainerName", "topGainerSymbol", "topGainerSector", "topGainerLtp", "topGainerPct",
+        "topLoserName", "topLoserSymbol", "topLoserSector", "topLoserLtp", "topLoserPct",
+        "lastSyncAt", "syncCycles", "updatedAt"
+      ) VALUES (
+        'Both', 'Both',
+        ${totalStocks}, ${totalGainers}, ${totalLosers}, ${totalUnchanged},
+        ${avgGain}, ${avgLoss},
+        ${gSrc?.topGainerName ? `'${esc(gSrc.topGainerName)}'` : 'NULL'},
+        ${gSrc?.topGainerSymbol ? `'${esc(gSrc.topGainerSymbol)}'` : 'NULL'},
+        ${gSrc?.topGainerSector ? `'${esc(gSrc.topGainerSector)}'` : 'NULL'},
+        ${gSrc?.topGainerLtp != null ? gSrc.topGainerLtp : 'NULL'},
+        ${gSrc?.topGainerPct != null ? gSrc.topGainerPct : 'NULL'},
+        ${lSrc?.topLoserName ? `'${esc(lSrc.topLoserName)}'` : 'NULL'},
+        ${lSrc?.topLoserSymbol ? `'${esc(lSrc.topLoserSymbol)}'` : 'NULL'},
+        ${lSrc?.topLoserSector ? `'${esc(lSrc.topLoserSector)}'` : 'NULL'},
+        ${lSrc?.topLoserLtp != null ? lSrc.topLoserLtp : 'NULL'},
+        ${lSrc?.topLoserPct != null ? lSrc.topLoserPct : 'NULL'},
+        NOW(), COALESCE((SELECT "syncCycles" FROM "MarketStats" WHERE exchange = 'Both'), 0) + 1, NOW()
+      )
+      ON CONFLICT (exchange) DO UPDATE SET
+        "totalStocks" = EXCLUDED."totalStocks",
+        "totalGainers" = EXCLUDED."totalGainers",
+        "totalLosers" = EXCLUDED."totalLosers",
+        "totalUnchanged" = EXCLUDED."totalUnchanged",
+        "avgGain" = EXCLUDED."avgGain",
+        "avgLoss" = EXCLUDED."avgLoss",
+        "topGainerName" = EXCLUDED."topGainerName",
+        "topGainerSymbol" = EXCLUDED."topGainerSymbol",
+        "topGainerSector" = EXCLUDED."topGainerSector",
+        "topGainerLtp" = EXCLUDED."topGainerLtp",
+        "topGainerPct" = EXCLUDED."topGainerPct",
+        "topLoserName" = EXCLUDED."topLoserName",
+        "topLoserSymbol" = EXCLUDED."topLoserSymbol",
+        "topLoserSector" = EXCLUDED."topLoserSector",
+        "topLoserLtp" = EXCLUDED."topLoserLtp",
+        "topLoserPct" = EXCLUDED."topLoserPct",
+        "lastSyncAt" = NOW(),
+        "syncCycles" = "MarketStats"."syncCycles" + 1,
+        "updatedAt" = NOW()
+    `);
+  } catch (e) {
+    console.error('[Sync:Writer] Combined MarketStats error:', e instanceof Error ? e.message : e);
+  }
+}
