@@ -303,6 +303,8 @@ export default function FiiDiiTradingPage() {
                                 >
                                     <option value="BSE">BSE</option>
                                     <option value="NSE">NSE</option>
+                                    <option value="Only NSE">Only NSE</option>
+                                    <option value="Only BSE">Only BSE</option>
                                 </select>
                             </div>
                             <div className="h-24 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-sm">

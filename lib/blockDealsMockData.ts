@@ -184,6 +184,6 @@ export const blockDealsData: BlockDeal[] = [
     },
 ];
 
-export const exchangeOptions = ['All Exchanges', 'BSE', 'NSE'];
+export const exchangeOptions = ['All Exchanges', 'BSE', 'NSE', 'Only NSE', 'Only BSE'];
 export const transactionOptions = ['All Transactions', 'PURCHASE', 'SELL'];
 export const sortOptions = ['Date (Newest)', 'Date (Oldest)', 'Deal Value (High)', 'Deal Value (Low)', 'Quantity (High)', 'Quantity (Low)'];

@@ -7,7 +7,7 @@ import { Download, RefreshCw, Search, ChevronLeft, ChevronRight, ChevronsLeft, C
 // Time period tabs
 type TimePeriod = 'intraday' | 'days' | 'weeks' | 'months' | 'years' | 'customize';
 type SubTab = 'custom' | 'seasonality' | 'ytd' | '52weeks' | 'all_time';
-type Exchange = 'NSE' | 'BSE' | 'Both';
+type Exchange = 'NSE' | 'BSE' | 'Both' | 'Only NSE' | 'Only BSE';
 type ViewType = 'all' | 'gainers' | 'losers' | 'unchanged';
 
 const PAGE_SIZE = 200;
@@ -322,7 +322,7 @@ function MarketPageContent() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const exchanges: Exchange[] = ['NSE', 'BSE', 'Both'];
+  const exchanges: string[] = ['NSE', 'BSE', 'Both', 'Only NSE', 'Only BSE'];
 
   const allTabs: { id: string; label: string }[] = [
     { id: 'intraday', label: 'Intraday Wise' },
@@ -536,7 +536,7 @@ function MarketPageContent() {
                     type="radio"
                     name="exchange"
                     checked={selectedExchange === exchange}
-                    onChange={() => handleExchangeChange(exchange)}
+                    onChange={() => handleExchangeChange(exchange as Exchange)}
                     className="w-4 h-4 text-black border-gray-300 focus:ring-black"
                   />
                   <span className={`ml-2 text-sm font-medium ${selectedExchange === exchange ? 'text-black underline' : 'text-gray-600'}`}>

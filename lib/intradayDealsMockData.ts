@@ -159,5 +159,5 @@ export const intradayDealsData: IntradayDeal[] = [
 ];
 
 export const filterTabs = ["Today's Intraday Deals", "Top Stock Intraday Deals", "Industry Wise Deals"];
-export const exchangeOptions = ['All Exchanges', 'BSE', 'NSE'];
+export const exchangeOptions = ['All Exchanges', 'BSE', 'NSE', 'Only NSE', 'Only BSE'];
 export const sortOptions = ['Time (Latest)', 'Time (Oldest)', 'Deal Value (High)', 'Deal Value (Low)', 'Quantity (High)', 'Quantity (Low)'];

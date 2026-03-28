@@ -205,26 +205,18 @@ export default function TopGainersLosersTable({
                 <div className="flex items-center space-x-4">
                     {/* Exchange Toggle */}
                     <div className="flex items-center space-x-3">
-                        <label className="flex items-center cursor-pointer">
-                            <input
-                                type="radio"
-                                name="exchange"
-                                checked={selectedExchange === 'NSE'}
-                                onChange={() => setSelectedExchange('NSE')}
-                                className="w-4 h-4 text-gray-900 border-gray-300 focus:ring-gray-900"
-                            />
-                            <span className="ml-2 text-sm font-medium text-gray-700">NSE</span>
-                        </label>
-                        <label className="flex items-center cursor-pointer">
-                            <input
-                                type="radio"
-                                name="exchange"
-                                checked={selectedExchange === 'BSE'}
-                                onChange={() => setSelectedExchange('BSE')}
-                                className="w-4 h-4 text-gray-900 border-gray-300 focus:ring-gray-900"
-                            />
-                            <span className="ml-2 text-sm font-medium text-gray-700">BSE</span>
-                        </label>
+                        {(['NSE', 'BSE', 'Only NSE', 'Only BSE'] as const).map((ex) => (
+                            <label key={ex} className="flex items-center cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="exchange"
+                                    checked={selectedExchange === ex}
+                                    onChange={() => setSelectedExchange(ex as 'NSE' | 'BSE')}
+                                    className="w-4 h-4 text-gray-900 border-gray-300 focus:ring-gray-900"
+                                />
+                                <span className="ml-2 text-sm font-medium text-gray-700">{ex}</span>
+                            </label>
+                        ))}
                     </div>
 
                     {/* Index Dropdown */}
