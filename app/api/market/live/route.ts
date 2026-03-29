@@ -12,6 +12,14 @@
  *   sort      = column to sort by (default: pctChange)
  *   order     = asc | desc (default: desc)
  *   search    = search company name or symbol
+ *   sectors   = comma-separated sector names
+ *   industries = comma-separated industry names
+ *   marketCaps = comma-separated cap labels
+ *   priceBands = comma-separated bands
+ *   series    = comma-separated series
+ *   priceMin/priceMax = price range
+ *   changeMin/changeMax = % change range
+ *   volumeMin = minimum volume
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -64,8 +72,27 @@ export async function GET(request: NextRequest) {
     const order = (sp.get('order') || 'desc') as 'asc' | 'desc';
     const search = sp.get('search')?.trim() || '';
 
-    // ── Check in-memory cache first ──
-    const cacheKey = `${exchange}:${filter}:${page}:${pageSize}:${sort}:${order}:${search}`;
+    // ── Parse advanced filter params ──
+    const rawSectors = sp.get('sectors')?.split(',').filter(Boolean) || [];
+    const rawIndustries = sp.get('industries')?.split(',').filter(Boolean) || [];
+    const rawMarketCaps = sp.get('marketCaps')?.split(',').filter(Boolean) || [];
+    const rawPriceBands = sp.get('priceBands')?.split(',').filter(Boolean) || [];
+    const rawSeries = sp.get('series')?.split(',').filter(Boolean) || [];
+    const priceMin = parseFloat(sp.get('priceMin') || '');
+    const priceMax = parseFloat(sp.get('priceMax') || '');
+    const changeMin = parseFloat(sp.get('changeMin') || '');
+    const changeMax = parseFloat(sp.get('changeMax') || '');
+    const volumeMin = parseFloat(sp.get('volumeMin') || '');
+
+    // ── Check in-memory cache (include all params) ──
+    const filterKey = [
+      rawSectors.join(';'), rawIndustries.join(';'), rawMarketCaps.join(';'),
+      rawPriceBands.join(';'), rawSeries.join(';'),
+      sp.get('priceMin') || '', sp.get('priceMax') || '',
+      sp.get('changeMin') || '', sp.get('changeMax') || '',
+      sp.get('volumeMin') || '',
+    ].join('|');
+    const cacheKey = `${exchange}:${filter}:${page}:${pageSize}:${sort}:${order}:${search}:${filterKey}`;
     const cached = responseCache.get(cacheKey);
     if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
       return NextResponse.json(cached.data);
@@ -74,39 +101,73 @@ export async function GET(request: NextRequest) {
     // Ensure data exists (blocking on first-ever load, background refresh if stale)
     await ensureDataReady(exchange);
 
-    // Build WHERE clause
-    const conditions: string[] = [];
-    if (exchange !== 'Both') {
-      conditions.push(`exchange = '${exchange}'`);
-    }
-    if (filter === 'gainers') conditions.push(`"netChange" > 0`);
-    else if (filter === 'losers') conditions.push(`"netChange" < 0`);
-    else if (filter === 'unchanged') conditions.push(`"netChange" = 0`);
+    // ── Build WHERE conditions in two parts: base (without view filter) + full (with view filter) ──
+    const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "''");
+    const baseConditions: string[] = [];
 
+    // Exchange filter
+    if (exchange !== 'Both') {
+      const dbExchange = exchange.replace('Only ', '');
+      baseConditions.push(`exchange = '${esc(dbExchange)}'`);
+    }
+
+    // Search
     if (search) {
       const safeSearch = search.replace(/\\/g, '\\\\').replace(/'/g, "''").replace(/[%_]/g, '');
-      conditions.push(`("displayName" ILIKE '%${safeSearch}%' OR "tradingSymbol" ILIKE '%${safeSearch}%')`);
+      baseConditions.push(`("displayName" ILIKE '%${safeSearch}%' OR "tradingSymbol" ILIKE '%${safeSearch}%')`);
     }
 
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    // Categorical filters
+    if (rawSectors.length) baseConditions.push(`sector IN (${rawSectors.map(s => `'${esc(s)}'`).join(',')})`);
+    if (rawIndustries.length) baseConditions.push(`industry IN (${rawIndustries.map(s => `'${esc(s)}'`).join(',')})`);
+    if (rawMarketCaps.length) baseConditions.push(`"marketCapLabel" IN (${rawMarketCaps.map(s => `'${esc(s)}'`).join(',')})`);
+    if (rawPriceBands.length) baseConditions.push(`"priceBand" IN (${rawPriceBands.map(s => `'${esc(s)}'`).join(',')})`);
+    if (rawSeries.length) baseConditions.push(`series IN (${rawSeries.map(s => `'${esc(s)}'`).join(',')})`);
+
+    // Range filters
+    if (isFinite(priceMin)) baseConditions.push(`"lastPrice" >= ${priceMin}`);
+    if (isFinite(priceMax)) baseConditions.push(`"lastPrice" <= ${priceMax}`);
+    if (isFinite(changeMin)) baseConditions.push(`"pctChange" >= ${changeMin}`);
+    if (isFinite(changeMax)) baseConditions.push(`"pctChange" <= ${changeMax}`);
+    if (isFinite(volumeMin)) baseConditions.push(`volume >= ${volumeMin}`);
+
+    // View filter (gainers/losers/unchanged) — only in full conditions
+    const fullConditions = [...baseConditions];
+    if (filter === 'gainers') fullConditions.push(`"netChange" > 0`);
+    else if (filter === 'losers') fullConditions.push(`"netChange" < 0`);
+    else if (filter === 'unchanged') fullConditions.push(`"netChange" = 0`);
+
+    const baseWhere = baseConditions.length > 0 ? `WHERE ${baseConditions.join(' AND ')}` : '';
+    const fullWhere = fullConditions.length > 0 ? `WHERE ${fullConditions.join(' AND ')}` : '';
     const orderClause = getSortClause(sort, order);
     const offset = (page - 1) * pageSize;
 
-    // Count + fetch in parallel (fewer round trips to DB)
-    const [countResult, rows] = await Promise.all([
-      prisma.$queryRawUnsafe<[{ count: bigint }]>(
-        `SELECT COUNT(*)::bigint as count FROM "LiveQuote" ${whereClause}`
+    // ── Count breakdown (for tab labels) + fetch rows — in parallel ──
+    const [countsResult, rows] = await Promise.all([
+      // Single query gives total + per-category counts (without view filter)
+      prisma.$queryRawUnsafe<[{ total: bigint; gainers: bigint; losers: bigint; unchanged: bigint }]>(
+        `SELECT COUNT(*)::bigint AS total,
+                COUNT(*) FILTER (WHERE "netChange" > 0)::bigint AS gainers,
+                COUNT(*) FILTER (WHERE "netChange" < 0)::bigint AS losers,
+                COUNT(*) FILTER (WHERE "netChange" = 0)::bigint AS unchanged
+         FROM "LiveQuote" ${baseWhere}`
       ),
-      // Select only columns the frontend needs (no id, securityId, exchangeSegment, open, high, low, circuits, syncedAt)
       prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(
         `SELECT "displayName", "tradingSymbol", sector, industry, series, "faceValue",
                 "priceBand", "marketCapValue", "prevClose", "lastPrice", "netChange",
                 "pctChange", "percentChanges", "week52High", "week52Low", volume
-         FROM "LiveQuote" ${whereClause} ORDER BY ${orderClause} LIMIT ${pageSize} OFFSET ${offset}`
+         FROM "LiveQuote" ${fullWhere} ORDER BY ${orderClause} LIMIT ${pageSize} OFFSET ${offset}`
       ),
     ]);
 
-    const totalStocks = Number(countResult[0]?.count || 0);
+    const counts = countsResult[0];
+    const viewTotal = Number(
+      filter === 'gainers' ? counts.gainers :
+      filter === 'losers' ? counts.losers :
+      filter === 'unchanged' ? counts.unchanged :
+      counts.total
+    );
+    const totalStocks = viewTotal;
     const totalPages = Math.ceil(totalStocks / pageSize);
 
     // Transform DB rows to frontend DTO
@@ -176,6 +237,12 @@ export async function GET(request: NextRequest) {
       stocks,
       pagination: { page, pageSize, totalStocks, totalPages },
       stats,
+      filteredCounts: {
+        total: Number(counts.total),
+        gainers: Number(counts.gainers),
+        losers: Number(counts.losers),
+        unchanged: Number(counts.unchanged),
+      },
       lastSyncAt: syncStatus.lastSyncAt,
       syncStatus: {
         isRunning: syncStatus.isRunning,

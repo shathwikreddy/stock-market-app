@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Download, RefreshCw, Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import FilterPanel, { type FilterState, type FilterOptions, emptyFilters, emptyFilterOptions } from '@/components/FilterPanel';
 
 // Time period tabs
 type TimePeriod = 'intraday' | 'days' | 'weeks' | 'months' | 'years' | 'customize';
@@ -28,6 +29,7 @@ const columnsByPeriod: Record<TimePeriod | SubTab, string[]> = {
 };
 
 const baseColumns = ['S No', 'Company Name', 'Sector', 'Industry', 'Group', 'F V', 'P Band', 'M Cap', 'Pre Close', 'CMP', 'Net Chag'];
+const TOGGLEABLE_COLUMNS = ['Sector', 'Industry', 'Group', 'F V', 'P Band', 'M Cap', 'Pre Close'];
 
 interface StockData {
   id: string;
@@ -171,15 +173,35 @@ const PaginationControls = ({
 };
 
 // ── Stock Table with Pagination ──
+const SORT_MAP_UI: Record<string, string> = {
+  'Company Name': 'name', 'CMP': 'lastPrice', 'Pre Close': 'prevClose',
+  'Net Chag': 'netChange', 'M Cap': 'marketCap',
+};
+
+const SORT_ICON_MAP: Record<string, string> = {
+  'Company Name': 'name', 'CMP': 'lastPrice', 'Net Chag': 'netChange', 'M Cap': 'marketCap',
+};
+
+function renderBaseCell(col: string, stock: StockData, colorClass: string) {
+  const cls = 'border border-gray-300 px-2 py-1';
+  switch (col) {
+    case 'S No': return <td key={col} className={`${cls} text-center text-black`}>{stock.id}</td>;
+    case 'Company Name': return <td key={col} className={`${cls} text-black font-medium whitespace-nowrap`}>{stock.companyName}</td>;
+    case 'Sector': return <td key={col} className={`${cls} text-black whitespace-nowrap`}>{stock.sector}</td>;
+    case 'Industry': return <td key={col} className={`${cls} text-black whitespace-nowrap`}>{stock.industry}</td>;
+    case 'Group': return <td key={col} className={`${cls} text-center text-black`}>{stock.group}</td>;
+    case 'F V': return <td key={col} className={`${cls} text-center text-black`}>{stock.faceValue}</td>;
+    case 'P Band': return <td key={col} className={`${cls} text-center text-black`}>{stock.priceBand}</td>;
+    case 'M Cap': return <td key={col} className={`${cls} text-right text-black whitespace-nowrap`}>{stock.marketCap}</td>;
+    case 'Pre Close': return <td key={col} className={`${cls} text-right text-black`}>{stock.preClose.toFixed(2)}</td>;
+    case 'CMP': return <td key={col} className={`${cls} text-right text-black font-medium`}>{stock.cmp.toFixed(2)}</td>;
+    case 'Net Chag': return <td key={col} className={`${cls} text-right font-medium ${colorClass}`}>{stock.netChange > 0 ? '+' : ''}{stock.netChange.toFixed(2)}</td>;
+    default: return null;
+  }
+}
+
 const StockTable = ({
-  data,
-  columns,
-  title,
-  pagination,
-  onPageChange,
-  sortCol,
-  sortOrder,
-  onSort,
+  data, columns, title, pagination, onPageChange, sortCol, sortOrder, onSort, hiddenColumns,
 }: {
   data: StockData[];
   columns: string[];
@@ -189,55 +211,40 @@ const StockTable = ({
   sortCol: string;
   sortOrder: 'asc' | 'desc';
   onSort: (col: string) => void;
+  hiddenColumns: Set<string>;
 }) => {
+  const visibleBase = baseColumns.filter(c => !hiddenColumns.has(c));
+
   const SortIcon = ({ col }: { col: string }) => {
     if (sortCol !== col) return null;
-    return <span className="ml-1 text-[10px]">{sortOrder === 'asc' ? '▲' : '▼'}</span>;
+    return <span className="ml-1 text-[10px]">{sortOrder === 'asc' ? '\u25B2' : '\u25BC'}</span>;
   };
 
   return (
     <div className="border border-black">
-      {/* Section Title */}
       <div className="text-center py-2 font-bold text-black border-b border-black bg-gray-50">
         {title} ({pagination.totalStocks})
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
         <table className="w-full text-xs border-collapse">
           <thead className="sticky top-0 z-10">
             <tr className="bg-gray-100">
-              {baseColumns.map((col) => (
-                <th
-                  key={col}
+              {visibleBase.map((col) => (
+                <th key={col}
                   className="border border-gray-400 px-2 py-1 text-black font-semibold text-center whitespace-nowrap bg-gray-100 cursor-pointer hover:bg-gray-200"
-                  onClick={() => {
-                    if (col === 'S No') return;
-                    const sortMap: Record<string, string> = {
-                      'Company Name': 'name',
-                      'CMP': 'lastPrice',
-                      'Pre Close': 'prevClose',
-                      'Net Chag': 'netChange',
-                      'M Cap': 'marketCap',
-                    };
-                    if (sortMap[col]) onSort(sortMap[col]);
-                  }}
+                  onClick={() => { if (SORT_MAP_UI[col]) onSort(SORT_MAP_UI[col]); }}
                 >
                   {col}
-                  {col === 'Company Name' && <SortIcon col="name" />}
-                  {col === 'CMP' && <SortIcon col="lastPrice" />}
-                  {col === 'Net Chag' && <SortIcon col="netChange" />}
-                  {col === 'M Cap' && <SortIcon col="marketCap" />}
+                  {SORT_ICON_MAP[col] && <SortIcon col={SORT_ICON_MAP[col]} />}
                 </th>
               ))}
               {columns.map((col) => (
-                <th
-                  key={col}
+                <th key={col}
                   className="border border-gray-400 px-2 py-1 text-black font-semibold text-center whitespace-nowrap bg-yellow-100 cursor-pointer hover:bg-yellow-200"
                   onClick={() => onSort(col)}
                 >
-                  {col}
-                  <SortIcon col={col} />
+                  {col}<SortIcon col={col} />
                 </th>
               ))}
             </tr>
@@ -245,37 +252,21 @@ const StockTable = ({
           <tbody>
             {data.length === 0 ? (
               <tr>
-                <td colSpan={baseColumns.length + columns.length} className="border border-gray-300 px-4 py-8 text-center text-gray-500">
+                <td colSpan={visibleBase.length + columns.length} className="border border-gray-300 px-4 py-8 text-center text-gray-500">
                   No data available
                 </td>
               </tr>
             ) : (
               data.map((stock) => {
-                const isPositive = stock.netChange > 0;
-                const isNegative = stock.netChange < 0;
-                const colorClass = isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-gray-600';
-
+                const colorClass = stock.netChange > 0 ? 'text-green-600' : stock.netChange < 0 ? 'text-red-600' : 'text-gray-600';
                 return (
                   <tr key={`${stock.id}-${stock.companyName}`} className="hover:bg-gray-50">
-                    <td className="border border-gray-300 px-2 py-1 text-center text-black">{stock.id}</td>
-                    <td className="border border-gray-300 px-2 py-1 text-black font-medium whitespace-nowrap">{stock.companyName}</td>
-                    <td className="border border-gray-300 px-2 py-1 text-black whitespace-nowrap">{stock.sector}</td>
-                    <td className="border border-gray-300 px-2 py-1 text-black whitespace-nowrap">{stock.industry}</td>
-                    <td className="border border-gray-300 px-2 py-1 text-center text-black">{stock.group}</td>
-                    <td className="border border-gray-300 px-2 py-1 text-center text-black">{stock.faceValue}</td>
-                    <td className="border border-gray-300 px-2 py-1 text-center text-black">{stock.priceBand}</td>
-                    <td className="border border-gray-300 px-2 py-1 text-right text-black whitespace-nowrap">{stock.marketCap}</td>
-                    <td className="border border-gray-300 px-2 py-1 text-right text-black">{stock.preClose.toFixed(2)}</td>
-                    <td className="border border-gray-300 px-2 py-1 text-right text-black font-medium">{stock.cmp.toFixed(2)}</td>
-                    <td className={`border border-gray-300 px-2 py-1 text-right font-medium ${colorClass}`}>
-                      {isPositive ? '+' : ''}{stock.netChange.toFixed(2)}
-                    </td>
+                    {visibleBase.map(col => renderBaseCell(col, stock, colorClass))}
                     {columns.map((col) => {
                       const value = stock.percentChanges[col];
                       const isNull = value === null || value === undefined;
                       return (
-                        <td
-                          key={col}
+                        <td key={col}
                           className={`border border-gray-300 px-2 py-1 text-right font-medium ${isNull ? 'text-gray-400' : value > 0 ? 'text-green-600' : value < 0 ? 'text-red-600' : 'text-gray-600'}`}
                         >
                           {isNull ? '-' : `${value > 0 ? '+' : ''}${value.toFixed(2)}%`}
@@ -290,7 +281,6 @@ const StockTable = ({
         </table>
       </div>
 
-      {/* Pagination */}
       {pagination.totalPages > 1 && (
         <PaginationControls pagination={pagination} onPageChange={onPageChange} />
       )}
@@ -322,6 +312,13 @@ function MarketPageContent() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Advanced filters
+  const [filters, setFilters] = useState<FilterState>(emptyFilters);
+  const [debouncedFilters, setDebouncedFilters] = useState<FilterState>(emptyFilters);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>(emptyFilterOptions);
+  const [filteredCounts, setFilteredCounts] = useState<{ total: number; gainers: number; losers: number; unchanged: number } | null>(null);
+  const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
+
   const exchanges: string[] = ['NSE', 'BSE', 'Both', 'Only NSE', 'Only BSE'];
 
   const allTabs: { id: string; label: string }[] = [
@@ -336,6 +333,20 @@ function MarketPageContent() {
     { id: '52weeks', label: '52 Weeks Gainers & Losers' },
     { id: 'all_time', label: 'All Time Gainers & Losers' },
   ];
+
+  // Debounce filter changes (handles rapid range input typing)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedFilters(filters), 300);
+    return () => clearTimeout(timer);
+  }, [filters]);
+
+  // Fetch filter options when exchange changes
+  useEffect(() => {
+    fetch(`/api/market/filters?exchange=${selectedExchange}`)
+      .then(r => r.json())
+      .then(data => setFilterOptions(data))
+      .catch(() => {});
+  }, [selectedExchange]);
 
   const currentColumns = columnsByPeriod[activeTab as TimePeriod | SubTab] || [];
   const periodLabel = allTabs.find(t => t.id === activeTab)?.label;
@@ -359,6 +370,16 @@ function MarketPageContent() {
         sort: sortCol,
         order: sortOrder,
         ...(searchQuery ? { search: searchQuery } : {}),
+        ...(debouncedFilters.sectors.length ? { sectors: debouncedFilters.sectors.join(',') } : {}),
+        ...(debouncedFilters.industries.length ? { industries: debouncedFilters.industries.join(',') } : {}),
+        ...(debouncedFilters.marketCaps.length ? { marketCaps: debouncedFilters.marketCaps.join(',') } : {}),
+        ...(debouncedFilters.priceBands.length ? { priceBands: debouncedFilters.priceBands.join(',') } : {}),
+        ...(debouncedFilters.series.length ? { series: debouncedFilters.series.join(',') } : {}),
+        ...(debouncedFilters.priceMin ? { priceMin: debouncedFilters.priceMin } : {}),
+        ...(debouncedFilters.priceMax ? { priceMax: debouncedFilters.priceMax } : {}),
+        ...(debouncedFilters.changeMin ? { changeMin: debouncedFilters.changeMin } : {}),
+        ...(debouncedFilters.changeMax ? { changeMax: debouncedFilters.changeMax } : {}),
+        ...(debouncedFilters.volumeMin ? { volumeMin: debouncedFilters.volumeMin } : {}),
       });
 
       const response = await fetch(`/api/market/live?${params}`);
@@ -372,6 +393,7 @@ function MarketPageContent() {
       setStockData(data.stocks || []);
       setPagination(data.pagination || { page: 1, pageSize: PAGE_SIZE, totalStocks: 0, totalPages: 0 });
       setStats(data.stats || { totalGainers: 0, totalLosers: 0, totalUnchanged: 0, avgGain: 0, avgLoss: 0 });
+      setFilteredCounts(data.filteredCounts || null);
       setLastSyncAt(data.lastSyncAt);
       setSyncStatus(data.syncStatus || null);
       setCurrentPage(data.pagination?.page || 1);
@@ -382,7 +404,7 @@ function MarketPageContent() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [selectedExchange, currentView, sortCol, sortOrder, searchQuery]);
+  }, [selectedExchange, currentView, sortCol, sortOrder, searchQuery, debouncedFilters]);
 
   // Fetch on mount and when deps change
   useEffect(() => {
@@ -441,15 +463,18 @@ function MarketPageContent() {
     setSortOrder('desc');
   };
 
-  // Handle exchange change
+  // Handle exchange change — reset filters since options differ per exchange
   const handleExchangeChange = (exchange: Exchange) => {
     setSelectedExchange(exchange);
+    setFilters(emptyFilters);
+    setDebouncedFilters(emptyFilters);
     setCurrentPage(1);
   };
 
-  // CSV Download
+  // CSV Download (respects column visibility)
   const downloadCSV = () => {
-    const allColumns = [...baseColumns, ...currentColumns];
+    const visibleBase = baseColumns.filter(c => !hiddenColumns.has(c));
+    const allColumns = [...visibleBase, ...currentColumns];
     const headers = allColumns.join(',');
 
     const csvLines: string[] = [];
@@ -459,20 +484,25 @@ function MarketPageContent() {
     csvLines.push('');
     csvLines.push(headers);
 
+    const getCsvValue = (col: string, stock: StockData): string => {
+      switch (col) {
+        case 'S No': return stock.id;
+        case 'Company Name': return `"${stock.companyName}"`;
+        case 'Sector': return `"${stock.sector}"`;
+        case 'Industry': return `"${stock.industry}"`;
+        case 'Group': return stock.group;
+        case 'F V': return String(stock.faceValue);
+        case 'P Band': return `"${stock.priceBand}"`;
+        case 'M Cap': return `"${stock.marketCap}"`;
+        case 'Pre Close': return stock.preClose.toFixed(2);
+        case 'CMP': return stock.cmp.toFixed(2);
+        case 'Net Chag': return stock.netChange.toFixed(2);
+        default: return '';
+      }
+    };
+
     stockData.forEach((stock) => {
-      const base = [
-        stock.id,
-        `"${stock.companyName}"`,
-        `"${stock.sector}"`,
-        `"${stock.industry}"`,
-        stock.group,
-        stock.faceValue,
-        `"${stock.priceBand}"`,
-        `"${stock.marketCap}"`,
-        stock.preClose.toFixed(2),
-        stock.cmp.toFixed(2),
-        stock.netChange.toFixed(2),
-      ];
+      const base = visibleBase.map(col => getCsvValue(col, stock));
       const pctData = currentColumns.map(col => {
         const value = stock.percentChanges[col];
         return value === null || value === undefined ? '-' : value.toFixed(2);
@@ -490,8 +520,14 @@ function MarketPageContent() {
     URL.revokeObjectURL(link.href);
   };
 
-  // Total stocks from stats
-  const totalStocksCount = stats.totalGainers + stats.totalLosers + stats.totalUnchanged;
+  // Use filtered counts for tab labels (respects advanced filters), fallback to global stats
+  const displayCounts = filteredCounts || {
+    total: stats.totalGainers + stats.totalLosers + stats.totalUnchanged,
+    gainers: stats.totalGainers,
+    losers: stats.totalLosers,
+    unchanged: stats.totalUnchanged,
+  };
+  const totalStocksCount = displayCounts.total;
 
   return (
     <div className="min-h-screen bg-white">
@@ -599,6 +635,17 @@ function MarketPageContent() {
           </div>
         </div>
 
+        {/* Filter Panel */}
+        <FilterPanel
+          filters={filters}
+          options={filterOptions}
+          onChange={(f) => { setFilters(f); setCurrentPage(1); }}
+          onReset={() => { setFilters(emptyFilters); setDebouncedFilters(emptyFilters); setCurrentPage(1); }}
+          hiddenColumns={hiddenColumns}
+          onHiddenColumnsChange={setHiddenColumns}
+          toggleableColumns={TOGGLEABLE_COLUMNS}
+        />
+
         {/* Loading State */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-20">
@@ -637,7 +684,7 @@ function MarketPageContent() {
                   currentView === 'gainers' ? 'text-green-600 bg-green-50' : 'text-gray-400 bg-gray-100'
                 }`}
               >
-                Gainers ({stats.totalGainers})
+                Gainers ({displayCounts.gainers})
               </button>
               <button
                 onClick={() => handleViewChange('losers')}
@@ -645,7 +692,7 @@ function MarketPageContent() {
                   currentView === 'losers' ? 'text-red-600 bg-red-50' : 'text-gray-400 bg-gray-100'
                 }`}
               >
-                Losers ({stats.totalLosers})
+                Losers ({displayCounts.losers})
               </button>
               <button
                 onClick={() => handleViewChange('unchanged')}
@@ -653,7 +700,7 @@ function MarketPageContent() {
                   currentView === 'unchanged' ? 'text-gray-700 bg-gray-50' : 'text-gray-400 bg-gray-100'
                 }`}
               >
-                Unchanged ({stats.totalUnchanged})
+                Unchanged ({displayCounts.unchanged})
               </button>
             </div>
 
@@ -677,6 +724,7 @@ function MarketPageContent() {
                 sortCol={sortCol}
                 sortOrder={sortOrder}
                 onSort={handleSort}
+                hiddenColumns={hiddenColumns}
               />
             </div>
           </>
