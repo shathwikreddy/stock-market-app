@@ -78,6 +78,8 @@ export async function GET(request: NextRequest) {
     const rawMarketCaps = sp.get('marketCaps')?.split(',').filter(Boolean) || [];
     const rawPriceBands = sp.get('priceBands')?.split(',').filter(Boolean) || [];
     const rawSeries = sp.get('series')?.split(',').filter(Boolean) || [];
+    const marketCapMin = parseFloat(sp.get('marketCapMin') || '');
+    const marketCapMax = parseFloat(sp.get('marketCapMax') || '');
     const priceMin = parseFloat(sp.get('priceMin') || '');
     const priceMax = parseFloat(sp.get('priceMax') || '');
     const changeMin = parseFloat(sp.get('changeMin') || '');
@@ -88,6 +90,7 @@ export async function GET(request: NextRequest) {
     const filterKey = [
       rawSectors.join(';'), rawIndustries.join(';'), rawMarketCaps.join(';'),
       rawPriceBands.join(';'), rawSeries.join(';'),
+      sp.get('marketCapMin') || '', sp.get('marketCapMax') || '',
       sp.get('priceMin') || '', sp.get('priceMax') || '',
       sp.get('changeMin') || '', sp.get('changeMax') || '',
       sp.get('volumeMin') || '',
@@ -123,6 +126,10 @@ export async function GET(request: NextRequest) {
     if (rawMarketCaps.length) baseConditions.push(`"marketCapLabel" IN (${rawMarketCaps.map(s => `'${esc(s)}'`).join(',')})`);
     if (rawPriceBands.length) baseConditions.push(`"priceBand" IN (${rawPriceBands.map(s => `'${esc(s)}'`).join(',')})`);
     if (rawSeries.length) baseConditions.push(`series IN (${rawSeries.map(s => `'${esc(s)}'`).join(',')})`);
+
+    // Market cap range filters (user enters in Crores, DB stores in INR)
+    if (isFinite(marketCapMin)) baseConditions.push(`"marketCapValue" >= ${marketCapMin * 1e7}`);
+    if (isFinite(marketCapMax)) baseConditions.push(`"marketCapValue" <= ${marketCapMax * 1e7}`);
 
     // Range filters
     if (isFinite(priceMin)) baseConditions.push(`"lastPrice" >= ${priceMin}`);

@@ -375,6 +375,8 @@ function MarketPageContent() {
         ...(debouncedFilters.marketCaps.length ? { marketCaps: debouncedFilters.marketCaps.join(',') } : {}),
         ...(debouncedFilters.priceBands.length ? { priceBands: debouncedFilters.priceBands.join(',') } : {}),
         ...(debouncedFilters.series.length ? { series: debouncedFilters.series.join(',') } : {}),
+        ...(debouncedFilters.marketCapMin ? { marketCapMin: debouncedFilters.marketCapMin } : {}),
+        ...(debouncedFilters.marketCapMax ? { marketCapMax: debouncedFilters.marketCapMax } : {}),
         ...(debouncedFilters.priceMin ? { priceMin: debouncedFilters.priceMin } : {}),
         ...(debouncedFilters.priceMax ? { priceMax: debouncedFilters.priceMax } : {}),
         ...(debouncedFilters.changeMin ? { changeMin: debouncedFilters.changeMin } : {}),

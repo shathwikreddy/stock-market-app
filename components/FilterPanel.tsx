@@ -15,6 +15,8 @@ export interface FilterState {
   changeMin: string;
   changeMax: string;
   volumeMin: string;
+  marketCapMin: string;
+  marketCapMax: string;
 }
 
 export interface FilterOptions {
@@ -28,6 +30,7 @@ export interface FilterOptions {
 export const emptyFilters: FilterState = {
   sectors: [], industries: [], marketCaps: [], priceBands: [], series: [],
   priceMin: '', priceMax: '', changeMin: '', changeMax: '', volumeMin: '',
+  marketCapMin: '', marketCapMax: '',
 };
 
 export const emptyFilterOptions: FilterOptions = {
@@ -37,7 +40,8 @@ export const emptyFilterOptions: FilterOptions = {
 export function hasActiveFilters(f: FilterState): boolean {
   return f.sectors.length > 0 || f.industries.length > 0 || f.marketCaps.length > 0 ||
     f.priceBands.length > 0 || f.series.length > 0 ||
-    !!f.priceMin || !!f.priceMax || !!f.changeMin || !!f.changeMax || !!f.volumeMin;
+    !!f.priceMin || !!f.priceMax || !!f.changeMin || !!f.changeMax || !!f.volumeMin ||
+    !!f.marketCapMin || !!f.marketCapMax;
 }
 
 function countActive(f: FilterState): number {
@@ -52,6 +56,8 @@ function countActive(f: FilterState): number {
   if (f.changeMin) n++;
   if (f.changeMax) n++;
   if (f.volumeMin) n++;
+  if (f.marketCapMin) n++;
+  if (f.marketCapMax) n++;
   return n;
 }
 
@@ -187,6 +193,8 @@ export default function FilterPanel({
   for (const s of filters.marketCaps) chips.push({ label: s, type: 'marketCaps', value: s });
   for (const s of filters.priceBands) chips.push({ label: `Band: ${s}`, type: 'priceBands', value: s });
   for (const s of filters.series) chips.push({ label: `Series: ${s}`, type: 'series', value: s });
+  if (filters.marketCapMin) chips.push({ label: `M Cap \u2265 ${Number(filters.marketCapMin).toLocaleString()} Cr`, type: 'marketCapMin', value: filters.marketCapMin });
+  if (filters.marketCapMax) chips.push({ label: `M Cap \u2264 ${Number(filters.marketCapMax).toLocaleString()} Cr`, type: 'marketCapMax', value: filters.marketCapMax });
   if (filters.priceMin) chips.push({ label: `Price \u2265 \u20B9${filters.priceMin}`, type: 'priceMin', value: filters.priceMin });
   if (filters.priceMax) chips.push({ label: `Price \u2264 \u20B9${filters.priceMax}`, type: 'priceMax', value: filters.priceMax });
   if (filters.changeMin) chips.push({ label: `Change \u2265 ${filters.changeMin}%`, type: 'changeMin', value: filters.changeMin });
@@ -229,13 +237,20 @@ export default function FilterPanel({
           <div className="flex flex-wrap gap-2">
             <MultiSelect label="Sector" options={options.sectors} selected={filters.sectors} onChange={v => update('sectors', v)} />
             <MultiSelect label="Industry" options={options.industries} selected={filters.industries} onChange={v => update('industries', v)} />
-            <MultiSelect label="Market Cap" options={options.marketCaps} selected={filters.marketCaps} onChange={v => update('marketCaps', v)} />
             <MultiSelect label="Price Band" options={options.priceBands} selected={filters.priceBands} onChange={v => update('priceBands', v)} />
             <MultiSelect label="Series" options={options.series} selected={filters.series} onChange={v => update('series', v)} />
           </div>
 
           {/* Range filters */}
           <div className="flex flex-wrap gap-x-6 gap-y-2 items-center">
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="font-medium text-gray-600 whitespace-nowrap">M Cap (Cr):</span>
+              <input type="number" placeholder="Min" value={filters.marketCapMin} onChange={e => update('marketCapMin', e.target.value)}
+                className="w-28 border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:border-black" />
+              <span className="text-gray-400">&mdash;</span>
+              <input type="number" placeholder="Max" value={filters.marketCapMax} onChange={e => update('marketCapMax', e.target.value)}
+                className="w-28 border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:border-black" />
+            </div>
             <div className="flex items-center gap-1.5 text-xs">
               <span className="font-medium text-gray-600 whitespace-nowrap">Price (\u20B9):</span>
               <input type="number" placeholder="Min" value={filters.priceMin} onChange={e => update('priceMin', e.target.value)}
