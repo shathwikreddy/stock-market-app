@@ -97,7 +97,8 @@ export async function GET(request: NextRequest) {
       sp.get('volumeMin') || '',
     ].join('|');
     const customDate = sp.get('customDate')?.trim() || '';
-    const cacheKey = `${exchange}:${filter}:${page}:${pageSize}:${sort}:${order}:${search}:${filterKey}:${customDate}`;
+    const customEndDate = sp.get('customEndDate')?.trim() || '';
+    const cacheKey = `${exchange}:${filter}:${page}:${pageSize}:${sort}:${order}:${search}:${filterKey}:${customDate}:${customEndDate}`;
     const cached = responseCache.get(cacheKey);
     if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
       return NextResponse.json(cached.data);
@@ -202,40 +203,62 @@ export async function GET(request: NextRequest) {
 
     // ── Custom date % change (override % Cust Date Chag for the current page) ──
     if (customDate && stocks.length > 0) {
-      const targetTs = Math.floor(new Date(customDate + 'T00:00:00Z').getTime() / 1000);
-      if (isFinite(targetTs) && targetTs > 0) {
+      const startTs = Math.floor(new Date(customDate + 'T00:00:00Z').getTime() / 1000);
+      const endTs = customEndDate
+        ? Math.floor(new Date(customEndDate + 'T00:00:00Z').getTime() / 1000)
+        : null;
+      if (isFinite(startTs) && startTs > 0 && (endTs === null || (isFinite(endTs) && endTs >= startTs))) {
         const secIds = rows.map(r => parseInt(String(r.securityId))).filter(n => isFinite(n) && n > 0);
         if (secIds.length > 0) {
           try {
+            const endSelect = endTs !== null
+              ? `(SELECT hp.closes[i]
+                   FROM generate_subscripts(hp.timestamps, 1) i
+                   WHERE hp.timestamps[i] <= ${endTs}
+                   ORDER BY i DESC
+                   LIMIT 1
+                  ) as "endClose"`
+              : `NULL::double precision as "endClose"`;
             const histRows = await prisma.$queryRawUnsafe<Array<{
               securityId: number;
               exchangeSegment: string;
-              customClose: number | null;
+              startClose: number | null;
+              endClose: number | null;
             }>>(`
               SELECT hp."securityId", hp."exchangeSegment",
                 (SELECT hp.closes[i]
                  FROM generate_subscripts(hp.timestamps, 1) i
-                 WHERE hp.timestamps[i] <= ${targetTs}
+                 WHERE hp.timestamps[i] <= ${startTs}
                  ORDER BY i DESC
                  LIMIT 1
-                ) as "customClose"
+                ) as "startClose",
+                ${endSelect}
               FROM "HistoricalPrice" hp
               WHERE hp."securityId" IN (${secIds.join(',')})
             `);
 
-            const closeMap = new Map<string, number>();
+            const closeMap = new Map<string, { start: number; end: number | null }>();
             for (const h of histRows) {
-              if (h.customClose != null && h.customClose > 0) {
-                closeMap.set(`${h.securityId}:${h.exchangeSegment}`, h.customClose);
+              if (h.startClose != null && h.startClose > 0) {
+                closeMap.set(`${h.securityId}:${h.exchangeSegment}`, {
+                  start: h.startClose,
+                  end: h.endClose != null && h.endClose > 0 ? h.endClose : null,
+                });
               }
             }
 
             for (let i = 0; i < stocks.length; i++) {
               const key = `${rows[i].securityId}:${rows[i].exchangeSegment}`;
-              const customClose = closeMap.get(key);
-              if (customClose && customClose > 0 && stocks[i].cmp > 0) {
-                stocks[i].percentChanges['% Cust Date Chag'] =
-                  Math.round(((stocks[i].cmp - customClose) / customClose) * 10000) / 100;
+              const entry = closeMap.get(key);
+              if (entry && entry.start > 0) {
+                // When end date provided, compare start → end close. Otherwise compare start → CMP.
+                const compareTo = endTs !== null ? entry.end : stocks[i].cmp;
+                if (compareTo && compareTo > 0) {
+                  stocks[i].percentChanges['% Cust Date Chag'] =
+                    Math.round(((compareTo - entry.start) / entry.start) * 10000) / 100;
+                } else {
+                  stocks[i].percentChanges['% Cust Date Chag'] = null;
+                }
               } else {
                 stocks[i].percentChanges['% Cust Date Chag'] = null;
               }

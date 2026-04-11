@@ -201,7 +201,7 @@ function renderBaseCell(col: string, stock: StockData, colorClass: string) {
 }
 
 const StockTable = ({
-  data, columns, title, pagination, onPageChange, sortCol, sortOrder, onSort, hiddenColumns, customDate,
+  data, columns, title, pagination, onPageChange, sortCol, sortOrder, onSort, hiddenColumns, customDate, customEndDate,
 }: {
   data: StockData[];
   columns: string[];
@@ -213,6 +213,7 @@ const StockTable = ({
   onSort: (col: string) => void;
   hiddenColumns: Set<string>;
   customDate?: string;
+  customEndDate?: string;
 }) => {
   const visibleBase = baseColumns.filter(c => !hiddenColumns.has(c));
 
@@ -243,8 +244,11 @@ const StockTable = ({
               {columns.map((col) => {
                 let label = col;
                 if (col === '% Cust Date Chag' && customDate) {
-                  const d = new Date(customDate + 'T00:00:00');
-                  label = `% ${d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' })} Chag`;
+                  const fmt = (iso: string) =>
+                    new Date(iso + 'T00:00:00').toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+                  label = customEndDate
+                    ? `% ${fmt(customDate)} → ${fmt(customEndDate)} Chag`
+                    : `% ${fmt(customDate)} Chag`;
                 }
                 return (
                   <th key={col}
@@ -327,8 +331,34 @@ function MarketPageContent() {
   const [filteredCounts, setFilteredCounts] = useState<{ total: number; gainers: number; losers: number; unchanged: number } | null>(null);
   const [hiddenColumns, setHiddenColumns] = useState<Set<string>>(new Set());
   const [customDate, setCustomDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+  const [startDateInput, setStartDateInput] = useState('');
+  const [endDateInput, setEndDateInput] = useState('');
+  const [dateError, setDateError] = useState('');
 
   const exchanges: string[] = ['NSE', 'BSE', 'Both', 'Only NSE', 'Only BSE'];
+
+  // MM/DD/YYYY ↔ YYYY-MM-DD helpers (used by the Customize Date picker)
+  const isoToDisplay = (iso: string): string => {
+    if (!iso) return '';
+    const [y, m, d] = iso.split('-');
+    if (!y || !m || !d) return '';
+    return `${m}/${d}/${y}`;
+  };
+  const parseDisplayDate = (input: string): { iso: string; valid: boolean } => {
+    const trimmed = input.trim();
+    if (!trimmed) return { iso: '', valid: true };
+    const m = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!m) return { iso: '', valid: false };
+    const mm = m[1].padStart(2, '0');
+    const dd = m[2].padStart(2, '0');
+    const yyyy = m[3];
+    const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+    if (isNaN(d.getTime()) || d.getFullYear() !== Number(yyyy) || d.getMonth() + 1 !== Number(mm) || d.getDate() !== Number(dd)) {
+      return { iso: '', valid: false };
+    }
+    return { iso: `${yyyy}-${mm}-${dd}`, valid: true };
+  };
 
   const allTabs: { id: string; label: string }[] = [
     { id: 'intraday', label: 'Intraday Wise' },
@@ -348,6 +378,16 @@ function MarketPageContent() {
     const timer = setTimeout(() => setDebouncedFilters(filters), 300);
     return () => clearTimeout(timer);
   }, [filters]);
+
+  // When switching to Customize Date tab, prefill inputs with the currently-applied range
+  useEffect(() => {
+    if (activeTab === 'custom') {
+      setStartDateInput(isoToDisplay(customDate));
+      setEndDateInput(isoToDisplay(customEndDate));
+      setDateError('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   // Fetch filter options when exchange changes
   useEffect(() => {
@@ -392,6 +432,7 @@ function MarketPageContent() {
         ...(debouncedFilters.changeMax ? { changeMax: debouncedFilters.changeMax } : {}),
         ...(debouncedFilters.volumeMin ? { volumeMin: debouncedFilters.volumeMin } : {}),
         ...(customDate ? { customDate } : {}),
+        ...(customEndDate ? { customEndDate } : {}),
       });
 
       const response = await fetch(`/api/market/live?${params}`);
@@ -416,7 +457,7 @@ function MarketPageContent() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [selectedExchange, currentView, sortCol, sortOrder, searchQuery, debouncedFilters, customDate]);
+  }, [selectedExchange, currentView, sortCol, sortOrder, searchQuery, debouncedFilters, customDate, customEndDate]);
 
   // Fetch on mount and when deps change
   useEffect(() => {
@@ -563,33 +604,99 @@ function MarketPageContent() {
 
         {/* Custom date picker */}
         {activeTab === 'custom' && (
-          <div className="mb-4 border border-black p-4 bg-gray-50">
-            <div className="flex items-center gap-4">
-              <span className="font-bold text-sm">Compare from date:</span>
-              <input
-                type="date"
-                value={customDate}
-                onChange={(e) => { setCustomDate(e.target.value); setCurrentPage(1); }}
-                max={new Date().toISOString().split('T')[0]}
-                min="2016-01-01"
-                className="border border-gray-400 px-2 py-1 bg-white text-sm text-black focus:outline-none focus:border-black"
-              />
-              {customDate && (
-                <button
-                  onClick={() => { setCustomDate(''); setCurrentPage(1); }}
-                  className="text-xs text-red-600 hover:text-red-800 underline"
-                >
-                  Clear
-                </button>
-              )}
+          <div className="mb-4 border border-gray-300 rounded-lg p-4 bg-white shadow-sm max-w-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <button
+                type="button"
+                onClick={() => {
+                  const t = new Date();
+                  const mm = String(t.getMonth() + 1).padStart(2, '0');
+                  const dd = String(t.getDate()).padStart(2, '0');
+                  setStartDateInput(`${mm}/${dd}/${t.getFullYear()}`);
+                  setDateError('');
+                }}
+                className="text-sm font-medium text-[#1256A0] hover:underline"
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setStartDateInput('');
+                  setEndDateInput('');
+                  setDateError('');
+                  if (customDate || customEndDate) {
+                    setCustomDate('');
+                    setCustomEndDate('');
+                    setCurrentPage(1);
+                  }
+                }}
+                className="text-sm font-medium text-gray-500 hover:text-gray-700"
+              >
+                Clear
+              </button>
             </div>
-            {customDate && (
-              <p className="text-xs text-gray-500 mt-2">
-                Showing % change from {new Date(customDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} to today
+            <div className="flex flex-wrap items-end gap-4">
+              <div className="flex flex-col">
+                <label className="text-xs text-gray-600 mb-1">Start Date</label>
+                <input
+                  type="text"
+                  value={startDateInput}
+                  onChange={(e) => { setStartDateInput(e.target.value); setDateError(''); }}
+                  placeholder="MM/DD/YYYY"
+                  className="border border-gray-300 rounded px-3 py-2 bg-white text-sm text-black placeholder-gray-400 focus:outline-none focus:border-[#1256A0] focus:ring-1 focus:ring-[#1256A0] w-36"
+                />
+              </div>
+              <div className="flex flex-col">
+                <label className="text-xs text-gray-600 mb-1">End Date</label>
+                <input
+                  type="text"
+                  value={endDateInput}
+                  onChange={(e) => { setEndDateInput(e.target.value); setDateError(''); }}
+                  placeholder="MM/DD/YYYY"
+                  className="border border-gray-300 rounded px-3 py-2 bg-white text-sm text-black placeholder-gray-400 focus:outline-none focus:border-[#1256A0] focus:ring-1 focus:ring-[#1256A0] w-36"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const start = parseDisplayDate(startDateInput);
+                  const end = parseDisplayDate(endDateInput);
+                  if (!start.valid) { setDateError('Invalid Start Date. Use MM/DD/YYYY.'); return; }
+                  if (!end.valid) { setDateError('Invalid End Date. Use MM/DD/YYYY.'); return; }
+                  if (!start.iso && !end.iso) { setDateError('Enter at least a Start Date.'); return; }
+                  if (!start.iso) { setDateError('Start Date is required.'); return; }
+                  if (end.iso && start.iso > end.iso) { setDateError('Start Date must be before End Date.'); return; }
+                  const today = new Date().toISOString().split('T')[0];
+                  if (start.iso > today) { setDateError('Start Date cannot be in the future.'); return; }
+                  if (end.iso && end.iso > today) { setDateError('End Date cannot be in the future.'); return; }
+                  setDateError('');
+                  setCustomDate(start.iso);
+                  setCustomEndDate(end.iso);
+                  setCurrentPage(1);
+                }}
+                className="px-6 py-2 border-2 border-[#1256A0] text-[#1256A0] font-semibold text-sm rounded hover:bg-[#1256A0] hover:text-white transition-colors"
+              >
+                Apply
+              </button>
+            </div>
+            {dateError && (
+              <p className="text-xs text-red-600 mt-3">{dateError}</p>
+            )}
+            {!dateError && customDate && (
+              <p className="text-xs text-gray-600 mt-3">
+                Showing % change from{' '}
+                <strong className="text-black">{new Date(customDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</strong>
+                {' '}to{' '}
+                <strong className="text-black">
+                  {customEndDate
+                    ? new Date(customEndDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                    : 'today'}
+                </strong>
               </p>
             )}
-            {!customDate && (
-              <p className="text-xs text-gray-400 mt-2">Select a date to see how stocks performed since that date</p>
+            {!dateError && !customDate && (
+              <p className="text-xs text-gray-400 mt-3">Enter a Start Date (and optional End Date) and click Apply to compare stock performance between the two dates.</p>
             )}
           </div>
         )}
@@ -597,9 +704,18 @@ function MarketPageContent() {
         {/* Active custom date indicator on other tabs */}
         {activeTab !== 'custom' && customDate && (
           <div className="mb-4 flex items-center gap-3 text-xs border border-gray-300 rounded px-3 py-2 bg-yellow-50">
-            <span className="text-gray-700">Custom date active: <strong className="text-black">{new Date(customDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</strong></span>
+            <span className="text-gray-700">
+              Custom date active:{' '}
+              <strong className="text-black">{new Date(customDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</strong>
+              {' → '}
+              <strong className="text-black">
+                {customEndDate
+                  ? new Date(customEndDate + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                  : 'today'}
+              </strong>
+            </span>
             <button onClick={() => handleTabChange('custom')} className="text-blue-600 hover:text-blue-800 underline">Change</button>
-            <button onClick={() => { setCustomDate(''); setCurrentPage(1); }} className="text-red-600 hover:text-red-800 underline">Clear</button>
+            <button onClick={() => { setCustomDate(''); setCustomEndDate(''); setStartDateInput(''); setEndDateInput(''); setCurrentPage(1); }} className="text-red-600 hover:text-red-800 underline">Clear</button>
           </div>
         )}
 
@@ -768,6 +884,7 @@ function MarketPageContent() {
                 onSort={handleSort}
                 hiddenColumns={hiddenColumns}
                 customDate={customDate}
+                customEndDate={customEndDate}
               />
             </div>
           </>
