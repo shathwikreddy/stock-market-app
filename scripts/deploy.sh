@@ -38,8 +38,8 @@ set +a
 
 echo "==> node $(node -v) / npm $(npm -v)"
 
-echo "==> Installing dependencies (npm ci)"
-npm ci --no-audit --no-fund
+echo "==> Installing dependencies (npm ci, including devDeps for the build)"
+npm ci --no-audit --no-fund --include=dev
 
 echo "==> Applying database migrations"
 npx prisma migrate deploy
