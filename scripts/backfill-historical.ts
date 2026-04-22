@@ -4,8 +4,8 @@
  * Fetches 10-year daily close history from Dhan API for ALL stocks
  * in the database and writes to the HistoricalPrice table.
  *
- * Run locally (no Vercel timeouts):
- *   npx tsx scripts/backfill-historical.ts
+ * Run on the VM:
+ *   npm run backfill
  *
  * Takes ~15-25 minutes for ~8000 stocks.
  * Safe to re-run — skips stocks that already have data.
@@ -235,8 +235,8 @@ async function main() {
   } else if (failed > 0) {
     console.log('  Some stocks failed. Re-run to retry them.');
   } else {
-    console.log('  All done! Now deploy to Vercel so the sync engine picks up the new data.');
-    console.log('  Or call: GET /api/cron/snapshot?secret=YOUR_SECRET&forceReload=true');
+    console.log('  All done! Trigger a cache reload so the sync engine picks up the new data:');
+    console.log('  curl "http://127.0.0.1:3000/api/cron/snapshot?secret=$CRON_SECRET&forceReload=true"');
   }
 
   console.log('');

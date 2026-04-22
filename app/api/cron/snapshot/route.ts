@@ -1,37 +1,27 @@
 /**
  * GET /api/cron/snapshot
  *
- * Cron endpoint — runs the sync engine in a LOOP for maximum data freshness.
- * During a 55-second window, it cycles through:
- *   - NSE quotes → compute → write (every cycle)
- *   - BSE quotes → compute → write (every 3rd cycle)
+ * Runs one sync cycle — fetches Dhan quotes, computes % changes, writes to
+ * LiveQuote + MarketStats. API routes just read from those tables.
  *
- * Result: ~8 NSE refreshes per minute, ~4 BSE refreshes per minute.
- * Each refresh writes to LiveQuote + MarketStats — API routes serve instantly.
- *
- * SETUP:
- *   Vercel Cron (Pro): add to vercel.json, 1-minute interval
- *   External: cron-job.org / UptimeRobot, ping every 1 minute
- *   URL: https://your-app.vercel.app/api/cron/snapshot?secret=YOUR_SECRET
+ * Invoked by stock-market-app-cron.timer every minute during IST market hours.
+ * BSE on even minutes, NSE on odd — each exchange refreshed every 2 minutes.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { runSyncLoop } from '@/lib/sync/engine';
+import { isMarketOpen } from '@/lib/market-hours';
 
 const CRON_SECRET = process.env.CRON_SECRET || '';
-
-// Vercel free tier: 10s max
-export const maxDuration = 10;
 
 export async function GET(request: NextRequest) {
   const t0 = Date.now();
 
-  // Auth: accept CRON_SECRET from query param OR Vercel's cron authorization header
   const secret = request.nextUrl.searchParams.get('secret');
   const authHeader = request.headers.get('authorization');
-  const isVercelCron = authHeader === `Bearer ${process.env.CRON_SECRET}`;
+  const isBearer = authHeader === `Bearer ${CRON_SECRET}`;
 
-  if (CRON_SECRET && secret !== CRON_SECRET && !isVercelCron) {
+  if (CRON_SECRET && secret !== CRON_SECRET && !isBearer) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -49,18 +39,11 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // Check if within Indian market hours (9:14 AM - 3:35 PM IST, Mon-Fri)
-  const now = new Date();
-  const ist = new Date(now.getTime() + 5.5 * 60 * 60 * 1000);
-  const day = ist.getUTCDay();
-  const hhmm = ist.getUTCHours() * 100 + ist.getUTCMinutes();
-
-  if (day === 0 || day === 6 || hhmm < 914 || hhmm > 1535) {
+  if (!isMarketOpen()) {
     return NextResponse.json({ skipped: true, reason: 'Outside market hours' });
   }
 
   try {
-    // Run single sync cycle (fits within Vercel free tier 10s limit)
     const { cycles, results } = await runSyncLoop();
 
     const totalQuotes = results.reduce((sum, r) => sum + r.quotesUpdated, 0);

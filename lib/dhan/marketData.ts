@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import getState from './globalState';
+import { getDhanAccessToken } from './token';
 
 const DHAN_BASE_URL = 'https://api.dhan.co/v2';
 
@@ -9,11 +10,15 @@ function api(): AxiosInstance {
     _api = axios.create({
       baseURL: DHAN_BASE_URL,
       headers: {
-        'access-token': process.env.DHAN_ACCESS_TOKEN || '',
         'client-id': process.env.DHAN_CLIENT_ID || '',
         'Content-Type': 'application/json',
       },
       timeout: 30000,
+    });
+    _api.interceptors.request.use(async (config) => {
+      const token = await getDhanAccessToken();
+      config.headers.set('access-token', token);
+      return config;
     });
   }
   return _api;

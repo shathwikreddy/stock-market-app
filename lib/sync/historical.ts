@@ -1,6 +1,6 @@
 /**
  * Historical price data management.
- * Loads from DB into memory on cold start, syncs daily from live quotes,
+ * Loads from DB into memory on process start, syncs daily from live quotes,
  * and populates missing stocks in the background.
  */
 

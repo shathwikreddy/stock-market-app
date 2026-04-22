@@ -1,0 +1,45 @@
+; systemd unit for the Next.js stock-market-app running on a VM.
+;
+; Install:
+;   sudo cp scripts/stock-market-app.service /etc/systemd/system/stock-market-app.service
+;   sudo systemctl daemon-reload
+;   sudo systemctl enable --now stock-market-app
+;
+; Logs:  journalctl -u stock-market-app -f
+; Reload after code deploy:  sudo systemctl restart stock-market-app
+;
+; NOTE: Edit User, WorkingDirectory, and EnvironmentFile paths below for your host.
+;       EnvironmentFile should contain DATABASE_URL, JWT_SECRET, CRON_SECRET,
+;       DHAN_ACCESS_TOKEN, DHAN_CLIENT_ID, NEXTAUTH_SECRET, etc. Mode 0600, owned
+;       by the service user — never world-readable.
+
+[Unit]
+Description=Stock Market App (Next.js)
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/srv/stock-market-app
+EnvironmentFile=/etc/stock-market-app.env
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOSTNAME=127.0.0.1
+ExecStart=/usr/bin/node .next/standalone/server.js
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+; Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/stock-market-app/.next/cache
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

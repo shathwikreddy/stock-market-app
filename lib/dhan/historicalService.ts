@@ -161,7 +161,7 @@ export async function syncDailyFromQuotes(
 }
 
 /**
- * Load price snapshots from PostgreSQL into memory on cold start (Vercel serverless).
+ * Load price snapshots from PostgreSQL into memory on process start.
  * Returns immediately if snapshots already exist in memory.
  */
 export async function ensureSnapshotsLoaded(): Promise<void> {
@@ -190,7 +190,7 @@ export async function ensureSnapshotsLoaded(): Promise<void> {
     }
 
     if (docs.length > 0) {
-      console.log(`[Snap] Loaded ${docs.length} price snapshots from DB (cold start recovery)`);
+      console.log(`[Snap] Loaded ${docs.length} price snapshots from DB`);
     }
   } catch (e) {
     console.error('[Snap] Failed to load snapshots:', e);
@@ -199,7 +199,7 @@ export async function ensureSnapshotsLoaded(): Promise<void> {
 
 /**
  * Store a price snapshot from live quotes. Called on every quote fetch.
- * Saves to memory (fast access) AND PostgreSQL (survives Vercel cold starts).
+ * Saves to memory (fast access) AND PostgreSQL (survives process restarts).
  * Keeps a rolling 2.5-hour window for intraday % change calculations.
  */
 export function storeSnapshot(quotes: Map<number, QuoteData>): void {
@@ -225,7 +225,7 @@ export function storeSnapshot(quotes: Map<number, QuoteData>): void {
     g.priceSnapshots.shift();
   }
 
-  // Persist to PostgreSQL (fire-and-forget -- survives cold starts)
+  // Persist to PostgreSQL (fire-and-forget -- survives process restarts)
   const pricesObj: Record<string, number> = {};
   for (const [id, p] of prices.entries()) {
     pricesObj[String(id)] = p;

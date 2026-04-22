@@ -10,8 +10,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { runSingleSync, getSyncStatus } from '@/lib/sync/engine';
 import type { Exchange } from '@/lib/sync/types';
 
-export const maxDuration = 10;
-
 export async function GET(request: NextRequest) {
   const action = request.nextUrl.searchParams.get('action') || 'status';
   const exchange = (request.nextUrl.searchParams.get('exchange') || 'NSE') as Exchange;

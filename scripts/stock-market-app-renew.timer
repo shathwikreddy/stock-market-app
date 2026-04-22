@@ -1,0 +1,11 @@
+[Unit]
+Description=Renew Dhan access token daily at 02:30 IST
+
+[Timer]
+OnCalendar=*-*-* 02:30:00 Asia/Kolkata
+; If the VM was off at 02:30, run as soon as it boots.
+Persistent=true
+Unit=stock-market-app-renew.service
+
+[Install]
+WantedBy=timers.target

@@ -107,7 +107,7 @@ interface EnrichResult {
 }
 
 /**
- * Two-phase enrichment designed for Vercel 10s timeout:
+ * Two-phase enrichment:
  *
  *   Phase 1 (fast): Batch quote() for market cap — 100+ stocks in ~2s
  *   Phase 2 (detailed): Individual quoteSummary() for sector/industry — ~30 stocks in ~5s

@@ -1,7 +1,7 @@
 /**
  * Intraday price snapshot management.
  * Stores rolling 2.5-hour window of prices for 5min/15min/30min/1hr/2hr % changes.
- * Persists to PostgreSQL to survive Vercel cold starts.
+ * Persists to PostgreSQL to survive process restarts.
  */
 
 import { prisma } from '@/lib/prisma';
@@ -13,7 +13,7 @@ const DEDUP_MS = 15_000;            // Skip if snapshot stored < 15s ago
 const CLEANUP_MS = 3 * 60 * 60 * 1000; // Clean DB snapshots older than 3hr
 
 /**
- * Load recent snapshots from DB into memory on cold start.
+ * Load recent snapshots from DB into memory on process start.
  */
 export async function ensureSnapshotsLoaded(): Promise<void> {
   const g = getState();
@@ -38,7 +38,7 @@ export async function ensureSnapshotsLoaded(): Promise<void> {
     }
 
     if (docs.length > 0) {
-      console.log(`[Sync:Snap] Loaded ${docs.length} snapshots from DB (cold start)`);
+      console.log(`[Sync:Snap] Loaded ${docs.length} snapshots from DB`);
     }
   } catch (e) {
     console.error('[Sync:Snap] Failed to load snapshots:', e);
@@ -47,7 +47,7 @@ export async function ensureSnapshotsLoaded(): Promise<void> {
 
 /**
  * Store a price snapshot from live quotes.
- * Saves to memory (instant access) AND PostgreSQL (survives cold starts).
+ * Saves to memory (instant access) AND PostgreSQL (survives process restarts).
  */
 export function storeSnapshot(quotes: Map<number, DhanQuote>): boolean {
   const g = getState();

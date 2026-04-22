@@ -5,9 +5,9 @@
  * Fetches 10-year daily close history from Dhan API for stocks
  * missing historical data in the database.
  *
- * Call repeatedly (e.g. every 1 min from Google Apps Script) until
- * the response shows done: true. Runs OUTSIDE market hours too —
- * historical data is always available from Dhan.
+ * Call repeatedly until the response shows done: true. Runs OUTSIDE market
+ * hours too — historical data is always available from Dhan. Typically
+ * driven by `npm run backfill` on the VM for the initial seed.
  *
  * After backfill is complete, call /api/cron/snapshot?secret=XXX&forceReload=true
  * to make the sync engine reload historical data from DB.
@@ -23,12 +23,11 @@ import axios, { AxiosInstance } from 'axios';
 import { randomUUID } from 'crypto';
 
 const CRON_SECRET = process.env.CRON_SECRET || '';
-export const maxDuration = 10;
 
 const DHAN_BASE = 'https://api.dhan.co/v2';
 const CONCURRENT = 5;
 const MIN_DATA_POINTS = 10; // Stocks with fewer points are considered "needing backfill"
-const BUDGET_MS = 7500; // Leave 2.5s for cold start + response overhead
+const BUDGET_MS = 7500;
 
 let _api: AxiosInstance | null = null;
 function getApi(): AxiosInstance {
@@ -36,11 +35,16 @@ function getApi(): AxiosInstance {
     _api = axios.create({
       baseURL: DHAN_BASE,
       headers: {
-        'access-token': process.env.DHAN_ACCESS_TOKEN || '',
         'client-id': process.env.DHAN_CLIENT_ID || '',
         'Content-Type': 'application/json',
       },
       timeout: 5000,
+    });
+    _api.interceptors.request.use(async (config) => {
+      const { getDhanAccessToken } = await import('@/lib/dhan/token');
+      const token = await getDhanAccessToken();
+      config.headers.set('access-token', token);
+      return config;
     });
   }
   return _api;
@@ -49,11 +53,10 @@ function getApi(): AxiosInstance {
 export async function GET(request: NextRequest) {
   const t0 = Date.now();
 
-  // Auth
   const secret = request.nextUrl.searchParams.get('secret');
   const authHeader = request.headers.get('authorization');
-  const isVercelCron = authHeader === `Bearer ${process.env.CRON_SECRET}`;
-  if (CRON_SECRET && secret !== CRON_SECRET && !isVercelCron) {
+  const isBearer = authHeader === `Bearer ${CRON_SECRET}`;
+  if (CRON_SECRET && secret !== CRON_SECRET && !isBearer) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

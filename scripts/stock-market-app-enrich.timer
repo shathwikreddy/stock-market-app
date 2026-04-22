@@ -1,0 +1,13 @@
+[Unit]
+Description=Run stock-market-app enrichment every 5 minutes during IST market hours
+
+[Timer]
+; Every 5 minutes, Mon–Fri, from 09:00 IST through 15:55 IST.
+; The route has its own 09:00–15:40 guard, so fires after 15:40 are cheap skips.
+OnCalendar=Mon..Fri 09..15:00/5:00 Asia/Kolkata
+AccuracySec=30s
+Persistent=false
+Unit=stock-market-app-enrich.service
+
+[Install]
+WantedBy=timers.target

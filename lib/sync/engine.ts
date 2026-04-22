@@ -55,7 +55,7 @@ export async function runSingleSync(exchange: Exchange): Promise<SyncResult> {
   // 5. Store price snapshot for intraday % changes
   storeSnapshot(allQuotes);
 
-  // 6. Daily close sync — awaited for data integrity (bulk SQL, fast on Neon)
+  // 6. Daily close sync — awaited for data integrity (bulk SQL, fast on local PG)
   for (const seg of segments) {
     const segQuotes = new Map<number, DhanQuote>();
     for (const s of stocks.filter((st) => st.exchangeSegment === seg)) {
@@ -107,7 +107,7 @@ export async function runSingleSync(exchange: Exchange): Promise<SyncResult> {
 
 /**
  * Run a single sync cycle for the cron endpoint.
- * Alternates NSE/BSE based on IST minute (deterministic, survives cold starts).
+ * Alternates NSE/BSE based on IST minute (deterministic, survives process restarts).
  * BSE on even minutes, NSE on odd → each exchange synced every 2 minutes.
  */
 export async function runSyncLoop(): Promise<{ cycles: number; results: SyncResult[] }> {
@@ -124,7 +124,7 @@ export async function runSyncLoop(): Promise<{ cycles: number; results: SyncResu
   let cycle = 0;
 
   try {
-    // Determine exchange from IST minute — deterministic, survives cold starts.
+    // Determine exchange from IST minute — deterministic, survives process restarts.
     // BSE on even minutes, NSE on odd → each gets synced every 2 minutes.
     const now = new Date();
     const istMinute = new Date(now.getTime() + 5.5 * 60 * 60 * 1000).getUTCMinutes();

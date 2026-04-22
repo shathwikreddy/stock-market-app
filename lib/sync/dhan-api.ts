@@ -5,6 +5,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { getState } from './state';
+import { getDhanAccessToken } from '@/lib/dhan/token';
 import type { DhanQuote, Segment, HistoricalData } from './types';
 
 const DHAN_BASE = 'https://api.dhan.co/v2';
@@ -17,11 +18,16 @@ function api(): AxiosInstance {
     _api = axios.create({
       baseURL: DHAN_BASE,
       headers: {
-        'access-token': process.env.DHAN_ACCESS_TOKEN || '',
         'client-id': process.env.DHAN_CLIENT_ID || '',
         'Content-Type': 'application/json',
       },
       timeout: 30000,
+    });
+    // Inject token per-request so renewals take effect without a restart.
+    _api.interceptors.request.use(async (config) => {
+      const token = await getDhanAccessToken();
+      config.headers.set('access-token', token);
+      return config;
     });
   }
   return _api;
