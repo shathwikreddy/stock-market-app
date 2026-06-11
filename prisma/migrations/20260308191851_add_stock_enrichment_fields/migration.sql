@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "StockMaster" ADD COLUMN     "enrichedAt" TIMESTAMP(3),
+ADD COLUMN     "industry" TEXT NOT NULL DEFAULT '-',
+ADD COLUMN     "marketCapValue" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "sector" TEXT NOT NULL DEFAULT '-';

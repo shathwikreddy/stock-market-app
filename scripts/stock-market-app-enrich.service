@@ -1,0 +1,11 @@
+; Enrichment cron — hits /api/cron/enrich every 5 minutes.
+; See stock-market-app-cron.service for install instructions.
+
+[Unit]
+Description=Stock Market App — enrichment cron
+After=network-online.target stock-market-app.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/stock-market-app-cron.env
+ExecStart=/usr/bin/curl -fsS --max-time 120 "${APP_URL}/api/cron/enrich?secret=${CRON_SECRET}"

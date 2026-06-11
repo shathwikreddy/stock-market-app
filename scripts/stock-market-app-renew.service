@@ -1,0 +1,15 @@
+; Oneshot service invoked by stock-market-app-renew.timer to refresh the
+; Dhan API access token (expires every 24h). Writes the new token to the
+; Setting table in Postgres; the app picks it up via a 60s in-memory cache.
+;
+; Install: see stock-market-app-cron.service.
+; Requires /etc/stock-market-app-cron.env with CRON_SECRET and APP_URL.
+
+[Unit]
+Description=Stock Market App — Dhan token renewal
+After=network-online.target stock-market-app.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/stock-market-app-cron.env
+ExecStart=/usr/bin/curl -fsS --max-time 30 "${APP_URL}/api/cron/renew-token?secret=${CRON_SECRET}"

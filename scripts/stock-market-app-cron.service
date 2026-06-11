@@ -1,0 +1,19 @@
+; Oneshot service invoked by stock-market-app-cron.timer to hit /api/cron/snapshot
+; every minute during IST market hours. In-process cron — no external deps.
+;
+; Install:
+;   sudo cp scripts/stock-market-app-cron.service /etc/systemd/system/
+;   sudo cp scripts/stock-market-app-cron.timer   /etc/systemd/system/
+;   sudo systemctl daemon-reload
+;   sudo systemctl enable --now stock-market-app-cron.timer
+;
+; Requires /etc/stock-market-app-cron.env with CRON_SECRET=... and APP_URL=https://...
+
+[Unit]
+Description=Stock Market App — snapshot cron
+After=network-online.target stock-market-app.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/stock-market-app-cron.env
+ExecStart=/usr/bin/curl -fsS --max-time 70 "${APP_URL}/api/cron/snapshot?secret=${CRON_SECRET}"

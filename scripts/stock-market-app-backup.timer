@@ -1,0 +1,10 @@
+[Unit]
+Description=Run stock-market-app pg_dump nightly at 03:15 IST
+
+[Timer]
+OnCalendar=*-*-* 03:15:00 Asia/Kolkata
+Persistent=true
+Unit=stock-market-app-backup.service
+
+[Install]
+WantedBy=timers.target

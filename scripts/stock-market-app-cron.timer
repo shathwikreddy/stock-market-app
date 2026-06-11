@@ -1,0 +1,14 @@
+[Unit]
+Description=Run stock-market-app snapshot every minute during IST market hours
+
+[Timer]
+; Every minute, Mon–Fri, 09:00–14:59 IST
+OnCalendar=Mon..Fri 09..14:*:00 Asia/Kolkata
+; Every minute, Mon–Fri, 15:00–15:40 IST
+OnCalendar=Mon..Fri 15:00..40:00 Asia/Kolkata
+AccuracySec=5s
+Persistent=false
+Unit=stock-market-app-cron.service
+
+[Install]
+WantedBy=timers.target
